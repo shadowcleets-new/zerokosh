@@ -1,0 +1,15 @@
+{
+  "format": 1,
+  "rules": [
+    {"bank": "SBI", "max_len": 20, "min_len": 8, "symbols_allowed": "@#$%", "require_symbol": true, "require_digit": true},
+    {"bank": "HDFC Bank", "max_len": 15, "min_len": 8, "symbols_allowed": "@#$_", "require_symbol": true, "require_digit": true},
+    {"bank": "ICICI Bank", "max_len": 16, "min_len": 8, "symbols_allowed": "@#$*", "require_symbol": false, "require_digit": true},
+    {"bank": "Axis Bank", "max_len": 16, "min_len": 8, "symbols_allowed": "@#$%&*", "require_symbol": true, "require_digit": true},
+    {"bank": "Kotak Mahindra Bank", "max_len": 16, "min_len": 8, "symbols_allowed": "@#$%", "require_symbol": true, "require_digit": true},
+    {"bank": "Punjab National Bank", "max_len": 20, "min_len": 8, "symbols_allowed": "@#$%", "require_symbol": false, "require_digit": true},
+    {"bank": "Bank of Baroda", "max_len": 16, "min_len": 8, "symbols_allowed": "@#$%&*", "require_symbol": true, "require_digit": true},
+    {"bank": "Canara Bank", "max_len": 15, "min_len": 8, "symbols_allowed": "@#$%", "require_symbol": false, "require_digit": true},
+    {"bank": "Union Bank of India", "max_len": 16, "min_len": 8, "symbols_allowed": "@#$%", "require_symbol": true, "require_digit": true},
+    {"bank": "Yes Bank", "max_len": 20, "min_len": 8, "symbols_allowed": "@#$%&*_", "require_symbol": true, "require_digit": true}
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "format": 1,
+  "apps": {
+    "com.application.zomato": "Zomato",
+    "in.swiggy.android": "Swiggy",
+    "com.grofers.customerapp": "Blinkit",
+    "com.zeptoconsumerapp": "Zepto",
+    "in.amazon.mShop.android.shopping": "Amazon",
+    "com.flipkart.android": "Flipkart",
+    "com.myntra.android": "Myntra",
+    "com.bigbasket.mobileapp": "BigBasket",
+    "com.jpl.jiomart": "JioMart",
+    "com.sbi.lotusintouch": "SBI",
+    "com.snapwork.hdfc": "HDFC Bank",
+    "com.csam.icici.bank.imobile": "ICICI Bank",
+    "com.axis.mobile": "Axis Bank",
+    "com.msf.kbank.mobile": "Kotak Mahindra Bank",
+    "com.icicidirect.mobile.trading": "ICICI Direct",
+    "com.zerodha.kite3": "Zerodha",
+    "com.nextbillion.groww": "Groww",
+    "in.upstox.app": "Upstox",
+    "com.angelbroking.angelwealth": "Angel One",
+    "net.one97.paytm": "Paytm"
+  }
+}

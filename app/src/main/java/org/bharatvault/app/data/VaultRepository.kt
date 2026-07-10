@@ -1,0 +1,338 @@
+/**
+ * @file VaultRepository.kt
+ * @description Single source of truth for vault state: unlock/lock lifecycle
+ *              (§5.2), §4.4 persistence, §4.5 merge-before-write, S13 cooldown.
+ *
+ * [TABLE OF CONTENTS]
+ * 1. STATE TYPES
+ * 2. REPOSITORY — UNLOCK / CREATE / LOCK
+ * 3. PERSISTENCE (merge + atomic write)
+ * 4. RECORD MUTATIONS
+ * 5. COOLDOWN (S13)
+ */
+package org.bharatvault.app.data
+
+// #region Imports
+import android.os.Build
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import org.bharatvault.app.crypto.AndroidCrypto
+import org.bharatvault.core.crypto.wipe
+import org.bharatvault.core.model.Record
+import org.bharatvault.core.model.VaultBody
+import org.bharatvault.core.vault.UnlockResult
+import org.bharatvault.core.vault.VaultEnvelope
+import org.bharatvault.core.vault.VaultFileCodec
+import org.bharatvault.core.vault.VaultMerge
+import org.bharatvault.core.vault.VaultOperations
+import java.util.UUID
+// #endregion
+
+// #region State types
+sealed interface VaultState {
+    data object NoVault : VaultState
+    data object Locked : VaultState
+    data object Unlocked : VaultState
+
+    /** File failed to open and backup restore also failed. */
+    data object Damaged : VaultState
+}
+
+enum class UnlockOutcome { SUCCESS, WRONG_CREDENTIAL, DAMAGED_RESTORED, DAMAGED, COOLDOWN }
+// #endregion
+
+class VaultRepository(
+    val crypto: AndroidCrypto,
+    @Volatile var store: VaultStore,
+    private val prefs: Prefs,
+) {
+
+    // #region Observable state
+    private val _state = MutableStateFlow(if (store.exists()) VaultState.Locked else VaultState.NoVault)
+    val state: StateFlow<VaultState> = _state
+
+    private val _body = MutableStateFlow<VaultBody?>(null)
+    val body: StateFlow<VaultBody?> = _body
+    // #endregion
+
+    // #region Session secrets (zeroed on lock, §5.2/§3.5)
+    private var vaultKey: ByteArray? = null
+    private var envelope: VaultEnvelope? = null
+    private var lastSeenModifiedMs: Long = -1
+    private var backupDoneThisSession = false
+    private val ioMutex = Mutex()
+    // #endregion
+
+    // #region Unlock / create / lock
+    suspend fun createVault(passphrase: ByteArray): String = withContext(Dispatchers.Default) {
+        if (prefs.kdfMem == 0L) {
+            val (ops, mem) = crypto.chooseKdfParams()
+            prefs.kdfOps = ops
+            prefs.kdfMem = mem
+        }
+        val created = VaultOperations.createVault(
+            passphrase = passphrase,
+            deviceId = prefs.deviceId,
+            nowMs = System.currentTimeMillis(),
+            crypto = crypto,
+            ops = prefs.kdfOps,
+            memBytes = prefs.kdfMem,
+            initialBody = VaultBody(),
+        )
+        store.writeAtomic(created.fileBytes) { candidate ->
+            VaultOperations.unlockWithPassphrase(candidate, passphrase, crypto) is UnlockResult.Success
+        }
+        // hold the session open so onboarding flows straight into Home
+        applyUnlock(VaultOperations.unlockWithPassphrase(created.fileBytes, passphrase, crypto) as UnlockResult.Success)
+        created.recoveryKeyFormatted
+    }
+
+    suspend fun unlockWithPassphrase(passphrase: ByteArray): UnlockOutcome =
+        attemptUnlock { bytes -> VaultOperations.unlockWithPassphrase(bytes, passphrase, crypto) }
+
+    suspend fun unlockWithRecoveryKey(recovery: String): UnlockOutcome =
+        attemptUnlock { bytes -> VaultOperations.unlockWithRecoveryKey(bytes, recovery, crypto) }
+
+    private suspend fun attemptUnlock(unlock: (ByteArray) -> UnlockResult): UnlockOutcome =
+        withContext(Dispatchers.Default) {
+            if (cooldownRemainingSeconds() > 0) return@withContext UnlockOutcome.COOLDOWN
+            val bytes = store.read() ?: return@withContext UnlockOutcome.DAMAGED
+            when (val result = unlock(bytes)) {
+                is UnlockResult.Success -> {
+                    prefs.failedAttempts = 0
+                    prefs.cooldownSeconds = 30
+                    applyUnlock(result)
+                    mergeConflictSiblings()
+                    UnlockOutcome.SUCCESS
+                }
+                is UnlockResult.WrongCredential -> {
+                    registerFailure()
+                    UnlockOutcome.WRONG_CREDENTIAL
+                }
+                is UnlockResult.Corrupt -> restoreFromBackup(unlock)
+            }
+        }
+
+    /** §11.2: "File damaged — restored from backup" using .bak. */
+    private fun restoreFromBackup(unlock: (ByteArray) -> UnlockResult): UnlockOutcome {
+        val bak = store.readBackup() ?: run { _state.value = VaultState.Damaged; return UnlockOutcome.DAMAGED }
+        val result = unlock(bak)
+        return if (result is UnlockResult.Success) {
+            store.writeAtomic(bak) { true }
+            prefs.failedAttempts = 0
+            applyUnlock(result)
+            UnlockOutcome.DAMAGED_RESTORED
+        } else {
+            _state.value = VaultState.Damaged
+            UnlockOutcome.DAMAGED
+        }
+    }
+
+    private fun applyUnlock(result: UnlockResult.Success) {
+        vaultKey?.wipe()
+        vaultKey = result.vaultKey
+        envelope = result.envelope
+        lastSeenModifiedMs = result.envelope.lastModifiedMs
+        _body.value = result.body
+        _state.value = VaultState.Unlocked
+    }
+
+    /** §5.2: zero keys, drop plaintext, back to S13. */
+    fun lock() {
+        vaultKey?.wipe()
+        vaultKey = null
+        envelope = null
+        _body.value = null
+        backupDoneThisSession = false
+        if (_state.value == VaultState.Unlocked) _state.value = VaultState.Locked
+    }
+
+    /** Applies a §3.4 biometric quick-unlock result obtained via BiometricPrompt. */
+    suspend fun adoptBiometricUnlock(result: UnlockResult.Success) {
+        prefs.failedAttempts = 0
+        prefs.cooldownSeconds = 30
+        applyUnlock(result)
+        mergeConflictSiblings()
+    }
+
+    /** For H-field reveal re-auth (§5.4) when biometrics are unavailable. */
+    suspend fun verifyPassphrase(passphrase: ByteArray): Boolean = withContext(Dispatchers.Default) {
+        val bytes = store.read() ?: return@withContext false
+        VaultOperations.unlockWithPassphrase(bytes, passphrase, crypto) is UnlockResult.Success
+    }
+    /** §3.3: re-wraps wrap_mk only. Caller must also disable quick-unlock (old MasterKey is stale). */
+    suspend fun changePassphrase(current: ByteArray, new: ByteArray): Boolean = withContext(Dispatchers.Default) {
+        ioMutex.withLock {
+            val bytes = store.read() ?: return@withLock false
+            val now = System.currentTimeMillis()
+            val out = VaultOperations.changePassphrase(bytes, current, new, prefs.deviceId, now, crypto)
+                ?: return@withLock false
+            if (!backupDoneThisSession) {
+                store.backupCurrent()
+                backupDoneThisSession = true
+            }
+            store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
+            envelope = VaultFileCodec.decode(out)
+            lastSeenModifiedMs = now
+            true
+        }
+    }
+
+    /** S4 from Settings: new RecoveryKey; re-wraps wrap_rk only. Returned string is shown ONCE. */
+    suspend fun rotateRecoveryKey(passphrase: ByteArray): String? = withContext(Dispatchers.Default) {
+        ioMutex.withLock {
+            val bytes = store.read() ?: return@withLock null
+            val now = System.currentTimeMillis()
+            val (out, formatted) = VaultOperations.rotateRecoveryKey(bytes, passphrase, prefs.deviceId, now, crypto)
+                ?: return@withLock null
+            if (!backupDoneThisSession) {
+                store.backupCurrent()
+                backupDoneThisSession = true
+            }
+            store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
+            envelope = VaultFileCodec.decode(out)
+            lastSeenModifiedMs = now
+            formatted
+        }
+    }
+    // #endregion
+
+    // #region Persistence (§4.4 atomic write + §4.5 merge-before-write)
+    private suspend fun persist(newBody: VaultBody) = ioMutex.withLock {
+        withContext(Dispatchers.Default) {
+            val key = vaultKey ?: error("locked")
+            var env = envelope ?: error("locked")
+            var bodyToWrite = newBody
+            val now = System.currentTimeMillis()
+
+            // §4.5.1: re-read before every save; merge if someone else wrote.
+            val onDisk = store.read()
+            if (onDisk != null) {
+                val diskEnv = runCatching { VaultFileCodec.decode(onDisk) }.getOrNull()
+                if (diskEnv != null && diskEnv.lastModifiedMs != lastSeenModifiedMs) {
+                    val diskUnlock = VaultOperations.unlockWithMasterKeyless(diskEnv, key, crypto)
+                    if (diskUnlock != null) {
+                        bodyToWrite = VaultMerge.merge(newBody, diskUnlock, now)
+                        env = diskEnv
+                    }
+                }
+            }
+
+            if (!backupDoneThisSession) {
+                store.backupCurrent()
+                backupDoneThisSession = true
+            }
+            val fileBytes = VaultOperations.save(env, bodyToWrite, key, prefs.deviceId, now, crypto)
+            store.writeAtomic(fileBytes) { candidate ->
+                runCatching { VaultFileCodec.decode(candidate) }.isSuccess
+            }
+            envelope = VaultFileCodec.decode(fileBytes)
+            lastSeenModifiedMs = now
+            _body.value = bodyToWrite
+        }
+    }
+
+    /** §4.5.1: on foreground/unlock — pick up external edits (cloud sync). */
+    suspend fun refreshFromDisk() {
+        val key = vaultKey ?: return
+        val current = _body.value ?: return
+        withContext(Dispatchers.Default) {
+            val onDisk = store.read() ?: return@withContext
+            val diskEnv = runCatching { VaultFileCodec.decode(onDisk) }.getOrNull() ?: return@withContext
+            if (diskEnv.lastModifiedMs == lastSeenModifiedMs) return@withContext
+            val diskBody = VaultOperations.unlockWithMasterKeyless(diskEnv, key, crypto) ?: return@withContext
+            val merged = VaultMerge.merge(current, diskBody, System.currentTimeMillis())
+            envelope = diskEnv
+            lastSeenModifiedMs = diskEnv.lastModifiedMs
+            if (merged != diskBody) persist(merged) else _body.value = merged
+        }
+        mergeConflictSiblings()
+    }
+
+    /** §4.5.3: merge and remove `vault*.bvlt` conflict siblings with our vault_uuid. */
+    private suspend fun mergeConflictSiblings() {
+        val key = vaultKey ?: return
+        val env = envelope ?: return
+        val siblings = store.conflictSiblings()
+        if (siblings.isEmpty()) return
+        var merged = _body.value ?: return
+        var changed = false
+        for ((name, bytes) in siblings) {
+            val sibEnv = runCatching { VaultFileCodec.decode(bytes) }.getOrNull() ?: continue
+            if (!sibEnv.vaultUuid.contentEquals(env.vaultUuid)) continue
+            val sibBody = VaultOperations.unlockWithMasterKeyless(sibEnv, key, crypto) ?: continue
+            merged = VaultMerge.merge(merged, sibBody, System.currentTimeMillis())
+            store.deleteSibling(name)
+            changed = true
+        }
+        if (changed) persist(merged)
+    }
+    // #endregion
+
+    // #region Record mutations
+    suspend fun upsertRecord(record: Record) {
+        val current = _body.value ?: return
+        val now = System.currentTimeMillis()
+        val existing = current.records.firstOrNull { it.uuid == record.uuid }
+        val prepared = if (existing == null) {
+            record.copy(
+                uuid = record.uuid.ifEmpty { UUID.randomUUID().toString() },
+                created_at = now, modified_at = now, rev = 1, device_id = prefs.deviceId,
+            )
+        } else {
+            record.copy(modified_at = now, rev = existing.rev + 1, device_id = prefs.deviceId) // §2.1: rev+1 every save
+        }
+        val records = if (existing == null) current.records + prepared
+        else current.records.map { if (it.uuid == prepared.uuid) prepared else it }
+        persist(
+            current.copy(
+                records = records,
+                meta = current.meta.copy(device_names = current.meta.device_names + (prefs.deviceId to deviceName())),
+            ),
+        )
+    }
+
+    suspend fun deleteRecord(uuid: String) {
+        val current = _body.value ?: return
+        persist(VaultMerge.applyDeletion(current, uuid, System.currentTimeMillis()))
+    }
+
+    suspend fun toggleFavorite(uuid: String) {
+        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return
+        upsertRecord(record.copy(favorite = !record.favorite))
+    }
+
+    private fun deviceName(): String = "${Build.MANUFACTURER} ${Build.MODEL}".trim()
+    // #endregion
+
+    // #region Cooldown (S13: 5 fails → 30 s, doubling; NEVER wipe)
+    private fun registerFailure() {
+        val fails = prefs.failedAttempts + 1
+        prefs.failedAttempts = fails
+        if (fails >= 5) {
+            val seconds = prefs.cooldownSeconds
+            prefs.cooldownUntilMs = System.currentTimeMillis() + seconds * 1000L
+            prefs.cooldownSeconds = (seconds * 2).coerceAtMost(1800)
+        }
+    }
+
+    fun cooldownRemainingSeconds(): Int =
+        ((prefs.cooldownUntilMs - System.currentTimeMillis()) / 1000L).coerceAtLeast(0).toInt()
+    // #endregion
+}
+
+/** Decrypt an already-parsed envelope with the session VaultKey (merge path). */
+private fun VaultOperations.unlockWithMasterKeyless(
+    envelope: VaultEnvelope,
+    vaultKey: ByteArray,
+    crypto: AndroidCrypto,
+): VaultBody? {
+    val plain = crypto.aeadDecrypt(envelope.bodyCiphertext, envelope.prefix, envelope.bodyNonce, vaultKey) ?: return null
+    return runCatching { org.bharatvault.core.model.VaultJson.decodeFromString<VaultBody>(plain.decodeToString()) }
+        .getOrNull()
+        .also { plain.wipe() }
+}

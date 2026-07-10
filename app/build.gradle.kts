@@ -57,7 +57,9 @@ dependencies {
     implementation(project(":core"))
 
     // §6.2 allowed list — nothing else without R0.5 review.
-    implementation("com.goterl:lazysodium-android:5.1.0")
+    implementation("com.goterl:lazysodium-android:5.1.0") {
+        exclude(group = "net.java.dev.jna", module = "jna") // pulls the desktop jar; we ship the @aar below
+    }
     implementation("net.java.dev.jna:jna:5.14.0@aar")
 
     val composeBom = platform("androidx.compose:compose-bom:2026.03.01")

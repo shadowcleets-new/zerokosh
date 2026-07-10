@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §12: keys mirror the cross-platform scheme scr.<screen>.<element> / msg.<id>
+     with dots mapped to underscores (Android constraint, DECISIONS.md D-005).
+     Tone (§10.6): plain, warm, zero jargon. -->
+<resources>
+    <string name="app_name">BharatVault</string>
+
+    <!-- S1 Language picker -->
+    <string name="scr_language_title">Choose your language</string>
+    <string name="scr_language_subtitle">अपनी भाषा चुनें</string>
+    <string name="scr_language_continue">Continue</string>
+
+    <!-- S2 Trust explainer -->
+    <string name="scr_trust_card1_title">Your data stays on this device</string>
+    <string name="scr_trust_card1_body">Everything you save lives in one locked file on your phone. It never goes to us — we have nowhere to put it.</string>
+    <string name="scr_trust_card2_title">We have no servers — nothing to hack, nothing to sell</string>
+    <string name="scr_trust_card2_body">There is no BharatVault account, no cloud, no sign-up. Only you can open this. Not even we can.</string>
+    <string name="scr_trust_card3_title">Free forever, open source</string>
+    <string name="scr_trust_card3_body">No subscription, no ads. Anyone can read our code and check every promise we make.</string>
+    <string name="scr_trust_continue">Continue</string>
+
+    <!-- S3 Create passphrase -->
+    <string name="scr_create_title">Create your passphrase</string>
+    <string name="scr_create_body">This one passphrase locks everything. Choose something long that only you would know.</string>
+    <string name="scr_create_hint">Passphrase (at least 10 characters)</string>
+    <string name="scr_create_confirm_hint">Type it again</string>
+    <string name="scr_create_mismatch">The two entries don\'t match</string>
+    <string name="scr_create_too_short">Use at least 10 characters — longer is stronger</string>
+    <string name="scr_create_strength_weak">Weak</string>
+    <string name="scr_create_strength_fair">Fair</string>
+    <string name="scr_create_strength_good">Good</string>
+    <string name="scr_create_strength_strong">Strong</string>
+    <string name="scr_create_pin_option">Use a 6-digit PIN instead</string>
+    <string name="scr_create_pin_hint">6-digit PIN</string>
+    <string name="scr_create_pin_why">A PIN is allowed because this phone protects it with its own security chip and your fingerprint or face.</string>
+    <string name="scr_create_pin_unavailable">A PIN needs a phone with fingerprint or face unlock. Please use a passphrase.</string>
+    <string name="scr_create_button">Lock it in</string>
+    <string name="scr_create_working">Preparing your vault…</string>
+
+    <!-- S4 Recovery kit -->
+    <string name="scr_recovery_title">Your Recovery Key</string>
+    <string name="scr_recovery_body">If you ever forget your passphrase, this key is the ONLY way back in. We cannot reset it for you — nobody can.</string>
+    <string name="scr_recovery_save_pdf">Save as PDF</string>
+    <string name="scr_recovery_confirm_check">I have written it down and kept it somewhere safe</string>
+    <string name="scr_recovery_done">Continue</string>
+    <string name="scr_recovery_never_again">You will not see this key again after this screen.</string>
+    <string name="scr_recovery_pdf_saved">Recovery Kit PDF saved</string>
+    <string name="scr_recovery_pdf_instructions">Keep this page with your property papers or other important documents. Anyone with this key can open your vault — treat it like a key to your locker.</string>
+    <string name="scr_recovery_pdf_title">BharatVault Recovery Kit</string>
+
+    <!-- S5 Quick unlock opt-in -->
+    <string name="scr_quickunlock_title">Unlock with your fingerprint or face</string>
+    <string name="scr_quickunlock_body">Open your vault the same way you unlock your phone. Your passphrase still works any time.</string>
+    <string name="scr_quickunlock_enable">Turn on</string>
+    <string name="scr_quickunlock_skip">Not now</string>
+    <string name="scr_quickunlock_backup_footer">Set up backup folder now</string>
+
+    <!-- S6 Home -->
+    <string name="scr_home_title">Home</string>
+    <string name="scr_home_search_hint">Search your vault</string>
+    <string name="scr_home_tab_home">Home</string>
+    <string name="scr_home_tab_authenticator">Authenticator</string>
+    <string name="scr_home_tab_settings">Settings</string>
+    <string name="scr_home_add">Add</string>
+    <string name="scr_home_empty_sample_bank">This is how your bank account will look</string>
+    <string name="scr_home_empty_sample_card">Your cards, UPI and app logins live here too</string>
+    <string name="scr_home_no_results">Nothing matches your search</string>
+    <string name="scr_home_group_other">Other</string>
+
+    <!-- §10.5 rotating safety tips -->
+    <string name="msg_safety_tip_1">Banks NEVER ask for your OTP. Anyone who does is a fraudster.</string>
+    <string name="msg_safety_tip_2">No bank official will ever ask you to install a screen-sharing app.</string>
+    <string name="msg_safety_tip_3">Your UPI PIN is only for the UPI app keypad — never tell it to anyone on a call.</string>
+    <string name="msg_safety_tip_4">KYC never expires in a day. “KYC expiring today” messages are scams.</string>
+    <string name="msg_safety_tip_5">To RECEIVE money you never need to enter your PIN or scan a QR code.</string>
+    <string name="msg_safety_tip_6">Electricity bill disconnection SMS with a personal number? It\'s a scam.</string>
+
+    <!-- S8 Template gallery -->
+    <string name="scr_gallery_title">What do you want to save?</string>
+    <string name="scr_gallery_quick_add">Quick add</string>
+
+    <!-- S9 Record detail -->
+    <string name="scr_detail_copy">Copy</string>
+    <string name="scr_detail_reveal">Show</string>
+    <string name="scr_detail_hide">Hide</string>
+    <string name="scr_detail_copied">Copied · clears in 30s</string>
+    <string name="scr_detail_edit">Edit</string>
+    <string name="scr_detail_delete">Delete</string>
+    <string name="scr_detail_favorite">Favourite</string>
+    <string name="scr_detail_delete_confirm_title">Delete this record?</string>
+    <string name="scr_detail_delete_confirm_body">It will also disappear from your other devices after they sync.</string>
+    <string name="scr_detail_delete_confirm_yes">Delete</string>
+    <string name="scr_detail_hidden">Hidden</string>
+    <string name="scr_detail_shown">Shown</string>
+
+    <!-- S10 Record edit -->
+    <string name="scr_edit_title_new">New</string>
+    <string name="scr_edit_title_hint">Title</string>
+    <string name="scr_edit_institution_hint">Bank / company (for grouping)</string>
+    <string name="scr_edit_save">Save</string>
+    <string name="scr_edit_cancel">Cancel</string>
+    <string name="scr_edit_invalid">This doesn\'t look right — please check</string>
+    <string name="scr_edit_picker_other">Other…</string>
+    <string name="scr_edit_picker_other_hint">Type your own</string>
+    <string name="scr_edit_generate">Generate</string>
+    <string name="scr_edit_luhn_warning">This card number doesn\'t pass the usual check — save anyway if it\'s correct</string>
+    <string name="scr_edit_link_none">None</string>
+    <string name="scr_edit_totp_hint">Paste the secret or otpauth:// link</string>
+    <string name="scr_edit_required_title">Give it a name first</string>
+
+    <!-- S13 Lock screen -->
+    <string name="scr_lock_title">Vault is locked</string>
+    <string name="scr_lock_hint">Passphrase</string>
+    <string name="scr_lock_unlock">Unlock</string>
+    <string name="scr_lock_wrong">Wrong passphrase</string>
+    <string name="scr_lock_cooldown">Too many tries. Wait %1$d seconds.</string>
+    <string name="scr_lock_use_recovery">Use Recovery Key</string>
+    <string name="scr_lock_recovery_hint">BVR-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_invalid">That recovery key isn\'t right — check it letter by letter</string>
+    <string name="scr_lock_biometric_title">Unlock BharatVault</string>
+    <string name="scr_lock_biometric_subtitle">Use your fingerprint or face</string>
+    <string name="scr_lock_use_passphrase_once">Please unlock with your passphrase once</string>
+    <string name="msg_file_damaged">File damaged — restored from backup</string>
+
+    <!-- S12 Settings (M2 scaffold) -->
+    <string name="scr_settings_title">Settings</string>
+    <string name="scr_settings_autolock">Lock when I leave the app</string>
+    <string name="scr_settings_autolock_immediately">Immediately</string>
+    <string name="scr_settings_autolock_1min">After 1 minute</string>
+    <string name="scr_settings_autolock_5min">After 5 minutes</string>
+    <string name="scr_settings_autolock_15min">After 15 minutes</string>
+    <string name="scr_settings_quick_unlock">Fingerprint / face unlock</string>
+    <string name="scr_settings_change_passphrase">Change passphrase</string>
+    <string name="scr_settings_new_recovery">Get a new Recovery Key</string>
+    <string name="scr_settings_sync_folder">Backup &amp; sync folder</string>
+    <string name="scr_settings_sync_not_set">Not backed up</string>
+    <string name="scr_settings_import">Import passwords</string>
+    <string name="scr_settings_export">Export</string>
+    <string name="scr_settings_language">Language</string>
+    <string name="scr_settings_about">About</string>
+    <string name="scr_settings_security_info">How your data is protected</string>
+    <string name="scr_settings_allow_screenshots">Allow screenshots</string>
+    <string name="scr_settings_allow_screenshots_warning">Screenshots of your vault could end up in cloud photo backups. Keep this off unless you really need it.</string>
+    <string name="scr_settings_current_passphrase">Current passphrase</string>
+    <string name="scr_settings_new_passphrase">New passphrase (at least 10 characters)</string>
+    <string name="scr_settings_passphrase_changed">Passphrase changed</string>
+
+    <!-- About -->
+    <string name="scr_about_version">Version %1$s</string>
+    <string name="scr_about_license">License: GPL-3.0 — free forever</string>
+    <string name="scr_about_source">Source code</string>
+    <string name="scr_about_body">BharatVault is free, open-source and has no servers. Only you can open your vault. Not even we can.</string>
+
+    <!-- S11 Authenticator -->
+    <string name="scr_auth_add_qr">Add via QR</string>
+    <string name="scr_auth_empty">Codes from your apps and brokers will appear here</string>
+    <string name="scr_auth_scan_title">Point the camera at the QR code</string>
+    <string name="scr_auth_camera_denied">Camera permission is needed only to scan the QR code. You can also paste the secret by hand when adding a record.</string>
+
+    <!-- §6.7 Autofill -->
+    <string name="scr_autofill_unlock_first">Unlock BharatVault to fill</string>
+
+    <!-- §6.7 Login helper (copy-mode fallback) -->
+    <string name="scr_login_helper_channel">Login helper</string>
+    <string name="scr_login_helper_channel_desc">Buttons that copy your login details one by one, for bank apps that block autofill</string>
+    <string name="scr_login_helper_title">Logging in to %1$s</string>
+    <string name="scr_login_helper_body">Tap a button to copy it · clears in 30s</string>
+
+    <!-- §5.7 Reminders -->
+    <string name="scr_reminder_channel">Renewal reminders</string>
+    <string name="scr_reminder_title">BharatVault reminder</string>
+    <string name="scr_reminder_body">%1$s is due soon · open BharatVault</string>
+
+    <!-- Common -->
+    <string name="msg_ok">OK</string>
+    <string name="msg_cancel">Cancel</string>
+    <string name="msg_back">Back</string>
+    <string name="msg_saved">Saved</string>
+    <string name="msg_auth_needed">Confirm it\'s you to see this</string>
+    <string name="cd_mask_hidden">hidden</string>
+    <string name="cd_shield_high_sensitivity">extra-protected field</string>
+</resources>

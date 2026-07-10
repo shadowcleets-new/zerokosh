@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §10.1 tokens -->
+<resources>
+    <color name="primary">#1A6B54</color>
+    <color name="accent">#E8A317</color>
+    <color name="error">#B3261E</color>
+    <color name="surface_light">#FAFAF7</color>
+    <color name="surface_dark">#0F1412</color>
+    <color name="success">#2E7D32</color>
+</resources>

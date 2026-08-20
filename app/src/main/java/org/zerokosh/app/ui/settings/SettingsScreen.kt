@@ -331,7 +331,7 @@ fun SettingsScreen(app: ZerokoshApp) {
                 SettingsDivider()
                 SettingsRow(
                     title = "License",
-                    value = "MIT",
+                    value = "GPL-3.0",
                     onClick = { }
                 )
                 SettingsDivider()

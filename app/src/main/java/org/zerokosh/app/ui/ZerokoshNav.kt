@@ -296,9 +296,18 @@ private fun MainScaffold(app: ZerokoshApp) {
                             Icon(
                                 painter = rememberVectorPainter(icon),
                                 contentDescription = if (fabMenuExpanded) "Close menu" else "Add",
-                                tint = VaultTheme.colors.paper,
+                                // animateIcon tints through a ColorFilter, which
+                                // beats Icon(tint=) -- the colour has to go here
+                                // or the glyph keeps the M3 default and vanishes
+                                // against our overridden container.
                                 modifier = with(ToggleFloatingActionButtonDefaults) {
-                                    Modifier.animateIcon({ checkedProgress })
+                                    Modifier.animateIcon(
+                                        checkedProgress = { checkedProgress },
+                                        color = ToggleFloatingActionButtonDefaults.iconColor(
+                                            initialColor = VaultTheme.colors.paper,
+                                            finalColor = VaultTheme.colors.paper,
+                                        ),
+                                    )
                                 },
                             )
                         }

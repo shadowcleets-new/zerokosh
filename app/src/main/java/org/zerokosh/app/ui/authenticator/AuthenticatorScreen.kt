@@ -444,12 +444,17 @@ private fun TotpCard(entry: TotpEntry, accented: Boolean) {
             // Was a hand-drawn Canvas with two drawArc calls. The Expressive
             // circular wavy indicator animates its own amplitude, so the
             // countdown reads as live rather than as a static swept arc.
-            Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                // No size override: the wavy indicator draws its wave against
+                // its own 48dp container, and squeezing it scallops the ring
+                // into a blob that no longer reads as a countdown.
                 CircularWavyProgressIndicator(
                     progress = { fraction },
-                    modifier = Modifier.size(44.dp),
                     color = ringColor,
                     trackColor = c.line,
+                    // Full amplitude is tuned for large indicators; on a 48dp
+                    // ring it reads as a squiggle rather than a countdown.
+                    amplitude = { 0.45f },
                 )
                 Text(
                     "${secondsLeft}s",

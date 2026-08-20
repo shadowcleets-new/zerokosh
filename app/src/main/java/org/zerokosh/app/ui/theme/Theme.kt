@@ -63,6 +63,19 @@ val VaultErrorLight = Color(0xFFD40C1A) // oklch(.55  .22  27)
 val VaultPrimarySoft = Color(0x14BB4717) // --vault-primary-soft: primary / 8%
 val VaultAccentSoft = Color(0x1A018D87)  // --vault-accent-soft:  accent  / 10%
 
+// Opaque container tones. M3 composites container roles over surfaces it picks
+// itself, so a translucent primaryContainer turned the floating toolbar muddy
+// where it sat over the record hero. These are the same tints pre-flattened
+// onto paper, so they read identically but survive being drawn anywhere.
+val VaultPrimaryContainer = Color(0xFFF8EDE5)   // primary 7.5% on paper -> 4.53:1 with onPrimaryContainer
+val VaultSecondaryContainer = Color(0xFFDFEDE9) // accent 12% on paper; teal-on-paper caps at ~3.4:1
+val VaultTertiaryContainer = Color(0xFFEDE9E5)  // warm neutral, ink-family
+val VaultErrorContainer = Color(0xFFFAE6E3)     // error 8.5% on paper -> 4.52:1 with onErrorContainer
+val VaultSurfaceBright = Color(0xFFFFFFFF)
+val VaultSurfaceDim = Color(0xFFEFEBE6)
+val VaultSurfaceHigh = Color(0xFFF0ECE7)
+val VaultSurfaceHighest = Color(0xFFEAE6E1)
+
 // Dark — from .dark in the mockup stylesheet.
 val VaultPaperDark = Color(0xFF120C09)
 val VaultSurfaceDark = Color(0xFF241D1B)
@@ -72,6 +85,14 @@ val VaultCardDark = Color(0xFF1B1412)
 val VaultPrimaryDark = Color(0xFFF0834E)
 val VaultAccentDark = Color(0xFF1DBCB5)
 val VaultErrorDark = Color(0xFFFF6367)
+val VaultPrimaryContainerDark = Color(0xFF351F14)   // primaryDark 16% on paperDark
+val VaultSecondaryContainerDark = Color(0xFF142824) // accentDark 16% on paperDark
+val VaultTertiaryContainerDark = Color(0xFF2A2320)
+val VaultErrorContainerDark = Color(0xFF381A18)
+val VaultSurfaceBrightDark = Color(0xFF2E2724)
+val VaultSurfaceDimDark = Color(0xFF0D0806)
+val VaultSurfaceHighDark = Color(0xFF2B2220)
+val VaultSurfaceHighestDark = Color(0xFF362C29)
 // #endregion
 
 // #region Extended palette
@@ -302,14 +323,17 @@ val CornerHero = 28.dp
 private val LightColors = lightColorScheme(
     primary = VaultPrimary,
     onPrimary = VaultPaper,
-    primaryContainer = VaultPrimary.copy(alpha = 0.10f),
+    primaryContainer = VaultPrimaryContainer,
     onPrimaryContainer = VaultPrimary,
+    inversePrimary = VaultPrimaryDark,
     secondary = VaultAccent,
     onSecondary = VaultPaper,
-    secondaryContainer = VaultAccent.copy(alpha = 0.12f),
+    secondaryContainer = VaultSecondaryContainer,
     onSecondaryContainer = VaultAccent,
     tertiary = VaultInk,
     onTertiary = VaultPaper,
+    tertiaryContainer = VaultTertiaryContainer,
+    onTertiaryContainer = VaultInk,
     background = VaultPaper,
     onBackground = VaultInk,
     surface = VaultSurface,
@@ -322,21 +346,33 @@ private val LightColors = lightColorScheme(
     outlineVariant = VaultLine,
     error = VaultErrorLight,
     onError = VaultPaper,
+    errorContainer = VaultErrorContainer,
+    onErrorContainer = VaultErrorLight,
     inverseSurface = VaultInk,
     inverseOnSurface = VaultPaper,
+    surfaceTint = VaultPrimary,
+    scrim = Color(0xFF000000),
+    surfaceBright = VaultSurfaceBright,
+    surfaceDim = VaultSurfaceDim,
+    surfaceContainerLow = VaultPaper,
+    surfaceContainerHigh = VaultSurfaceHigh,
+    surfaceContainerHighest = VaultSurfaceHighest,
 )
 
 private val DarkColors = darkColorScheme(
     primary = VaultPrimaryDark,
     onPrimary = VaultPaperDark,
-    primaryContainer = VaultPrimaryDark.copy(alpha = 0.16f),
+    primaryContainer = VaultPrimaryContainerDark,
     onPrimaryContainer = VaultPrimaryDark,
+    inversePrimary = VaultPrimary,
     secondary = VaultAccentDark,
     onSecondary = VaultPaperDark,
-    secondaryContainer = VaultAccentDark.copy(alpha = 0.16f),
+    secondaryContainer = VaultSecondaryContainerDark,
     onSecondaryContainer = VaultAccentDark,
     tertiary = VaultInkDark,
     onTertiary = VaultPaperDark,
+    tertiaryContainer = VaultTertiaryContainerDark,
+    onTertiaryContainer = VaultInkDark,
     background = VaultPaperDark,
     onBackground = VaultInkDark,
     surface = VaultSurfaceDark,
@@ -349,8 +385,17 @@ private val DarkColors = darkColorScheme(
     outlineVariant = Color(0x1AFFFFFF),
     error = VaultErrorDark,
     onError = VaultPaperDark,
+    errorContainer = VaultErrorContainerDark,
+    onErrorContainer = VaultErrorDark,
     inverseSurface = VaultInkDark,
     inverseOnSurface = VaultPaperDark,
+    surfaceTint = VaultPrimaryDark,
+    scrim = Color(0xFF000000),
+    surfaceBright = VaultSurfaceBrightDark,
+    surfaceDim = VaultSurfaceDimDark,
+    surfaceContainerLow = VaultCardDark,
+    surfaceContainerHigh = VaultSurfaceHighDark,
+    surfaceContainerHighest = VaultSurfaceHighestDark,
 )
 
 @Composable

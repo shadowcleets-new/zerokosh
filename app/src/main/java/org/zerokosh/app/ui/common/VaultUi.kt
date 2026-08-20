@@ -378,7 +378,9 @@ fun VaultToggleRow(
                 colors = ToggleButtonDefaults.toggleButtonColors(
                     containerColor = c.surface,
                     contentColor = c.ink(0.55f),
-                    checkedContainerColor = c.primary.copy(alpha = 0.14f),
+                    // Opaque: M3 draws this over surfaces it chooses itself, and
+                    // a translucent container picks up whatever sits behind it.
+                    checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     checkedContentColor = c.primary,
                 ),
             ) {

@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.Visibility
@@ -601,7 +602,9 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
         placeholder = { Text("YYYY-MM-DD") },
         modifier = modifier,
         trailingIcon = {
-            TextButton(onClick = { showPicker = true }) { Text("📅") }
+            IconButton(onClick = { showPicker = true }) {
+                Icon(Icons.Outlined.CalendarToday, contentDescription = "Pick a date")
+            }
         },
     )
     if (showPicker) {
@@ -637,7 +640,9 @@ private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label
         value = value, onValueChange = {}, readOnly = true, label = { Text(label) },
         placeholder = { Text("YYYY-MM") },
         modifier = modifier,
-        trailingIcon = { TextButton(onClick = { showPicker = true }) { Text("📅") } },
+        trailingIcon = { IconButton(onClick = { showPicker = true }) {
+                Icon(Icons.Outlined.CalendarToday, contentDescription = "Pick a date")
+            } },
     )
     if (showPicker) {
         val now = LocalDate.now()

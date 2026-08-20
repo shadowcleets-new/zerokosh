@@ -238,9 +238,18 @@ fun RecordDetailScreen(
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
                 .padding(bottom = 24.dp),
-            colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+            colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(
+                toolbarContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                toolbarContentColor = MaterialTheme.colorScheme.onSurface,
+                fabContainerColor = MaterialTheme.colorScheme.primary,
+                fabContentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
             floatingActionButton = {
-                FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onEdit) {
+                FloatingToolbarDefaults.VibrantFloatingActionButton(
+                    onClick = onEdit,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
                     Icon(Icons.Filled.Edit, contentDescription = "Edit")
                 }
             },

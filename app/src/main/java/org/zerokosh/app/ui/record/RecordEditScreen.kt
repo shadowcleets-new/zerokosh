@@ -46,6 +46,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -152,6 +153,24 @@ fun RecordEditScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            // NFC prefill is only meaningful on the card template, and only when
+            // the phone can actually do it.
+            var showTapCard by remember { mutableStateOf(false) }
+            if (showTapCard) {
+                TapCardSheet(
+                    onCard = { card ->
+                        card.pan?.let { values["card_number"] = it }
+                        card.expiryMonthYear?.let { mmyy ->
+                            // The MONTHYEAR field stores YYYY-MM.
+                            values["expiry"] = "20" + mmyy.substring(2) + "-" + mmyy.substring(0, 2)
+                        }
+                        card.cardholderName?.let { values["name_on_card"] = it }
+                        showTapCard = false
+                    },
+                    onDismiss = { showTapCard = false },
+                )
+            }
+
             // Header: Cancel / mono record kicker / Save, exactly as the mockup.
             val saveAction = save@{
                     if (title.isBlank()) {
@@ -285,6 +304,12 @@ fun RecordEditScreen(
                                 value = values[field.k].orEmpty(),
                                 onValueChange = { values[field.k] = it },
                                 showInvalid = showInvalid,
+                                // Only the card template has a card to tap.
+                                onTapCard = if (templateId == "card") {
+                                    { showTapCard = true }
+                                } else {
+                                    null
+                                },
                             )
                         }
                     }
@@ -457,6 +482,7 @@ fun FieldEditor(
     value: String,
     onValueChange: (String) -> Unit,
     showInvalid: Boolean,
+    onTapCard: (() -> Unit)? = null,
 ) {
     val label = fieldLabel(templateId, field.k)
     val invalid = showInvalid && !FieldValidation.isValid(field, value)
@@ -521,7 +547,7 @@ fun FieldEditor(
             isError = invalid,
             supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
         )
-        FieldType.CARDNUM -> CardNumberField(value, onValueChange, label, modifier)
+        FieldType.CARDNUM -> CardNumberField(value, onValueChange, label, modifier, onTapCard)
         FieldType.TOTP -> OutlinedTextField(
             value = value, onValueChange = onValueChange, label = { Text(label) },
             placeholder = { Text(stringResource(R.string.scr_edit_totp_hint)) },
@@ -783,7 +809,13 @@ fun DropdownSelector(
 
 // #region Card number (§2.2/§5.10: groups of 4, Luhn check, network badge)
 @Composable
-private fun CardNumberField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier) {
+private fun CardNumberField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier,
+    onTapCard: (() -> Unit)? = null,
+) {
     val network = CardUtils.detectNetwork(value)
     val luhnOk = value.length < 12 || CardUtils.luhnValid(value)
     OutlinedTextField(
@@ -795,21 +827,34 @@ private fun CardNumberField(value: String, onValueChange: (String) -> Unit, labe
         textStyle = SecretTextStyle,
         modifier = modifier,
         singleLine = true,
-        trailingIcon = network?.let { n ->
-            {
-                Text(
-                    when (n) {
-                        CardUtils.Network.RUPAY -> "RuPay"
-                        CardUtils.Network.VISA -> "Visa"
-                        CardUtils.Network.MASTERCARD -> "MC"
-                        CardUtils.Network.AMEX -> "Amex"
-                        CardUtils.Network.DINERS -> "Diners"
-                        CardUtils.Network.MAESTRO -> "Maestro"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 12.dp),
-                )
+        // The tap-to-read button and the detected-network badge share this slot.
+        // The button is offered only where the hardware can honour it.
+        trailingIcon = {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                if (onTapCard != null) {
+                    IconButton(onClick = onTapCard) {
+                        Icon(
+                            Icons.Outlined.Contactless,
+                            contentDescription = "Read the card by tapping it",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                if (network != null) {
+                    Text(
+                        when (network) {
+                            CardUtils.Network.RUPAY -> "RuPay"
+                            CardUtils.Network.VISA -> "Visa"
+                            CardUtils.Network.MASTERCARD -> "MC"
+                            CardUtils.Network.AMEX -> "Amex"
+                            CardUtils.Network.DINERS -> "Diners"
+                            CardUtils.Network.MAESTRO -> "Maestro"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(end = 12.dp),
+                    )
+                }
             }
         },
         supportingText = {

@@ -14,6 +14,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -65,7 +67,10 @@ fun GeneratorSheet(app: ZerokoshApp, onUse: (String) -> Unit, onDismiss: () -> U
 
     var preview by remember { mutableStateOf(generate()) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // rememberBottomSheetState is the unified replacement for the deprecated
+    // rememberModalBottomSheetState / rememberStandardBottomSheetState pair.
+    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.padding(24.dp)) {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                 Text(

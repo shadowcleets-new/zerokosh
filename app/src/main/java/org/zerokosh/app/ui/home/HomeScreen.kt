@@ -36,6 +36,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -102,6 +105,7 @@ import org.zerokosh.core.model.Record
 @Composable
 fun HomeScreen(
     app: ZerokoshApp,
+    onScrollHideFab: (Boolean) -> Unit = {},
     onOpen: (String) -> Unit,
     onAdd: () -> Unit,
 ) {
@@ -156,7 +160,30 @@ fun HomeScreen(
             return@Column
         }
 
+        // The Add FAB sits over this list. lastScrolledForward is Compose's own
+        // direction flag, so no manual offset bookkeeping is needed; the
+        // canScrollBackward guard stops the FAB hiding on an overscroll bounce
+        // while already at the top.
+        val listState = rememberLazyListState()
+        // lastScrolledForward did not flip reliably here, so the direction is
+        // derived from the first visible item instead. The 12px deadband stops
+        // a jitter at rest from flapping the FAB.
+        LaunchedEffect(listState) {
+            var lastIndex = listState.firstVisibleItemIndex
+            var lastOffset = listState.firstVisibleItemScrollOffset
+            snapshotFlow {
+                listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset
+            }.collect { (index, offset) ->
+                val down = index > lastIndex || (index == lastIndex && offset > lastOffset + 12)
+                val up = index < lastIndex || (index == lastIndex && offset < lastOffset - 12)
+                if (down) onScrollHideFab(true) else if (up) onScrollHideFab(false)
+                lastIndex = index
+                lastOffset = offset
+            }
+        }
+
         LazyColumn(
+            state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
             // Clears the floating FAB and the bottom dock.
             contentPadding = PaddingValues(bottom = 132.dp),

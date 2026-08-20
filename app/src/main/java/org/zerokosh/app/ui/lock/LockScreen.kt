@@ -11,6 +11,8 @@
  * 3. SCREEN + UNLOCK LOGIC
  * 4. SENSOR TARGET
  */
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package org.zerokosh.app.ui.lock
 
 // #region Imports
@@ -71,6 +73,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.material3.ContainedLoadingIndicator
 import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -300,16 +303,6 @@ fun LockScreen(app: ZerokoshApp) {
                     visualTransformation =
                         if (recoveryMode || revealed) androidx.compose.ui.text.input.VisualTransformation.None
                         else PasswordVisualTransformation(),
-                    // The recovery key is already shown in clear, so it needs no toggle.
-                    trailingIcon = if (recoveryMode) null else {
-                        {
-                            RevealToggle(
-                                visible = revealed,
-                                onToggle = { revealed = !revealed },
-                                tint = LockOnSurface.copy(alpha = 0.7f),
-                            )
-                        }
-                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = if (recoveryMode) KeyboardType.Text else KeyboardType.Password,
                     ),
@@ -329,6 +322,25 @@ fun LockScreen(app: ZerokoshApp) {
                         }
                     },
                     enabled = !busy && cooldown == 0,
+                    trailingIcon = if (busy) {
+                        {
+                            // Argon2id at 64 MB takes visible time on a cold
+                            // start; the contained indicator gives that wait a
+                            // home inside the field rather than a dead control.
+                            ContainedLoadingIndicator(
+                                modifier = Modifier.size(40.dp),
+                                indicatorColor = LockOnSurface,
+                            )
+                        }
+                    } else if (recoveryMode) null else {
+                        {
+                            RevealToggle(
+                                visible = revealed,
+                                onToggle = { revealed = !revealed },
+                                tint = LockOnSurface.copy(alpha = 0.7f),
+                            )
+                        }
+                    },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = LockOnSurface,

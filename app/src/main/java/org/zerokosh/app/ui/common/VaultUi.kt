@@ -72,6 +72,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
@@ -368,27 +369,22 @@ fun VaultToggleRow(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val c = VaultTheme.colors
-    Row(
+    // ButtonGroup is what actually connects these two: it owns the shared
+    // geometry and the press squish, where a plain Row of ToggleButtons only
+    // gives the per-button corner morph. No overflow indicator — two fixed
+    // options never overflow.
+    ButtonGroup(
+        overflowIndicator = {},
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         options.forEachIndexed { index, label ->
-            ToggleButton(
+            toggleableItem(
                 checked = index == selectedIndex,
+                label = label,
                 onCheckedChange = { onSelect(index) },
-                modifier = Modifier.weight(1f),
-                colors = ToggleButtonDefaults.toggleButtonColors(
-                    containerColor = c.surface,
-                    contentColor = c.ink(0.55f),
-                    // Opaque: M3 draws this over surfaces it chooses itself, and
-                    // a translucent container picks up whatever sits behind it.
-                    checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    checkedContentColor = c.primary,
-                ),
-            ) {
-                Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)
-            }
+                weight = 1f,
+            )
         }
     }
 }
@@ -643,20 +639,20 @@ fun VaultFilterChip(
     count: Int? = null,
 ) {
     val c = VaultTheme.colors
-    // Expressive chips morph their corner geometry on selection rather than only
-    // swapping fill, so the state change is legible without relying on colour.
-    val corner by animateDpAsState(
-        targetValue = if (selected) 12.dp else 18.dp,
-        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
-        label = "chipCorner",
-    )
+    // The corner morph used to be a hand-rolled animateDpAsState. Expressive
+    // ships it as a first-class overload, which also gives a pressed shape the
+    // hand-rolled version never had.
     FilterChip(
         selected = selected,
         onClick = onClick,
+        shapes = FilterChipDefaults.shapes(
+            shape = RoundedCornerShape(18.dp),
+            selectedShape = RoundedCornerShape(12.dp),
+            pressedShape = RoundedCornerShape(8.dp),
+        ),
         modifier = modifier.semantics(mergeDescendants = true) {
             contentDescription = if (count != null) "$label, $count" else label
         },
-        shape = RoundedCornerShape(corner),
         leadingIcon = if (selected) {
             {
                 Icon(

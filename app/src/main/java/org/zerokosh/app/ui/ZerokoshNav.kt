@@ -57,6 +57,7 @@ import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -250,6 +251,7 @@ private fun MainScaffold(app: ZerokoshApp) {
     // The Expressive FAB menu puts the four templates that cover most additions
     // one tap away and keeps the gallery as the escape hatch.
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    var fabVisible by remember { mutableStateOf(true) }
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
     // Leaving the Vault tab must not strand an open menu offscreen.
     LaunchedEffect(activeTab) { if (activeTab != VaultTab.Vault) fabMenuExpanded = false }
@@ -283,6 +285,11 @@ private fun MainScaffold(app: ZerokoshApp) {
                         ToggleFloatingActionButton(
                             checked = fabMenuExpanded,
                             onCheckedChange = { fabMenuExpanded = it },
+                            // Never hide the button while its own menu is open.
+                            modifier = Modifier.animateFloatingActionButton(
+                                visible = fabVisible || fabMenuExpanded,
+                                alignment = Alignment.BottomEnd,
+                            ),
                             containerColor = ToggleFloatingActionButtonDefaults.containerColor(
                                 initialColor = VaultTheme.colors.primary,
                                 finalColor = VaultTheme.colors.ink,
@@ -360,6 +367,7 @@ private fun MainScaffold(app: ZerokoshApp) {
                             CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
                                 HomeScreen(
                                     app = app,
+                                    onScrollHideFab = { hide -> fabVisible = !hide },
                                     onOpen = { uuid -> nav.navigate("detail/$uuid") },
                                     onAdd = openGallery,
                                 )

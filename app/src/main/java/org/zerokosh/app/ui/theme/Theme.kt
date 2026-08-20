@@ -25,6 +25,8 @@ package org.zerokosh.app.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.LocalRippleThemeConfiguration
+import androidx.compose.material3.RippleDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
@@ -410,6 +412,13 @@ fun ZerokoshTheme(
         // scheme and component behaviour but keep our own OKLCH-derived colour
         // scheme, Newsreader/Instrument Sans/JetBrains Mono type and corner
         // geometry, so the Organic Editorial direction survives the makeover.
+        // Expressive replaces the opacity wash that used to mark keyboard focus
+        // with a drawn inset ring. The wash was nearly invisible against our
+        // tinted surfaces, so this is an accessibility fix, not a restyle.
+        CompositionLocalProvider(
+            LocalRippleThemeConfiguration provides
+                RippleDefaults.InsetFocusRingRippleThemeConfiguration,
+        ) {
         MaterialExpressiveTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
             motionScheme = MotionScheme.expressive(),
@@ -417,6 +426,7 @@ fun ZerokoshTheme(
             typography = BharatTypography,
             content = content,
         )
+        }
     }
 }
 // #endregion

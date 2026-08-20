@@ -49,12 +49,11 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -545,6 +544,9 @@ private fun PlainField(
 ) {
     OutlinedTextField(
         value = value, onValueChange = onValueChange, label = { Text(label) },
+        // TextFieldLabelPosition is only on the TextFieldState-based overload,
+        // so Cutout waits on that migration. The expressive shape applies here.
+        shape = OutlinedTextFieldDefaults.roundedShape,
         modifier = modifier, singleLine = true,
         isError = invalid,
         supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },

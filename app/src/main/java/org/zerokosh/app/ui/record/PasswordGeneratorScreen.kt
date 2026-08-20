@@ -68,8 +68,12 @@ fun PasswordGeneratorScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            // The flexible bar carries a subtitle slot, which lets the live
+            // character count sit under the title instead of competing with the
+            // generated string below it.
+            MediumFlexibleTopAppBar(
                 title = { Text("Generate Password") },
+                subtitle = { Text("${length.toInt()} characters") },
                 navigationIcon = {
                     TextButton(onClick = onCancel) { Text("Cancel") }
                 },

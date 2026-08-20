@@ -73,6 +73,20 @@ import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ButtonGroup
+import android.provider.Settings
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.platform.LocalContext
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.compose.material3.toPath
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
@@ -1021,17 +1035,77 @@ fun VaultExtendedFab(
  *
  * Read as composables because toShape() resolves against the current density.
  */
+/**
+ * A [Shape] that interpolates between two MaterialShapes. Morph gives the path
+ * at a progress value; the scale-and-centre step is the same one
+ * RoundedPolygon.toShape() performs, so a morphing blob sits exactly where a
+ * static one did.
+ */
+private class MorphShape(private val morph: Morph, private val progress: Float) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+        val path = morph.toPath(progress)
+        path.transform(Matrix().apply { scale(x = size.width, y = size.height) })
+        path.translate(size.center - path.getBounds().center)
+        return Outline.Generic(path)
+    }
+}
+
+/**
+ * Two MaterialShapes, breathed between. The blobs are decorative, so this is
+ * exactly the kind of motion that has to stop when the user has asked the system
+ * to reduce it — at animator scale 0 the shape is pinned at rest instead.
+ */
+@Composable
+private fun breathingBlob(
+    from: RoundedPolygon,
+    to: RoundedPolygon,
+    durationMillis: Int,
+): Shape {
+    val morph = remember(from, to) { Morph(from, to) }
+    val context = LocalContext.current
+    val animated = remember(context) {
+        Settings.Global.getFloat(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f,
+        ) > 0f
+    }
+    if (!animated) return remember(morph) { MorphShape(morph, 0f) }
+
+    val transition = rememberInfiniteTransition(label = "blob")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "blobProgress",
+    )
+    // A new Shape per progress value is what makes clip() re-read the outline.
+    return remember(morph, progress) { MorphShape(morph, progress) }
+}
+
+/**
+ * The hero blobs. Each is a morph between two MaterialShapes rather than a
+ * single static one, on deliberately mismatched periods so the composition never
+ * repeats a pose.
+ */
 object VaultBlobs {
     /** Large soft organic mass — the hero's primary blob. */
     val Primary: Shape
-        @Composable get() = MaterialShapes.Puffy.toShape()
+        @Composable get() = breathingBlob(MaterialShapes.Puffy, MaterialShapes.Cookie9Sided, 9000)
 
     /** Petalled counterweight — the accent satellite. */
     val Accent: Shape
-        @Composable get() = MaterialShapes.Clover4Leaf.toShape()
+        @Composable get() = breathingBlob(MaterialShapes.Clover4Leaf, MaterialShapes.Flower, 11000)
 
     /** Small dark pebble anchoring the composition. */
     val Ink: Shape
-        @Composable get() = MaterialShapes.Cookie9Sided.toShape()
+        @Composable get() = breathingBlob(MaterialShapes.Cookie9Sided, MaterialShapes.Pill, 13000)
 }
 // #endregion

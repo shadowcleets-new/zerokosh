@@ -304,6 +304,8 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("Maha Mumbai Metro", "Maha Mumbai Metro (Lines 2A/7)", "transit", "Maha Mumbai Metro", "Travel", isPopular = true),
             GalleryItem("Mumbai Metro 3", "Mumbai Metro Aqua Line 3 (MMRC)", "transit", "Mumbai Metro Line 3", "Travel"),
             GalleryItem("Navi Mumbai Metro", "Navi Mumbai Metro (CIDCO)", "transit", "Navi Mumbai Metro", "Travel"),
+            GalleryItem("Mumbai Monorail", "Mumbai Monorail (MMRDA)", "transit", "Mumbai Monorail", "Travel"),
+            GalleryItem("Thane Metro", "Thane Metro (MMRDA)", "transit", "Thane Metro", "Travel"),
             GalleryItem("Mumbai1", "Mumbai1 NCMC Mobility Card", "utility", "Mumbai1 Card", "Travel"),
             GalleryItem("DMRC", "Delhi Metro (DMRC)", "transit", "DMRC Metro", "Travel", isPopular = true),
             GalleryItem("Noida Metro", "Noida Metro (NMRC Aqua)", "transit", "Noida Metro", "Travel"),

@@ -2,14 +2,13 @@
 // adding anything else requires human review (R0.5/R0.7).
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
     namespace = "org.zerokosh.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "org.zerokosh.app"
@@ -80,7 +79,13 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2026.03.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.material3:material3")
+    // Material 3 Expressive. The BOM pins material3 1.4.0, which carries the
+    // Expressive *tokens* but not the components that consume them — ButtonGroup,
+    // ToggleButton, FloatingActionButtonMenu, FloatingToolbar, LoadingIndicator,
+    // the wavy progress indicators and MaterialShapes all land in 1.5.0.
+    implementation("androidx.compose.material3:material3:1.5.0-alpha25")
+    // MaterialShapes / Morph are backed by the shapes library.
+    implementation("androidx.graphics:graphics-shapes:1.0.1")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.navigation:navigation-compose:2.9.8")

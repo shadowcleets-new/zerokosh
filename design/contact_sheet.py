@@ -9,13 +9,18 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = r'C:\Users\acer\bharatvault'
 RES = os.path.join(ROOT, r'app\src\main\res\drawable')
 GAL = os.path.join(ROOT, r'app\src\main\java\org\zerokosh\app\ui\gallery\TemplateGalleryScreen.kt')
-OUT = os.path.join(ROOT, r'design\imported-logos.png')
+OUT = os.path.join(ROOT, r'design\imported-logos-2.png')
 
-STEMS = ['aadhaar', 'bajajfinance', 'bestelectricity', 'digilocker', 'dmrc', 'epfo',
-         'fimoney', 'gmail', 'googlepay', 'jupitermoney', 'mahamumbaimetro', 'makemytrip',
-         'mumbaimetro3', 'mumbaimetroone', 'mumbaimonorail', 'myjio', 'nagpurmetro',
-         'navimumbaimetro', 'pan', 'paytm', 'punemetro', 'punjabnationalbank',
-         'railone', 'rupay', 'thanemetro', 'visa']
+STEMS = ['adityabirlacapital','airtelpaymentsbank','ausmallfinancebank','bandhanbank',
+         'bankofmaharashtra','capitalsmallfinancebank','cheq','cityunionbank','csbbank',
+         'dcbbank','dhanlaxmibank','equitassmallfinancebank','esafsmallfinancebank','famapp',
+         'finopaymentsbank','hyderabadmetro','idfcfirstbank','indianoverseasbank',
+         'indiapostpaymentsbank','indmoney','irctc','jammukashmirbank','janasmallfinancebank',
+         'jiopaymentsbank','karnatakabank','karurvysyabank','kotaksecurities','mastercard',
+         'muthootfinance','niyo','nsdlpaymentsbank','onecard','openmoney','paytmpaymentsbank',
+         'razorpayx','rblbank','shivaliksmallfinancebank','slice','southindianbank',
+         'suryodaysmallfinancebank','tamilnadmercantilebank','tatacapital','ucobank',
+         'ujjivansmallfinancebank','unicards','unitysmallfinancebank','utkarshsmallfinancebank']
 
 
 def norm(s):
@@ -44,7 +49,7 @@ H = PAD * 2 + 90 + rows * CELL
 
 img = Image.new('RGB', (W, H), '#F3F4F6')
 d = ImageDraw.Draw(img)
-d.text((PAD, PAD), 'Imported brand logos — 26 files', font=font(30, True), fill='#16181D')
+d.text((PAD, PAD), 'Second logo batch — 47 files', font=font(30, True), fill='#16181D')
 d.text((PAD, PAD + 42), 'shown on the app\'s card tile, labelled with the catalog entry each one serves',
        font=font(15), fill='#6B7280')
 

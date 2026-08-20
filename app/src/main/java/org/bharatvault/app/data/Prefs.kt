@@ -43,6 +43,10 @@ class Prefs(context: Context) {
         get() = prefs.getString(KEY_LANG, "") ?: ""
         set(v) = prefs.edit().putString(KEY_LANG, v).apply()
 
+    var themeOption: Int
+        get() = prefs.getInt(KEY_THEME, 0)
+        set(v) = prefs.edit().putInt(KEY_THEME, v).apply()
+
     var onboardingDone: Boolean
         get() = prefs.getBoolean(KEY_ONBOARDED, false)
         set(v) = prefs.edit().putBoolean(KEY_ONBOARDED, v).apply()
@@ -70,6 +74,11 @@ class Prefs(context: Context) {
         set(v) = prefs.edit().putInt(KEY_COOLDOWN_LEN, v).apply()
 
     /** SAF tree uri of the user-chosen sync folder (§5.6); empty = app-private storage. */
+    /** BV-02: ask for POST_NOTIFICATIONS once, and only when a dated record exists. */
+    var notificationAsked: Boolean
+        get() = prefs.getBoolean(KEY_NOTIF_ASKED, false)
+        set(v) = prefs.edit().putBoolean(KEY_NOTIF_ASKED, v).apply()
+
     var syncFolderUri: String
         get() = prefs.getString(KEY_SYNC_URI, "") ?: ""
         set(v) = prefs.edit().putString(KEY_SYNC_URI, v).apply()
@@ -87,5 +96,7 @@ class Prefs(context: Context) {
         const val KEY_COOLDOWN = "cooldown_until_ms"
         const val KEY_COOLDOWN_LEN = "cooldown_seconds"
         const val KEY_SYNC_URI = "sync_folder_uri"
+        const val KEY_NOTIF_ASKED = "notification_asked"
+        const val KEY_THEME = "theme_option"
     }
 }

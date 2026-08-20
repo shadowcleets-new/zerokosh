@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BV-15: the launch window is painted before Compose runs, so it needs its own
+     dark value or the app flashes light on every cold start in dark mode. -->
+<resources>
+    <!-- VaultPaperDark -->
+    <color name="window_background">#120C09</color>
+</resources>

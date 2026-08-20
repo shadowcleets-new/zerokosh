@@ -10,3 +10,7 @@ captures/
 *.keystore
 *.jks
 app/release/
+
+# IDE workspace and stray build output
+.antigravity/
+core/bin/

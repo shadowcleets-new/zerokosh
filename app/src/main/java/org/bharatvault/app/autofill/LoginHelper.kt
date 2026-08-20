@@ -10,13 +10,16 @@ package org.bharatvault.app.autofill
 // #region Imports
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.Manifest
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import org.bharatvault.app.R
 import org.bharatvault.app.ui.common.ClipboardHelper
 import org.bharatvault.core.model.Record
@@ -86,7 +89,18 @@ object LoginHelper {
             builder.addAction(0, label, pi)
         }
 
-        NotificationManagerCompat.from(context).notify(NOTIF_ID, builder.build())
+        // BV-14: POST_NOTIFICATIONS is a runtime permission on Android 13+, and a
+        // notify() without it throws SecurityException. Autofill runs in a service
+        // with no UI to prompt from, so this posts only when the grant is already
+        // there and stays silent otherwise.
+        val allowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (allowed) {
+            runCatching {
+                NotificationManagerCompat.from(context).notify(NOTIF_ID, builder.build())
+            }
+        }
     }
 }
 

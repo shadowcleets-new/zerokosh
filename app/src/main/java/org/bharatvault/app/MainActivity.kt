@@ -21,6 +21,18 @@ class MainActivity : FragmentActivity() {
     private val app get() = application as BharatVaultApp
     private var backgroundedAtMs: Long = 0
 
+    /**
+     * BV-04: set while we hand off to another activity of our own volition — a
+     * file picker, a document creator. Every ActivityResultRegistry launch funnels
+     * through startActivityForResult, so this catches them all.
+     */
+    private var awaitingActivityResult = false
+
+    override fun startActivityForResult(intent: android.content.Intent, requestCode: Int, options: Bundle?) {
+        awaitingActivityResult = true
+        super.startActivityForResult(intent, requestCode, options)
+    }
+
     override fun attachBaseContext(newBase: Context) {
         // S1 language choice (en/hi in v1) without an extra dependency (§12)
         val tag = Prefs(newBase).languageTag
@@ -40,7 +52,13 @@ class MainActivity : FragmentActivity() {
         applyScreenPrivacy()
         enableEdgeToEdge()
         setContent {
-            BharatVaultTheme {
+            val themeOption = app.prefs.themeOption
+            val darkTheme = when (themeOption) {
+                1 -> false
+                2 -> true
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
+            BharatVaultTheme(darkTheme = darkTheme) {
                 BharatVaultNav(app)
             }
         }
@@ -64,10 +82,20 @@ class MainActivity : FragmentActivity() {
             if (elapsed >= minutes * 60_000L) app.repository.lock()
         }
         backgroundedAtMs = 0
+        awaitingActivityResult = false
     }
 
     override fun onStop() {
         super.onStop()
-        backgroundedAtMs = System.currentTimeMillis()
+        // BV-04: a rotation or a picker round-trip is not the user leaving. With
+        // auto-lock on "Immediately" (elapsed >= 0 is always true) those would
+        // lock the vault the moment they came back — and the picker's result
+        // callback would then run against a locked repository, losing whatever
+        // was half-typed into an edit form.
+        backgroundedAtMs = if (isChangingConfigurations || awaitingActivityResult) {
+            0
+        } else {
+            System.currentTimeMillis()
+        }
     }
 }

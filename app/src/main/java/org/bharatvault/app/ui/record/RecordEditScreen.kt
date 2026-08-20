@@ -13,14 +13,21 @@
 package org.bharatvault.app.ui.record
 
 // #region Imports
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -30,15 +37,18 @@ import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,7 +71,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import org.bharatvault.app.BharatVaultApp
+import org.bharatvault.app.ui.common.BrandTile
+import org.bharatvault.app.ui.common.Kicker
+import org.bharatvault.app.ui.common.WhiteCard
+import org.bharatvault.app.ui.theme.FieldLabelStyle
+import org.bharatvault.app.ui.theme.VaultTheme
+import org.bharatvault.core.model.CustomField
 import org.bharatvault.app.R
 import org.bharatvault.app.ui.common.fieldLabel
 import org.bharatvault.app.ui.generator.GeneratorSheet
@@ -100,6 +122,10 @@ fun RecordEditScreen(
         }
     }
     var titleMissing by remember { mutableStateOf(false) }
+    // The mockup's "+ Add another field": the record model and the detail view
+    // already carry custom fields, this is where they get authored.
+    var customFields by remember { mutableStateOf(existing?.custom_fields ?: emptyList()) }
+    var showAddField by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun invalidFields(): List<String> = template.fields.filter { f ->
@@ -110,92 +136,300 @@ fun RecordEditScreen(
     var showInvalid by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        existing?.title ?: "${stringResource(R.string.scr_edit_title_new)} ${
-                            org.bharatvault.app.ui.gallery.templateName(templateId)
-                        }",
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onDone) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.scr_edit_cancel))
-                    }
-                },
-                actions = {
-                    TextButton(onClick = save@{
-                        if (title.isBlank()) {
-                            titleMissing = true
-                            return@save
-                        }
-                        if (invalidFields().isNotEmpty()) {
-                            showInvalid = true
-                            return@save
-                        }
-                        val record = Record(
-                            uuid = existing?.uuid ?: "",
-                            template_id = templateId,
-                            title = title.trim(),
-                            institution = institution.ifBlank { deriveInstitution(templateId, values) }.trim(),
-                            fields = values.filterValues { it.isNotBlank() }, // §2.1: empty fields omitted
-                            custom_fields = existing?.custom_fields ?: emptyList(),
-                            tags = existing?.tags ?: emptyList(),
-                            favorite = existing?.favorite ?: false,
-                            created_at = existing?.created_at ?: 0,
-                            modified_at = 0,
-                            rev = existing?.rev ?: 1,
-                            device_id = "",
-                            reminders = existing?.reminders ?: emptyList(),
-                        )
-                        scope.launch {
-                            app.repository.upsertRecord(record)
-                            onDone()
-                        }
-                    }) { Text(stringResource(R.string.scr_edit_save)) }
-                },
-            )
-        },
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxSize(),
+        // BV-20: the root scaffold in BharatVaultNav already consumes the system
+        // bars; applying them again here padded the gesture bar twice.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .statusBarsPadding()
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it; titleMissing = false },
-                label = { Text(stringResource(R.string.scr_edit_title_hint)) },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                singleLine = true,
-                isError = titleMissing,
-                supportingText = {
-                    if (titleMissing) Text(stringResource(R.string.scr_edit_required_title), color = MaterialTheme.colorScheme.error)
-                },
-            )
-            OutlinedTextField(
-                value = institution,
-                onValueChange = { institution = it },
-                label = { Text(stringResource(R.string.scr_edit_institution_hint)) },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                singleLine = true,
-            )
-            template.fields.forEach { field ->
-                FieldEditor(
-                    app = app,
-                    templateId = templateId,
-                    field = field,
-                    value = values[field.k].orEmpty(),
-                    onValueChange = { values[field.k] = it },
-                    showInvalid = showInvalid,
+            // Header: Cancel / mono record kicker / Save, exactly as the mockup.
+            val saveAction = save@{
+                    if (title.isBlank()) {
+                        titleMissing = true
+                        return@save
+                    }
+                    if (invalidFields().isNotEmpty()) {
+                        showInvalid = true
+                        return@save
+                    }
+                    val record = Record(
+                        uuid = existing?.uuid ?: "",
+                        template_id = templateId,
+                        title = title.trim(),
+                        institution = institution.ifBlank { deriveInstitution(templateId, values) }.trim(),
+                        fields = values.filterValues { it.isNotBlank() }, // §2.1: empty fields omitted
+                        custom_fields = customFields.filter { it.label.isNotBlank() },
+                        tags = existing?.tags ?: emptyList(),
+                        favorite = existing?.favorite ?: false,
+                        created_at = existing?.created_at ?: 0,
+                        modified_at = 0,
+                        rev = existing?.rev ?: 1,
+                        device_id = "",
+                        reminders = existing?.reminders ?: emptyList(),
+                    )
+                    scope.launch {
+                        app.repository.upsertRecord(record)
+                        onDone()
+                    }
+                }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.scr_edit_cancel),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VaultTheme.colors.mute,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onDone)
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                )
+                Kicker(
+                    text = listOf(
+                        if (existing == null) "New" else "Edit",
+                        institution.ifBlank { org.bharatvault.app.ui.gallery.templateName(templateId) },
+                    ).joinToString(" · "),
+                )
+                Text(
+                    text = stringResource(R.string.scr_edit_save),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = VaultTheme.colors.accent,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { saveAction() }
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
                 )
             }
+
+            // Brand strip: which template this record is being cut from.
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                BrandTile(code = institution.ifBlank { title.ifBlank { templateId } })
+                Column {
+                    Text(
+                        text = title.ifBlank { org.bharatvault.app.ui.gallery.templateName(templateId) },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = VaultTheme.colors.ink,
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = "using the ${org.bharatvault.app.ui.gallery.templateName(templateId)} template",
+                        fontSize = 11.sp,
+                        color = VaultTheme.colors.mute,
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+            WhiteCard(corner = 20.dp) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it; titleMissing = false },
+                        label = { Text(stringResource(R.string.scr_edit_title_hint)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = titleMissing,
+                        supportingText = {
+                            if (titleMissing) Text(stringResource(R.string.scr_edit_required_title), color = MaterialTheme.colorScheme.error)
+                        },
+                    )
+                    OutlinedTextField(
+                        value = institution,
+                        onValueChange = { institution = it },
+                        label = { Text(stringResource(R.string.scr_edit_institution_hint)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                }
+            }
+            if (template.fields.isNotEmpty()) {
+                WhiteCard(corner = 20.dp) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        template.fields.forEach { field ->
+                            FieldEditor(
+                                app = app,
+                                templateId = templateId,
+                                field = field,
+                                value = values[field.k].orEmpty(),
+                                onValueChange = { values[field.k] = it },
+                                showInvalid = showInvalid,
+                            )
+                        }
+                    }
+                }
+            }
+            if (customFields.isNotEmpty()) {
+                WhiteCard(corner = 20.dp) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        customFields.forEachIndexed { index, custom ->
+                            CustomFieldEditor(
+                                app = app,
+                                field = custom,
+                                onValueChange = { updated ->
+                                    customFields = customFields.toMutableList()
+                                        .also { it[index] = updated }
+                                },
+                                onRemove = {
+                                    customFields = customFields.toMutableList()
+                                        .also { it.removeAt(index) }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(VaultTheme.colors.primary.copy(alpha = 0.06f))
+                    .border(1.dp, VaultTheme.colors.primary.copy(alpha = 0.20f), RoundedCornerShape(16.dp))
+                    .clickable { showAddField = true }
+                    .padding(vertical = 12.dp),
+                contentAlignment = androidx.compose.ui.Alignment.Center,
+            ) {
+                Text(
+                    text = "+ Add another field",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = VaultTheme.colors.primary,
+                )
+            }
+
             Spacer(Modifier.height(48.dp))
         }
+        }
     }
+
+    if (showAddField) {
+        AddCustomFieldDialog(
+            onDismiss = { showAddField = false },
+            onAdd = { label, type ->
+                customFields = customFields + CustomField(label = label, type = type, value = "")
+                showAddField = false
+            },
+        )
+    }
+}
+
+/** One user-named field: the label is fixed, the value edits like any secret or text. */
+@Composable
+private fun CustomFieldEditor(
+    app: BharatVaultApp,
+    field: CustomField,
+    onValueChange: (CustomField) -> Unit,
+    onRemove: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = field.label.uppercase(),
+                style = FieldLabelStyle,
+                color = VaultTheme.colors.mute,
+            )
+            Text(
+                text = "Remove",
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable(onClick = onRemove)
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        if (field.type == "SECRET") {
+            SecretField(
+                app = app,
+                value = field.value,
+                onValueChange = { onValueChange(field.copy(value = it)) },
+                label = field.label,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            OutlinedTextField(
+                value = field.value,
+                onValueChange = { onValueChange(field.copy(value = it)) },
+                label = { Text(field.label) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddCustomFieldDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
+    var label by remember { mutableStateOf("") }
+    var secret by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add a field") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { label = it },
+                    label = { Text("Field name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Checkbox(checked = secret, onCheckedChange = { secret = it })
+                    Text("Treat as a secret (masked, hold to reveal)")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = label.isNotBlank(),
+                onClick = { onAdd(label.trim(), if (secret) "SECRET" else "TEXT") },
+            ) { Text("Add") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) } },
+    )
 }
 
 /** S6 grouping: pull institution from the natural key field when the user left it blank. */
@@ -225,7 +459,7 @@ fun FieldEditor(
 ) {
     val label = fieldLabel(templateId, field.k)
     val invalid = showInvalid && !FieldValidation.isValid(field, value)
-    val modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+    val modifier = Modifier.fillMaxWidth()
 
     when (field.type) {
         FieldType.TEXT -> PlainField(value, onValueChange, label, modifier, invalid)

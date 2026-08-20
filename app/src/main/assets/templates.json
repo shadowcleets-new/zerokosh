@@ -1,1 +1,984 @@
-{"format":1,"templates":[{"id":"bank_account","icon":"bank","fields":[ {"k":"bank_name","t":"PICKER:banks","s":"L"}, {"k":"account_number","t":"NUMBER","s":"M","m":"last4","v":"^[0-9]{9,18}$"}, {"k":"account_type","t":"PICKER:account_types","s":"L"}, {"k":"ifsc","t":"IFSC","s":"L"}, {"k":"micr","t":"NUMBER","s":"L","v":"^[0-9]{9}$"}, {"k":"branch","t":"TEXT","s":"L"}, {"k":"customer_id","t":"TEXT","s":"M"}, {"k":"netbanking_user_id","t":"TEXT","s":"M"}, {"k":"login_password","t":"SECRET","s":"H"}, {"k":"transaction_password","t":"SECRET","s":"H"}, {"k":"profile_password","t":"SECRET","s":"H"}, {"k":"tpin","t":"PIN","s":"H"}, {"k":"registered_mobile","t":"PHONE","s":"L"}, {"k":"registered_email","t":"EMAIL","s":"L"}, {"k":"nominee","t":"TEXT","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"card","icon":"card","fields":[ {"k":"card_number","t":"CARDNUM","s":"M","m":"last4"}, {"k":"name_on_card","t":"TEXT","s":"L"}, {"k":"expiry","t":"MONTHYEAR","s":"L"}, {"k":"cvv","t":"PIN","s":"H","v":"^[0-9]{3,4}$"}, {"k":"atm_pin","t":"PIN","s":"H","v":"^[0-9]{4,6}$"}, {"k":"card_type","t":"PICKER:card_kinds","s":"L"}, {"k":"card_variant","t":"TEXT","s":"L"}, {"k":"linked_account","t":"LINK:bank_account","s":"L"}, {"k":"billing_cycle_day","t":"NUMBER","s":"L","v":"^([1-9]|[12][0-9]|3[01])$"}, {"k":"card_portal_login","t":"TEXT","s":"M"}, {"k":"card_portal_password","t":"SECRET","s":"H"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"upi","icon":"upi","fields":[ {"k":"upi_id","t":"TEXT","s":"L","v":"^[\\w.\\-]{2,}@[a-zA-Z]{2,}$"}, {"k":"linked_account","t":"LINK:bank_account","s":"L"}, {"k":"upi_pin","t":"PIN","s":"H","v":"^[0-9]{4,6}$"}, {"k":"apps_used","t":"TEXT","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"demat","icon":"chart","fields":[ {"k":"broker","t":"PICKER:brokers","s":"L"}, {"k":"client_id","t":"TEXT","s":"M"}, {"k":"dp_id","t":"TEXT","s":"M"}, {"k":"bo_id","t":"TEXT","s":"M"}, {"k":"login_password","t":"SECRET","s":"H"}, {"k":"mpin","t":"PIN","s":"H"}, {"k":"cdsl_tpin","t":"PIN","s":"H"}, {"k":"totp","t":"TOTP","s":"H"}, {"k":"api_key","t":"SECRET","s":"H"}, {"k":"api_secret","t":"SECRET","s":"H"}, {"k":"mf_folios","t":"NOTE","s":"M"}, {"k":"nominee","t":"TEXT","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"insurance","icon":"shield","fields":[ {"k":"insurer","t":"PICKER:insurers","s":"L"}, {"k":"policy_number","t":"TEXT","s":"M"}, {"k":"policy_type","t":"PICKER:policy_types","s":"L"}, {"k":"sum_assured","t":"NUMBER","s":"L"}, {"k":"premium_amount","t":"NUMBER","s":"L"}, {"k":"premium_due_date","t":"DATE","s":"L"}, {"k":"portal_login","t":"TEXT","s":"M"}, {"k":"portal_password","t":"SECRET","s":"H"}, {"k":"nominee","t":"TEXT","s":"L"}, {"k":"agent_contact","t":"PHONE","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"gov_id","icon":"id","fields":[ {"k":"id_kind","t":"PICKER:gov_id_kinds","s":"L"}, {"k":"id_number","t":"TEXT","s":"H","m":"last4"}, {"k":"name_as_per_id","t":"TEXT","s":"L"}, {"k":"portal_login","t":"TEXT","s":"M"}, {"k":"portal_password","t":"SECRET","s":"H"}, {"k":"expiry","t":"DATE","s":"L"}, {"k":"file_copy","t":"FILE","s":"H"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"epf_pension","icon":"savings","fields":[ {"k":"scheme","t":"PICKER:pension_schemes","s":"L"}, {"k":"uan_or_pran","t":"TEXT","s":"M"}, {"k":"password","t":"SECRET","s":"H"}, {"k":"ipin","t":"PIN","s":"H"}, {"k":"tpin","t":"PIN","s":"H"}, {"k":"linked_mobile","t":"PHONE","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"utility","icon":"bolt","fields":[ {"k":"utility_kind","t":"PICKER:utility_kinds","s":"L"}, {"k":"provider","t":"TEXT","s":"L"}, {"k":"consumer_number","t":"TEXT","s":"M"}, {"k":"portal_login","t":"TEXT","s":"M"}, {"k":"portal_password","t":"SECRET","s":"H"}, {"k":"wifi_password","t":"SECRET","s":"M"}, {"k":"vehicle_number","t":"TEXT","s":"L"}, {"k":"fastag_id","t":"TEXT","s":"M"}, {"k":"due_day","t":"NUMBER","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"telecom","icon":"sim","fields":[ {"k":"mobile_number","t":"PHONE","s":"L"}, {"k":"operator","t":"PICKER:telecom","s":"L"}, {"k":"plan_type","t":"PICKER:plan_types","s":"L"}, {"k":"account_number","t":"TEXT","s":"M"}, {"k":"sim_pin","t":"PIN","s":"H"}, {"k":"puk","t":"PIN","s":"H"}, {"k":"renewal_date","t":"DATE","s":"L"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"app_profile","icon":"cart","fields":[ {"k":"app_name","t":"TEXT","s":"L"}, {"k":"registered_mobile","t":"PHONE","s":"L"}, {"k":"registered_email","t":"EMAIL","s":"L"}, {"k":"password_if_any","t":"SECRET","s":"H"}, {"k":"wallet_pin","t":"PIN","s":"H"}, {"k":"membership","t":"TEXT","s":"L"}, {"k":"membership_renewal","t":"DATE","s":"L"}, {"k":"gift_cards","t":"NOTE","s":"M"}, {"k":"totp","t":"TOTP","s":"H"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"login","icon":"key","fields":[ {"k":"website","t":"URL","s":"L"}, {"k":"username","t":"TEXT","s":"M"}, {"k":"password","t":"SECRET","s":"H"}, {"k":"totp","t":"TOTP","s":"H"}, {"k":"notes","t":"NOTE","s":"L"}]},{"id":"secure_note","icon":"note","fields":[ {"k":"body","t":"NOTE","s":"M"}, {"k":"attachment","t":"FILE","s":"H"}]}]}
+{
+  "format": 1,
+  "templates": [
+    {
+      "id": "bank_account",
+      "icon": "bank",
+      "fields": [
+        {
+          "k": "bank_name",
+          "t": "PICKER:banks",
+          "s": "L"
+        },
+        {
+          "k": "account_number",
+          "t": "NUMBER",
+          "s": "M",
+          "m": "last4",
+          "v": "^[0-9]{9,18}$"
+        },
+        {
+          "k": "account_type",
+          "t": "PICKER:account_types",
+          "s": "L"
+        },
+        {
+          "k": "ifsc",
+          "t": "IFSC",
+          "s": "L"
+        },
+        {
+          "k": "micr",
+          "t": "NUMBER",
+          "s": "L",
+          "v": "^[0-9]{9}$"
+        },
+        {
+          "k": "branch",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "customer_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "netbanking_user_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "login_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "transaction_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "profile_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "tpin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "registered_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "registered_email",
+          "t": "EMAIL",
+          "s": "L"
+        },
+        {
+          "k": "nominee",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "icon": "card",
+      "fields": [
+        {
+          "k": "card_number",
+          "t": "CARDNUM",
+          "s": "M",
+          "m": "last4"
+        },
+        {
+          "k": "name_on_card",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "expiry",
+          "t": "MONTHYEAR",
+          "s": "L"
+        },
+        {
+          "k": "cvv",
+          "t": "PIN",
+          "s": "H",
+          "v": "^[0-9]{3,4}$"
+        },
+        {
+          "k": "atm_pin",
+          "t": "PIN",
+          "s": "H",
+          "v": "^[0-9]{4,6}$"
+        },
+        {
+          "k": "card_type",
+          "t": "PICKER:card_kinds",
+          "s": "L"
+        },
+        {
+          "k": "card_variant",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "linked_account",
+          "t": "LINK:bank_account",
+          "s": "L"
+        },
+        {
+          "k": "billing_cycle_day",
+          "t": "NUMBER",
+          "s": "L",
+          "v": "^([1-9]|[12][0-9]|3[01])$"
+        },
+        {
+          "k": "card_portal_login",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "card_portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "upi",
+      "icon": "upi",
+      "fields": [
+        {
+          "k": "upi_id",
+          "t": "TEXT",
+          "s": "L",
+          "v": "^[\\w.\\-]{2,}@[a-zA-Z]{2,}$"
+        },
+        {
+          "k": "linked_account",
+          "t": "LINK:bank_account",
+          "s": "L"
+        },
+        {
+          "k": "upi_pin",
+          "t": "PIN",
+          "s": "H",
+          "v": "^[0-9]{4,6}$"
+        },
+        {
+          "k": "app_name",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "demat",
+      "icon": "chart",
+      "fields": [
+        {
+          "k": "broker",
+          "t": "PICKER:brokers",
+          "s": "L"
+        },
+        {
+          "k": "client_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "dp_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "bo_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "login_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "mpin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "cdsl_tpin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "totp",
+          "t": "TOTP",
+          "s": "H"
+        },
+        {
+          "k": "api_key",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "api_secret",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "nominee",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "insurance",
+      "icon": "shield",
+      "fields": [
+        {
+          "k": "insurer",
+          "t": "PICKER:insurers",
+          "s": "L"
+        },
+        {
+          "k": "policy_number",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "policy_type",
+          "t": "PICKER:policy_types",
+          "s": "L"
+        },
+        {
+          "k": "sum_assured",
+          "t": "NUMBER",
+          "s": "L"
+        },
+        {
+          "k": "premium_amount",
+          "t": "NUMBER",
+          "s": "L"
+        },
+        {
+          "k": "premium_due_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "portal_login",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "nominee",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "agent_contact",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "gov_id",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "id_kind",
+          "t": "PICKER:gov_id_kinds",
+          "s": "L"
+        },
+        {
+          "k": "id_number",
+          "t": "TEXT",
+          "s": "H",
+          "m": "last4"
+        },
+        {
+          "k": "name_as_per_id",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "portal_login",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "expiry",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "pan_card",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "pan_number",
+          "t": "TEXT",
+          "s": "H",
+          "m": "last4",
+          "v": "^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
+        },
+        {
+          "k": "name_on_pan",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "fathers_name",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "dob",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "e_filing_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "aadhaar_linked",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "aadhaar_card",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "aadhaar_number",
+          "t": "NUMBER",
+          "s": "H",
+          "m": "last4",
+          "v": "^[0-9]{12}$"
+        },
+        {
+          "k": "name_on_aadhaar",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "dob",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "linked_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "address",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "myaadhaar_passcode",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "passport",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "passport_number",
+          "t": "TEXT",
+          "s": "H",
+          "m": "last4"
+        },
+        {
+          "k": "given_names",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "surname",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "dob",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "place_of_issue",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "issue_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "expiry_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "portal_login",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "driving_license",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "dl_number",
+          "t": "TEXT",
+          "s": "H",
+          "m": "last4"
+        },
+        {
+          "k": "name_on_dl",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "dob",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "vehicle_classes",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "issue_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "expiry_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "rto_location",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "voter_id",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "epic_number",
+          "t": "TEXT",
+          "s": "H",
+          "m": "last4"
+        },
+        {
+          "k": "name_on_voter_id",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "constituency",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "file_copy",
+          "t": "FILE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "digilocker",
+      "icon": "id",
+      "fields": [
+        {
+          "k": "login_username",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "security_pin",
+          "t": "PIN",
+          "s": "H",
+          "v": "^[0-9]{6}$"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "epf_pension",
+      "icon": "savings",
+      "fields": [
+        {
+          "k": "uan_number",
+          "t": "NUMBER",
+          "s": "M",
+          "v": "^[0-9]{12}$"
+        },
+        {
+          "k": "pf_member_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "name_on_epf",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "linked_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "nominee",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "utility",
+      "icon": "bolt",
+      "fields": [
+        {
+          "k": "utility_kind",
+          "t": "PICKER:utility_kinds",
+          "s": "L"
+        },
+        {
+          "k": "provider",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "consumer_number",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "account_holder",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "portal_login",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "due_day",
+          "t": "NUMBER",
+          "s": "L"
+        },
+        {
+          "k": "vehicle_number",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "fastag_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "telecom",
+      "icon": "sim",
+      "fields": [
+        {
+          "k": "mobile_number",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "operator",
+          "t": "PICKER:telecom",
+          "s": "L"
+        },
+        {
+          "k": "plan_type",
+          "t": "PICKER:plan_types",
+          "s": "L"
+        },
+        {
+          "k": "sim_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "puk",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "portal_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "renewal_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "shopping",
+      "icon": "cart",
+      "fields": [
+        {
+          "k": "registered_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "registered_email",
+          "t": "EMAIL",
+          "s": "L"
+        },
+        {
+          "k": "password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "membership_id",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "wallet_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "gift_card_code",
+          "t": "SECRET",
+          "s": "M"
+        },
+        {
+          "k": "gift_card_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "transit",
+      "icon": "cart",
+      "fields": [
+        {
+          "k": "operator_name",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "registered_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "registered_email",
+          "t": "EMAIL",
+          "s": "L"
+        },
+        {
+          "k": "login_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "wallet_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "smart_card_number",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "app_profile",
+      "icon": "cart",
+      "fields": [
+        {
+          "k": "app_name",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "registered_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "registered_email",
+          "t": "EMAIL",
+          "s": "L"
+        },
+        {
+          "k": "password_if_any",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "wallet_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "membership",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "membership_renewal",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "gift_cards",
+          "t": "NOTE",
+          "s": "M"
+        },
+        {
+          "k": "totp",
+          "t": "TOTP",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "login",
+      "icon": "key",
+      "fields": [
+        {
+          "k": "website",
+          "t": "URL",
+          "s": "L"
+        },
+        {
+          "k": "username",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "totp",
+          "t": "TOTP",
+          "s": "H"
+        },
+        {
+          "k": "recovery_codes",
+          "t": "NOTE",
+          "s": "H"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "secure_note",
+      "icon": "note",
+      "fields": [
+        {
+          "k": "body",
+          "t": "NOTE",
+          "s": "M"
+        },
+        {
+          "k": "attachment",
+          "t": "FILE",
+          "s": "H"
+        }
+      ]
+    }
+  ]
+}

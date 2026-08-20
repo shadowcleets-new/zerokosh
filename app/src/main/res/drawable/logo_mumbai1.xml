@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M16,0 L112,0 A16,16 0,0,1 128,16 L128,112 A16,16 0,0,1 112,128 L16,128 A16,16 0,0,1 0,112 L0,16 A16,16 0,0,1 16,0 Z" />
+    <!-- Card & Contactless Symbol -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M24,36 L104,36 L104,92 L24,92 Z M36,52 L56,52 L56,64 L36,64 Z M76,52 A12,12 0,0,1 88,64 M76,44 A20,20 0,0,1 96,64"
+        android:strokeWidth="4"
+        android:strokeColor="#FFD700" />
+</vector>

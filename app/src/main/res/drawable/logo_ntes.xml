@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <path
+        android:fillColor="#4A148C"
+        android:pathData="M16,0 L112,0 A16,16 0,0,1 128,16 L128,112 A16,16 0,0,1 112,128 L16,128 A16,16 0,0,1 0,112 L0,16 A16,16 0,0,1 16,0 Z" />
+    <!-- Clock / Status Target Symbol -->
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M64,24 A40,40 0,1,0 64,104 A40,40 0,1,0 64,24 Z M64,36 A28,28 0,1,1 64,92 A28,28 0,1,1 64,36 Z M60,44 L68,44 L68,64 L84,64 L84,72 L60,72 Z" />
+</vector>

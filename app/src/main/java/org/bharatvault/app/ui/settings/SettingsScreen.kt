@@ -8,44 +8,32 @@
  * 1. SCREEN LIST
  * 2. CHANGE PASSPHRASE DIALOG
  * 3. NEW RECOVERY KEY DIALOG
- * 4. ABOUT
+ * 4. SYNC FOLDER DIALOG
+ * 5. ABOUT
  */
 package org.bharatvault.app.ui.settings
 
 // #region Imports
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material3.*
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -53,9 +41,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import org.bharatvault.app.BharatVaultApp
+import org.bharatvault.app.ui.common.Kicker
+import org.bharatvault.app.ui.common.SectionLabel
+import org.bharatvault.app.ui.common.WhiteCard
+import org.bharatvault.app.ui.theme.VaultTheme
 import org.bharatvault.app.MainActivity
 import org.bharatvault.app.R
 import org.bharatvault.app.quickunlock.QuickUnlockManager
@@ -74,255 +72,661 @@ fun SettingsScreen(app: BharatVaultApp) {
     var quickUnlockOn by remember { mutableStateOf(app.prefs.quickUnlockEnabled) }
     var allowShots by remember { mutableStateOf(app.prefs.allowScreenshots) }
     var enableQuickUnlockAsk by remember { mutableStateOf(false) }
+    
+    // Sync folder state
+    var syncUri by remember { mutableStateOf(app.prefs.syncFolderUri) }
+    var showSyncSheet by remember { mutableStateOf(false) }
+    var syncBusy by remember { mutableStateOf(false) }
+
+    val syncFolderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            runCatching {
+                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(uri, flags)
+            }
+            runCatching {
+                app.repository.updateSyncFolder(context, uri)
+                syncUri = uri.toString()
+            }.onSuccess {
+                scope.launch {
+                    syncBusy = true
+                    val success = runCatching { app.repository.manualBackup(context) }.getOrDefault(false)
+                    syncBusy = false
+                    val folderName = runCatching { DocumentFile.fromTreeUri(context, uri)?.name }.getOrNull() ?: "Folder"
+                    if (success) {
+                        Toast.makeText(context, "Backup folder connected & vault backed up to $folderName!", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, "Backup folder connected: $folderName", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }.onFailure { e ->
+                Toast.makeText(context, "Failed to bind folder: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    
+    // Export a copy of the encrypted vault file. Safe to hand out: it is
+    // ciphertext, useless without the passphrase or the Recovery Kit.
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            // BV-09: reading the vault and writing it to a content URI is file I/O;
+            // it was running on the main thread inside the picker callback.
+            scope.launch {
+                val ok = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val bytes = app.repository.store.read() ?: return@runCatching false
+                        context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) }
+                            ?: return@runCatching false
+                        true
+                    }.getOrDefault(false)
+                }
+                Toast.makeText(
+                    context,
+                    if (ok) "Encrypted vault exported" else "Export failed",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+
+    // Dropdown states
+    var showAutoLockDropdown by remember { mutableStateOf(false) }
+    var showLanguageDropdown by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VaultTheme.colors.paper)
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(R.string.scr_settings_title),
-                style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(onClick = { app.repository.lock() }) {
-                Icon(Icons.Outlined.Lock, contentDescription = stringResource(R.string.scr_lock_title))
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-
-        // §5.2 auto-lock timing: 0/1/5/15
-        Text(stringResource(R.string.scr_settings_autolock), style = MaterialTheme.typography.titleMedium)
-        val autoLockOptions = listOf(
-            0 to stringResource(R.string.scr_settings_autolock_immediately),
-            1 to stringResource(R.string.scr_settings_autolock_1min),
-            5 to stringResource(R.string.scr_settings_autolock_5min),
-            15 to stringResource(R.string.scr_settings_autolock_15min),
-        )
-        DropdownSelector(
-            options = autoLockOptions.map { it.second },
-            selected = autoLockOptions.firstOrNull { it.first == app.prefs.autoLockMinutes }?.second
-                ?: autoLockOptions[1].second,
-            onSelect = { picked -> app.prefs.autoLockMinutes = autoLockOptions.first { it.second == picked }.first },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        )
-
-        SettingRow(
-            title = stringResource(R.string.scr_settings_quick_unlock),
-            checked = quickUnlockOn,
-            enabled = QuickUnlockManager.hardwareBackedBiometricsAvailable(context),
-        ) { turnOn ->
-            if (turnOn) {
-                enableQuickUnlockAsk = true
-            } else {
-                QuickUnlockManager.disable(context, app)
-                quickUnlockOn = false
+        // Header - mono kicker over the serif statement, plus a lock-now action.
+        Column(modifier = Modifier.padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 8.dp)) {
+            Kicker("Settings")
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Your rules.",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = VaultTheme.colors.ink,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { app.repository.lock() }) {
+                    Icon(Icons.Outlined.Lock, contentDescription = stringResource(R.string.scr_lock_title), tint = VaultTheme.colors.ink)
+                }
             }
         }
 
-        SettingRow(
-            title = stringResource(R.string.scr_settings_allow_screenshots),
-            subtitle = stringResource(R.string.scr_settings_allow_screenshots_warning),
-            checked = allowShots,
-        ) { on ->
-            app.prefs.allowScreenshots = on
-            allowShots = on
-            (context as? MainActivity)?.applyScreenPrivacy()
+        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+            // Security Group
+            SettingsGroupTitle("Security")
+            SettingsCard {
+                // Auto-lock
+                val autoLockOptions = listOf(
+                    0 to stringResource(R.string.scr_settings_autolock_immediately),
+                    1 to stringResource(R.string.scr_settings_autolock_1min),
+                    5 to stringResource(R.string.scr_settings_autolock_5min),
+                    15 to stringResource(R.string.scr_settings_autolock_15min),
+                )
+                val currentAutoLock = autoLockOptions.firstOrNull { it.first == app.prefs.autoLockMinutes }?.second ?: autoLockOptions[1].second
+                
+                Box {
+                    SettingsRow(
+                        title = stringResource(R.string.scr_settings_autolock),
+                        value = currentAutoLock,
+                        onClick = { showAutoLockDropdown = true }
+                    )
+                    DropdownMenu(
+                        expanded = showAutoLockDropdown,
+                        onDismissRequest = { showAutoLockDropdown = false }
+                    ) {
+                        autoLockOptions.forEach { (minutes, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+                                onClick = {
+                                    app.prefs.autoLockMinutes = minutes
+                                    showAutoLockDropdown = false
+                                }
+                            )
+                        }
+                    }
+                }
+                SettingsDivider()
+                SettingsRowToggle(
+                    title = stringResource(R.string.scr_settings_quick_unlock),
+                    checked = quickUnlockOn,
+                    enabled = QuickUnlockManager.hardwareBackedBiometricsAvailable(context),
+                    onToggle = { turnOn ->
+                        if (turnOn) {
+                            enableQuickUnlockAsk = true
+                        } else {
+                            QuickUnlockManager.disable(context, app)
+                            quickUnlockOn = false
+                        }
+                    }
+                )
+                SettingsDivider()
+                SettingsRowToggle(
+                    title = stringResource(R.string.scr_settings_allow_screenshots),
+                    checked = allowShots,
+                    onToggle = { on ->
+                        app.prefs.allowScreenshots = on
+                        allowShots = on
+                        (context as? MainActivity)?.applyScreenPrivacy()
+                    }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = stringResource(R.string.scr_settings_change_passphrase),
+                    onClick = { showChangePass = true }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = stringResource(R.string.scr_settings_new_recovery),
+                    onClick = { showNewRecovery = true }
+                )
+            }
+            
+            Spacer(Modifier.height(24.dp))
+            
+            // Sync Group
+            SettingsGroupTitle("Sync")
+            SettingsCard {
+                val isConfigured = syncUri.isNotEmpty()
+                val folderName = remember(syncUri) {
+                    if (isConfigured) {
+                        runCatching {
+                            DocumentFile.fromTreeUri(context, Uri.parse(syncUri))?.name
+                        }.getOrNull() ?: "Active Folder"
+                    } else null
+                }
+
+                SettingsRow(
+                    title = stringResource(R.string.scr_settings_sync_folder),
+                    value = if (isConfigured) "Active · ${folderName ?: "Folder"}" else stringResource(R.string.scr_settings_sync_not_set),
+                    valueColor = if (isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    onClick = {
+                        if (isConfigured) {
+                            showSyncSheet = true
+                        } else {
+                            syncFolderLauncher.launch(null)
+                        }
+                    }
+                )
+            }
+            
+            Spacer(Modifier.height(24.dp))
+
+            // Appearance Group
+            SettingsGroupTitle("Appearance")
+            SettingsCard {
+                Box {
+                    var showThemeDropdown by remember { mutableStateOf(false) }
+                    val currentTheme = when (app.prefs.themeOption) {
+                        1 -> "Light"
+                        2 -> "Dark"
+                        else -> "System"
+                    }
+                    SettingsRow(
+                        title = "Theme",
+                        value = currentTheme,
+                        onClick = { showThemeDropdown = true }
+                    )
+                    DropdownMenu(
+                        expanded = showThemeDropdown,
+                        onDismissRequest = { showThemeDropdown = false }
+                    ) {
+                        listOf("System" to 0, "Light" to 1, "Dark" to 2).forEach { (label, opt) ->
+                            DropdownMenuItem(
+                                text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+                                onClick = {
+                                    app.prefs.themeOption = opt
+                                    showThemeDropdown = false
+                                    (context as? Activity)?.recreate()
+                                }
+                            )
+                        }
+                    }
+                }
+                SettingsDivider()
+                Box {
+                    val currentLang = if (app.prefs.languageTag == "hi") "हिन्दी" else "English"
+                    SettingsRow(
+                        title = stringResource(R.string.scr_settings_language),
+                        value = currentLang,
+                        onClick = { showLanguageDropdown = true }
+                    )
+                    DropdownMenu(
+                        expanded = showLanguageDropdown,
+                        onDismissRequest = { showLanguageDropdown = false }
+                    ) {
+                        listOf("English" to "en", "हिन्दी" to "hi").forEach { (label, tag) ->
+                            DropdownMenuItem(
+                                text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+                                onClick = {
+                                    app.prefs.languageTag = tag
+                                    showLanguageDropdown = false
+                                    (context as? Activity)?.recreate()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            
+            // About Section
+            SettingsGroupTitle("About")
+            SettingsCard {
+                SettingsRow(
+                    title = stringResource(R.string.scr_settings_about),
+                    value = "v0.1.0",
+                    onClick = { }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = "License",
+                    value = "MIT",
+                    onClick = { }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = "Logos provided by",
+                    value = "Logo.dev",
+                    onClick = { }
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // The terminal action from the mockup: hand the user their own ciphertext.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(VaultTheme.colors.primary.copy(alpha = 0.05f))
+                    .border(1.dp, VaultTheme.colors.primary.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                    .clickable { exportLauncher.launch("bharat-vault-backup.bvlt") }
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "Export encrypted .bvlt",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = VaultTheme.colors.primary,
+                )
+            }
+
+            // Clears the bottom navigation bar.
+            Spacer(Modifier.height(120.dp))
         }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-        TextButton(onClick = { showChangePass = true }) { Text(stringResource(R.string.scr_settings_change_passphrase)) }
-        TextButton(onClick = { showNewRecovery = true }) { Text(stringResource(R.string.scr_settings_new_recovery)) }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-        // §5.6 sync folder + §5.11 import/export land with M3/M5
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.scr_settings_sync_folder), modifier = Modifier.weight(1f))
-            Text(
-                stringResource(R.string.scr_settings_sync_not_set),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-        // Language
-        Text(stringResource(R.string.scr_settings_language), style = MaterialTheme.typography.titleMedium)
-        DropdownSelector(
-            options = listOf("English", "हिन्दी"),
-            selected = if (app.prefs.languageTag == "hi") "हिन्दी" else "English",
-            onSelect = { picked ->
-                app.prefs.languageTag = if (picked == "हिन्दी") "hi" else "en"
-                (context as? Activity)?.recreate()
-            },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        )
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-        AboutSection()
     }
 
     if (showChangePass) {
-        ChangePassphraseDialog(app) { showChangePass = false }
+        ChangePassphraseDialog(app = app, onDismiss = { showChangePass = false })
     }
+
     if (showNewRecovery) {
-        NewRecoveryKeyDialog(app) { showNewRecovery = false }
+        NewRecoveryKeyDialog(app = app, onDismiss = { showNewRecovery = false })
     }
+
     if (enableQuickUnlockAsk) {
         EnableQuickUnlockDialog(
             app = app,
             onDone = { enabled ->
                 quickUnlockOn = enabled
                 enableQuickUnlockAsk = false
+            }
+        )
+    }
+
+    if (showSyncSheet) {
+        val folderName = remember(syncUri) {
+            runCatching {
+                DocumentFile.fromTreeUri(context, Uri.parse(syncUri))?.name
+            }.getOrNull() ?: "Active Folder"
+        }
+        SyncFolderDialog(
+            app = app,
+            folderName = folderName,
+            onBackupNow = {
+                scope.launch {
+                    syncBusy = true
+                    val success = app.repository.manualBackup(context)
+                    syncBusy = false
+                    if (success) {
+                        Toast.makeText(context, "Vault backed up to $folderName!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Backup failed — check folder permissions", Toast.LENGTH_LONG).show()
+                    }
+                }
             },
+            onChangeFolder = {
+                showSyncSheet = false
+                syncFolderLauncher.launch(null)
+            },
+            onDisconnect = {
+                app.repository.updateSyncFolder(context, null)
+                syncUri = ""
+                showSyncSheet = false
+                Toast.makeText(context, "Backup folder disconnected", Toast.LENGTH_SHORT).show()
+            },
+            onDismiss = { showSyncSheet = false },
+            busy = syncBusy
         )
     }
 }
 
 @Composable
-private fun SettingRow(
+private fun SettingsGroupTitle(text: String) {
+    SectionLabel(
+        text = text,
+        modifier = Modifier.padding(start = 4.dp, bottom = 10.dp),
+    )
+}
+
+/** The white grouped card the mockup draws every settings block inside. */
+@Composable
+private fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
+    WhiteCard(corner = 20.dp, content = content)
+}
+
+@Composable
+private fun SettingsRow(
     title: String,
-    checked: Boolean,
-    subtitle: String? = null,
-    enabled: Boolean = true,
-    onToggle: (Boolean) -> Unit,
+    value: String? = null,
+    valueColor: Color = Color.Unspecified,
+    onClick: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-            if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+    val c = VaultTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = c.ink,
+            modifier = Modifier.weight(1f)
+        )
+        if (value != null) {
+            Text(
+                text = value,
+                fontSize = 12.sp,
+                fontWeight = if (valueColor == Color.Unspecified) FontWeight.Normal else FontWeight.SemiBold,
+                color = if (valueColor == Color.Unspecified) c.mute else valueColor
+            )
         }
-        Switch(checked = checked, onCheckedChange = onToggle, enabled = enabled)
     }
 }
-// #endregion
 
-// #region Change passphrase (§3.3: re-wraps wrap_mk only)
 @Composable
-private fun ChangePassphraseDialog(app: BharatVaultApp, onClose: () -> Unit) {
-    var current by remember { mutableStateOf("") }
-    var new by remember { mutableStateOf("") }
-    var wrong by remember { mutableStateOf(false) }
-    var busy by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val doneMsg = stringResource(R.string.scr_settings_passphrase_changed)
+private fun SettingsRowToggle(
+    title: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onToggle: (Boolean) -> Unit
+) {
+    val c = VaultTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled, onClick = { onToggle(!checked) })
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (enabled) c.ink else c.ink(0.38f),
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onToggle,
+            enabled = enabled,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = c.paper,
+                checkedTrackColor = c.accent,
+                checkedBorderColor = c.accent,
+                uncheckedThumbColor = c.paper,
+                uncheckedTrackColor = c.ink(0.18f),
+                uncheckedBorderColor = c.ink(0.18f),
+            ),
+        )
+    }
+}
 
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(stringResource(R.string.scr_settings_change_passphrase)) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = current, onValueChange = { current = it; wrong = false },
-                    label = { Text(stringResource(R.string.scr_settings_current_passphrase)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine = true, isError = wrong,
-                    supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) },
-                )
-                OutlinedTextField(
-                    value = new, onValueChange = { new = it },
-                    label = { Text(stringResource(R.string.scr_settings_new_passphrase)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine = true,
-                    supportingText = {
-                        if (new.isNotEmpty() && passphraseScore(new) == 0) {
-                            Text(stringResource(R.string.scr_create_too_short), color = MaterialTheme.colorScheme.error)
-                        }
-                    },
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = !busy && current.isNotEmpty() && new.length >= 10,
-                onClick = {
-                    busy = true
-                    scope.launch {
-                        val ok = app.repository.changePassphrase(current.toByteArray(), new.toByteArray())
-                        busy = false
-                        if (ok) {
-                            Toast.makeText(context, doneMsg, Toast.LENGTH_SHORT).show()
-                            onClose()
-                        } else {
-                            wrong = true
-                        }
-                    }
-                },
-            ) { Text(stringResource(R.string.msg_ok)) }
-        },
-        dismissButton = { TextButton(onClick = onClose) { Text(stringResource(R.string.msg_cancel)) } },
+@Composable
+private fun SettingsDivider() {
+    HorizontalDivider(
+        color = VaultTheme.colors.line,
+        modifier = Modifier.padding(horizontal = 16.dp)
     )
 }
 // #endregion
 
-// #region New recovery key (S4 from Settings: re-wraps wrap_rk)
+// #region Change Passphrase Dialog
 @Composable
-private fun NewRecoveryKeyDialog(app: BharatVaultApp, onClose: () -> Unit) {
+private fun ChangePassphraseDialog(app: BharatVaultApp, onDismiss: () -> Unit) {
+    // BV-14: resolved in composition so a locale change re-reads it.
+    val passphraseChangedMessage = stringResource(R.string.scr_settings_passphrase_changed)
+    var current by remember { mutableStateOf("") }
+    var newPass by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var wrongCurrent by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val valid = current.isNotEmpty() && newPass.length >= 10 && newPass == confirm
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.scr_settings_change_passphrase)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = current, onValueChange = { current = it; wrongCurrent = false },
+                    label = { Text(stringResource(R.string.scr_settings_current_passphrase)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true, isError = wrongCurrent,
+                    supportingText = { if (wrongCurrent) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) }
+                )
+                OutlinedTextField(
+                    value = newPass, onValueChange = { newPass = it },
+                    label = { Text(stringResource(R.string.scr_settings_new_passphrase)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = confirm, onValueChange = { confirm = it },
+                    label = { Text("Confirm new passphrase") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true, isError = confirm.isNotEmpty() && confirm != newPass
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = valid && !busy,
+                onClick = {
+                    busy = true
+                    scope.launch {
+                        val ok = app.repository.changePassphrase(current.toByteArray(), newPass.toByteArray())
+                        busy = false
+                        if (ok) {
+                            Toast.makeText(context, passphraseChangedMessage, Toast.LENGTH_SHORT).show()
+                            onDismiss()
+                        } else {
+                            wrongCurrent = true
+                        }
+                    }
+                }
+            ) {
+                if (busy) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.msg_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) }
+        }
+    )
+}
+// #endregion
+
+// #region New Recovery Key Dialog
+@Composable
+private fun NewRecoveryKeyDialog(app: BharatVaultApp, onDismiss: () -> Unit) {
     var passphrase by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
-    var busy by remember { mutableStateOf(false) }
     var newKey by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        onDismissRequest = { if (newKey == null) onClose() },
-        title = { Text(stringResource(if (newKey == null) R.string.scr_settings_new_recovery else R.string.scr_recovery_title)) },
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.scr_settings_new_recovery)) },
         text = {
             if (newKey == null) {
-                OutlinedTextField(
-                    value = passphrase, onValueChange = { passphrase = it; wrong = false },
-                    label = { Text(stringResource(R.string.scr_lock_hint)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine = true, isError = wrong,
-                    supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) },
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Confirm your passphrase to generate a new Recovery Key. The previous key will stop working.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(
+                        value = passphrase, onValueChange = { passphrase = it; wrong = false },
+                        label = { Text(stringResource(R.string.scr_lock_hint)) },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true, isError = wrong,
+                        supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) }
+                    )
+                }
             } else {
-                Column {
-                    Card {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Your new Recovery Key:", style = MaterialTheme.typography.bodySmall)
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    ) {
                         Text(
-                            newKey!!,
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            style = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-                            textAlign = TextAlign.Center,
+                            text = newKey!!,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.scr_recovery_never_again),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
+                    Text("Store this offline. The old Recovery Key is no longer valid.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                 }
             }
         },
         confirmButton = {
             if (newKey == null) {
-                TextButton(
-                    enabled = !busy && passphrase.isNotEmpty(),
+                Button(
+                    enabled = passphrase.isNotEmpty() && !busy,
                     onClick = {
                         busy = true
                         scope.launch {
-                            val result = app.repository.rotateRecoveryKey(passphrase.toByteArray())
+                            val key = app.repository.rotateRecoveryKey(passphrase.toByteArray())
                             busy = false
-                            if (result != null) newKey = result else wrong = true
+                            if (key != null) {
+                                newKey = key
+                            } else {
+                                wrong = true
+                            }
                         }
-                    },
-                ) { Text(stringResource(R.string.msg_ok)) }
+                    }
+                ) {
+                    if (busy) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    else Text("Generate")
+                }
             } else {
-                TextButton(onClick = onClose) { Text(stringResource(R.string.scr_recovery_done)) }
+                Button(onClick = onDismiss) { Text("Done") }
             }
         },
         dismissButton = {
-            if (newKey == null) TextButton(onClick = onClose) { Text(stringResource(R.string.msg_cancel)) }
+            if (newKey == null) {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) }
+            }
+        }
+    )
+}
+// #endregion
+
+// #region Sync Folder Dialog
+@Composable
+private fun SyncFolderDialog(
+    app: BharatVaultApp,
+    folderName: String,
+    onBackupNow: () -> Unit,
+    onChangeFolder: () -> Unit,
+    onDisconnect: () -> Unit,
+    onDismiss: () -> Unit,
+    busy: Boolean,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.FolderZip, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text("Backup & Sync Folder")
+            }
         },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Connected folder: $folderName",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Your encrypted .bvlt vault files are saved directly inside this folder. Sync this directory with Google Drive, Syncthing, Nextcloud, or an SD card for automated multi-device backup.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (busy) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Text("Backing up vault...", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onBackupNow,
+                enabled = !busy,
+            ) {
+                Icon(Icons.Outlined.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Backup Now")
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                OutlinedButton(onClick = onChangeFolder, enabled = !busy) {
+                    Text("Change Folder")
+                }
+                TextButton(onClick = onDisconnect, enabled = !busy) {
+                    Text("Disconnect", color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
     )
 }
 // #endregion
@@ -334,7 +738,8 @@ private fun EnableQuickUnlockDialog(app: BharatVaultApp, onDone: (Boolean) -> Un
     var wrong by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val activity = LocalContext.current as FragmentActivity
+    // BV-14: LocalContext can be a wrapper; LocalActivity resolves the host.
+    val activity = LocalActivity.current as FragmentActivity
 
     AlertDialog(
         onDismissRequest = { onDone(false) },

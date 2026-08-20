@@ -15,14 +15,18 @@ class TemplateCatalogTest {
     private val catalog = TemplateCatalog.parse(File("../spec/templates.json").canonicalFile.readText())
 
     @Test
-    fun `all 12 templates present in spec order`() {
-        assertEquals(
-            listOf(
-                "bank_account", "card", "upi", "demat", "insurance", "gov_id",
-                "epf_pension", "utility", "telecom", "app_profile", "login", "secure_note",
-            ),
-            catalog.templates.map { it.id },
+    fun `the 12 spec templates are all present, in spec order`() {
+        val spec = listOf(
+            "bank_account", "card", "upi", "demat", "insurance", "gov_id",
+            "epf_pension", "utility", "telecom", "app_profile", "login", "secure_note",
         )
+        val ids = catalog.templates.map { it.id }
+        // R0.2 item 5 forbids renaming or removing a template — that would orphan
+        // data in existing vaults. Adding new ones (pan_card, passport, transit …)
+        // is safe and the app ships several, so this asserts the original twelve
+        // still exist in their spec order rather than that the catalogue never grows.
+        assertTrue(ids.containsAll(spec), "removed or renamed: ${spec - ids.toSet()}")
+        assertEquals(spec, ids.filter { it in spec })
         assertEquals(1, catalog.format)
     }
 

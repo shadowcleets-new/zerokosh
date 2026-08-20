@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- §10.1 tokens -->
+<!-- Only the pre-Compose window and the launcher icon read from here. Every
+     in-app colour lives in ui/theme/Theme.kt as the resolved BharatVault tokens.
+     BV-16: the previous entries (green #1A6B54, amber #E8A317) were left over
+     from an earlier design system and matched nothing in the app. -->
 <resources>
-    <color name="primary">#1A6B54</color>
-    <color name="accent">#E8A317</color>
-    <color name="error">#B3261E</color>
-    <color name="surface_light">#FAFAF7</color>
-    <color name="surface_dark">#0F1412</color>
-    <color name="success">#2E7D32</color>
+    <!-- VaultPaper. BV-15: values-night overrides this so a dark-mode launch
+         doesn't flash a light rectangle before the first composed frame. -->
+    <color name="window_background">#FDFAF6</color>
+
+    <!-- VaultInk — adaptive launcher icon ground. -->
+    <color name="ic_launcher_background">#180F0D</color>
 </resources>

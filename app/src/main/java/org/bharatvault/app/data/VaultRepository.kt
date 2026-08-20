@@ -13,6 +13,8 @@
 package org.bharatvault.app.data
 
 // #region Imports
+import android.content.Context
+import android.net.Uri
 import android.os.Build
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,9 +88,31 @@ class VaultRepository(
         store.writeAtomic(created.fileBytes) { candidate ->
             VaultOperations.unlockWithPassphrase(candidate, passphrase, crypto) is UnlockResult.Success
         }
-        // hold the session open so onboarding flows straight into Home
-        applyUnlock(VaultOperations.unlockWithPassphrase(created.fileBytes, passphrase, crypto) as UnlockResult.Success)
+        // BV-25: deliberately do NOT open the session here. Flipping to Unlocked
+        // swaps OnboardingFlow for MainScaffold in the root switch, which disposes
+        // the onboarding NavHost and orphans S5 (Recovery Kit) and S6 (Quick
+        // Unlock) — the user would never see their one-time Recovery Key.
+        // completeOnboarding() opens the session once S6 is done.
         created.recoveryKeyFormatted
+    }
+
+    /**
+     * S6 → S7. Opens the session that [createVault] prepared, re-deriving from
+     * disk so a Recovery Key rotation during S5 can't leave a stale envelope
+     * behind. Falls back to Locked rather than stranding the user in onboarding.
+     */
+    suspend fun completeOnboarding(passphrase: ByteArray): Boolean = withContext(Dispatchers.Default) {
+        val bytes = store.read() ?: return@withContext false
+        when (val result = VaultOperations.unlockWithPassphrase(bytes, passphrase, crypto)) {
+            is UnlockResult.Success -> {
+                applyUnlock(result)
+                true
+            }
+            else -> {
+                _state.value = VaultState.Locked
+                false
+            }
+        }
     }
 
     suspend fun unlockWithPassphrase(passphrase: ByteArray): UnlockOutcome =
@@ -251,6 +275,32 @@ class VaultRepository(
             if (merged != diskBody) persist(merged) else _body.value = merged
         }
         mergeConflictSiblings()
+    }
+
+    /** §5.6/§6.6: Update active VaultStore between LocalVaultStore and SafVaultStore */
+    fun updateSyncFolder(context: Context, treeUri: Uri?) {
+        if (treeUri != null) {
+            prefs.syncFolderUri = treeUri.toString()
+            store = SafVaultStore(context, treeUri)
+        } else {
+            prefs.syncFolderUri = ""
+            store = LocalVaultStore(context)
+        }
+    }
+
+    /** Manually sync current encrypted vault bytes to the SAF backup directory */
+    suspend fun manualBackup(context: Context): Boolean = ioMutex.withLock {
+        withContext(Dispatchers.Default) {
+            val uriStr = prefs.syncFolderUri
+            if (uriStr.isEmpty()) return@withContext false
+            val treeUri = Uri.parse(uriStr)
+            val safStore = SafVaultStore(context, treeUri)
+            val currentBytes = store.read() ?: return@withContext false
+            safStore.writeAtomic(currentBytes) { candidate ->
+                runCatching { VaultFileCodec.decode(candidate) }.isSuccess
+            }
+            true
+        }
     }
 
     /** §4.5.3: merge and remove `vault*.bvlt` conflict siblings with our vault_uuid. */

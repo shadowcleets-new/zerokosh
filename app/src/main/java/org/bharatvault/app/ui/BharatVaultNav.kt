@@ -2,39 +2,64 @@
  * @file BharatVaultNav.kt
  * @description Root navigation: state-driven top switch (NoVault → onboarding,
  *              Locked → S13, Unlocked → main tabs), per §5.1 flow
- *              S1→S2→S3→S4→S5→S6 first run, S13→S6 thereafter.
+ *              S1→S2→S3→S4→S5→S6 first run, S13→S6 thereafter. The main
+ *              scaffold carries the mockup's four-tab M3 bottom navigation
+ *              (Vault · Codes · Templates · Settings) with a separate extended
+ *              FAB floating above it.
  *
  * [TABLE OF CONTENTS]
- * 1. ROOT SWITCH
- * 2. ONBOARDING FLOW (S1–S5)
- * 3. MAIN SCAFFOLD (tabs + inner routes)
- * 4. DAMAGED SCREEN
+ * 1. IMPORTS & DEPENDENCIES
+ * 2. ROOT SWITCH
+ * 3. ONBOARDING FLOW (S1–S6)
+ * 4. MAIN SCAFFOLD (dock + FAB + inner routes)
+ * 5. DAMAGED SCREEN
  */
 package org.bharatvault.app.ui
 
 // #region Imports
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import org.bharatvault.app.reminders.ReminderWorker
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -42,22 +67,37 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.bharatvault.app.BharatVaultApp
-import org.bharatvault.app.R
 import org.bharatvault.app.data.VaultState
 import org.bharatvault.app.ui.authenticator.AuthenticatorScreen
+import org.bharatvault.app.ui.common.EmphasisSpan
+import org.bharatvault.app.ui.common.GroupCard
+import org.bharatvault.app.ui.common.Kicker
+import org.bharatvault.app.ui.common.NoticeCard
+import org.bharatvault.app.ui.common.NoticeTone
 import org.bharatvault.app.ui.common.RevealAuth
+import org.bharatvault.app.ui.common.VaultExtendedFab
+import org.bharatvault.app.ui.common.VaultNavBar
+import org.bharatvault.app.ui.common.VaultTab
 import org.bharatvault.app.ui.gallery.TemplateGalleryScreen
 import org.bharatvault.app.ui.home.HomeScreen
 import org.bharatvault.app.ui.lock.LockScreen
+import org.bharatvault.app.ui.motion.LocalAnimatedVisibilityScope
+import org.bharatvault.app.ui.motion.LocalSharedTransitionScope
+import org.bharatvault.app.ui.motion.globalEnterTransition
+import org.bharatvault.app.ui.motion.globalExitTransition
+import org.bharatvault.app.ui.motion.globalPopEnterTransition
+import org.bharatvault.app.ui.motion.globalPopExitTransition
 import org.bharatvault.app.ui.onboarding.CreatePassphraseScreen
 import org.bharatvault.app.ui.onboarding.LanguageScreen
 import org.bharatvault.app.ui.onboarding.OnboardingState
 import org.bharatvault.app.ui.onboarding.QuickUnlockScreen
 import org.bharatvault.app.ui.onboarding.RecoveryKitScreen
 import org.bharatvault.app.ui.onboarding.TrustScreen
+import org.bharatvault.app.ui.onboarding.WelcomeScreen
 import org.bharatvault.app.ui.record.RecordDetailScreen
 import org.bharatvault.app.ui.record.RecordEditScreen
 import org.bharatvault.app.ui.settings.SettingsScreen
+import org.bharatvault.app.ui.theme.VaultTheme
 // #endregion
 
 // #region Root switch
@@ -76,16 +116,36 @@ fun BharatVaultNav(app: BharatVaultApp) {
 }
 // #endregion
 
-// #region Onboarding flow (S1→S5)
+// #region Onboarding flow (S1→S6)
 @Composable
 private fun OnboardingFlow(app: BharatVaultApp) {
     val nav = rememberNavController()
     val onboarding = remember { OnboardingState() }
-    NavHost(navController = nav, startDestination = "language") {
-        composable("language") { LanguageScreen(app) { nav.navigate("trust") } }
-        composable("trust") { TrustScreen { nav.navigate("create") } }
+    NavHost(
+        navController = nav,
+        startDestination = "welcome",
+        enterTransition = { globalEnterTransition() },
+        exitTransition = { globalExitTransition() },
+        popEnterTransition = { globalPopEnterTransition() },
+        popExitTransition = { globalPopExitTransition() },
+    ) {
+        composable("welcome") {
+            WelcomeScreen(
+                app = app,
+                onGetStarted = { nav.navigate("language") },
+                onLogin = { nav.navigate("language") }, // NoVault: both paths proceed
+            )
+        }
+        composable("language") {
+            LanguageScreen(app, onBack = { nav.popBackStack() }) { nav.navigate("trust") }
+        }
+        composable("trust") {
+            TrustScreen(onBack = { nav.popBackStack() }) { nav.navigate("create") }
+        }
         composable("create") {
-            CreatePassphraseScreen(app, onboarding) { nav.navigate("recovery") }
+            CreatePassphraseScreen(app, onboarding, onBack = { nav.popBackStack() }) {
+                nav.navigate("recovery")
+            }
         }
         composable("recovery") {
             RecoveryKitScreen(app, onboarding) { nav.navigate("quickunlock") }
@@ -93,98 +153,153 @@ private fun OnboardingFlow(app: BharatVaultApp) {
         composable("quickunlock") {
             QuickUnlockScreen(app, onboarding) {
                 app.prefs.onboardingDone = true
-                // repository is already Unlocked → root switch lands on Home (S6)
+                // repository is already Unlocked → root switch lands on Home (S7)
             }
         }
     }
 }
 // #endregion
 
-// #region Main scaffold (S6 tabs: Home · Authenticator · Settings — §10.3)
-private data class Tab(val route: String, val labelRes: Int, val icon: @Composable () -> Unit)
+// #region Main scaffold
+private val TabRoutes = mapOf(
+    VaultTab.Vault to "home",
+    VaultTab.Codes to "authenticator",
+    VaultTab.Templates to "gallery",
+    VaultTab.Settings to "settings",
+)
+
+/** Date fields ReminderWorker auto-suggests a 30-day reminder for (§5.7). */
+private val ReminderDateFields =
+    listOf("expiry", "premium_due_date", "membership_renewal", "renewal_date")
 
 @Composable
 private fun MainScaffold(app: BharatVaultApp) {
     val nav: NavHostController = rememberNavController()
-    val tabs = listOf(
-        Tab("home", R.string.scr_home_tab_home) { Icon(Icons.Filled.Home, null) },
-        Tab("authenticator", R.string.scr_home_tab_authenticator) { Icon(Icons.Outlined.Timer, null) },
-        Tab("settings", R.string.scr_home_tab_settings) { Icon(Icons.Filled.Settings, null) },
-    )
     val backStack by nav.currentBackStackEntryAsState()
+
+    // BV-02: the vault is only readable while it is open, so this is the one
+    // moment reminders can be evaluated. Ask for POST_NOTIFICATIONS only if the
+    // vault actually holds something with a date worth reminding about.
+    val context = LocalContext.current
+    val body by app.repository.body.collectAsState()
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { /* the reminder check runs either way; a denial just silences it */ }
+    LaunchedEffect(body === null) {
+        ReminderWorker.runNow(context)
+        val hasDatedRecord = body?.records.orEmpty().any { record ->
+            record.reminders.isNotEmpty() ||
+                ReminderDateFields.any { record.fields[it]?.isNotBlank() == true }
+        }
+        if (hasDatedRecord && !app.prefs.notificationAsked &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            app.prefs.notificationAsked = true
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     val currentRoute = backStack?.destination?.route
+    val activeTab = TabRoutes.entries.firstOrNull { it.value == currentRoute }?.key
+    val openGallery = {
+        nav.navigate("gallery") {
+            popUpTo("home") { saveState = true }
+            launchSingleTop = true
+        }
+    }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (currentRoute in tabs.map { it.route }) {
-                NavigationBar {
-                    tabs.forEach { tab ->
-                        NavigationBarItem(
-                            selected = currentRoute == tab.route,
-                            onClick = {
-                                nav.navigate(tab.route) {
-                                    popUpTo("home") { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = tab.icon,
-                            label = { Text(stringResource(tab.labelRes)) },
-                        )
+            if (activeTab != null) {
+                VaultNavBar(active = activeTab, onSelect = { tab ->
+                    nav.navigate(TabRoutes.getValue(tab)) {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                }
+                })
+            }
+        },
+        floatingActionButton = {
+            // The mockup floats an extended FAB above the dock on the two list
+            // screens; Templates and Settings carry their own actions.
+            when (activeTab) {
+                VaultTab.Vault -> VaultExtendedFab("Add", openGallery)
+                VaultTab.Codes -> VaultExtendedFab(
+                    label = "Scan",
+                    onClick = openGallery,
+                    icon = Icons.Outlined.QrCodeScanner,
+                )
+                else -> Unit
             }
         },
     ) { padding ->
-        NavHost(
-            navController = nav,
-            startDestination = "home",
-            modifier = Modifier.padding(padding),
-        ) {
-            composable("home") {
-                HomeScreen(
-                    app = app,
-                    onAdd = { nav.navigate("gallery") },
-                    onOpen = { uuid -> nav.navigate("detail/$uuid") },
-                )
-            }
-            composable("authenticator") {
-                AuthenticatorScreen(app)
-            }
-            composable("settings") {
-                SettingsScreen(app)
-            }
-            composable("gallery") {
-                TemplateGalleryScreen(
-                    app = app,
-                    onPick = { templateId, presetName ->
-                        nav.navigate("edit/$templateId?preset=${presetName ?: ""}") {
-                            popUpTo("home")
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
+                NavHost(
+                    navController = nav,
+                    startDestination = "home",
+                    modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+                    enterTransition = { globalEnterTransition() },
+                    exitTransition = { globalExitTransition() },
+                    popEnterTransition = { globalPopEnterTransition() },
+                    popExitTransition = { globalPopExitTransition() },
+                ) {
+                    composable("home") {
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
+                            HomeScreen(
+                                app = app,
+                                onOpen = { uuid -> nav.navigate("detail/$uuid") },
+                                onAdd = openGallery,
+                            )
                         }
-                    },
-                )
-            }
-            composable("detail/{uuid}") { entry ->
-                val uuid = entry.arguments?.getString("uuid") ?: return@composable
-                RecordDetailScreen(
-                    app = app,
-                    uuid = uuid,
-                    onEdit = { nav.navigate("edit/byid?uuid=$uuid") },
-                    onOpenRecord = { linked -> nav.navigate("detail/$linked") },
-                    onClose = { nav.popBackStack() },
-                )
-            }
-            composable("edit/{templateId}?uuid={uuid}&preset={preset}") { entry ->
-                val templateId = entry.arguments?.getString("templateId") ?: return@composable
-                val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
-                val preset = entry.arguments?.getString("preset")?.ifEmpty { null }
-                RecordEditScreen(
-                    app = app,
-                    templateIdArg = templateId,
-                    editUuid = uuid,
-                    presetName = preset,
-                    onDone = { nav.popBackStack() },
-                )
+                    }
+                    composable("authenticator") { AuthenticatorScreen(app) }
+                    composable("settings") { SettingsScreen(app) }
+                    composable("gallery") {
+                        TemplateGalleryScreen(
+                            app = app,
+                            onPick = { templateId, presetName ->
+                                nav.navigate("edit/$templateId?preset=${presetName ?: ""}") {
+                                    popUpTo("home")
+                                }
+                            },
+                            onClose = {
+                                nav.navigate("home") {
+                                    popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
+                    composable("detail/{uuid}") { entry ->
+                        val uuid = entry.arguments?.getString("uuid") ?: return@composable
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
+                            RecordDetailScreen(
+                                app = app,
+                                uuid = uuid,
+                                onEdit = { nav.navigate("edit/byid?uuid=$uuid") },
+                                onOpenRecord = { linked -> nav.navigate("detail/$linked") },
+                                onClose = { nav.popBackStack() },
+                            )
+                        }
+                    }
+                    composable("edit/{templateId}?uuid={uuid}&preset={preset}") { entry ->
+                        val templateId = entry.arguments?.getString("templateId") ?: return@composable
+                        val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
+                        val preset = entry.arguments?.getString("preset")?.ifEmpty { null }
+                        RecordEditScreen(
+                            app = app,
+                            templateIdArg = templateId,
+                            editUuid = uuid,
+                            presetName = preset,
+                            onDone = { nav.popBackStack() },
+                        )
+                    }
+                }
             }
         }
     }
@@ -194,16 +309,54 @@ private fun MainScaffold(app: BharatVaultApp) {
 // #region Damaged screen (§11.2 clean failure path)
 @Composable
 private fun DamagedScreen() {
+    val c = VaultTheme.colors
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(c.paper)
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 28.dp, vertical = 24.dp),
     ) {
+        Kicker("Damaged state")
+        Spacer(Modifier.height(12.dp))
         Text(
-            stringResource(R.string.msg_file_damaged),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.error,
+            buildAnnotatedString {
+                append("Something in the ")
+                withStyle(EmphasisSpan.copy(color = c.ink)) { append("vault file") }
+                append(" is off.")
+            },
+            style = MaterialTheme.typography.displayMedium,
+            color = c.ink,
         )
+
+        Spacer(Modifier.height(24.dp))
+        NoticeCard(
+            title = "Integrity check failed",
+            body = "The .bvlt file's Poly1305 authentication tag doesn't match. This can " +
+                "happen after an interrupted sync or a bad flash.",
+            icon = Icons.Outlined.WarningAmber,
+            tone = NoticeTone.Warn,
+        )
+
+        Spacer(Modifier.height(24.dp))
+        GroupCard {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    "What to do next",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = c.ink,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "BharatVault keeps a rolling backup beside the vault file. Restore it " +
+                        "from your sync folder, or reopen the vault with your Recovery Kit " +
+                        "on another device.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = c.ink(0.65f),
+                )
+            }
+        }
     }
 }
 // #endregion

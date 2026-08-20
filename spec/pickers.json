@@ -13,7 +13,13 @@
       "Suryoday Small Finance Bank", "ESAF Small Finance Bank", "Utkarsh Small Finance Bank",
       "North East Small Finance Bank", "Capital Small Finance Bank", "Shivalik Small Finance Bank",
       "Unity Small Finance Bank", "Airtel Payments Bank", "India Post Payments Bank",
-      "Fino Payments Bank", "Jio Payments Bank", "Paytm Payments Bank", "Citibank India"
+      "Fino Payments Bank", "Jio Payments Bank", "Paytm Payments Bank", "NSDL Payments Bank",
+      "Fi Money", "Jupiter Money", "Niyo Global", "Slice", "OneCard", "Uni Card", "FamPay",
+      "RazorpayX", "Open Money", "INDmoney", "Cheq", "Bajaj Finance", "Tata Capital",
+      "Aditya Birla Capital", "Muthoot Finance", "Manappuram Finance", "L&T Finance",
+      "Mahindra Finance", "Shriram Finance", "LIC Housing Finance", "PNB Housing Finance",
+      "Navi Finserv", "KreditBee", "MoneyView", "IIFL Finance", "Standard Chartered Bank",
+      "HSBC India", "Citibank India", "DBS Bank India", "Deutsche Bank India"
     ],
     "brokers": [
       "Zerodha", "Groww", "Upstox", "Angel One", "ICICI Direct",

@@ -14,6 +14,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -80,6 +82,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
     companion object {
         const val CHANNEL_ID = "bharatvault_reminders"
         const val WORK_NAME = "bharatvault_daily_reminders"
+        const val RUN_NOW_NAME = "bharatvault_reminders_on_unlock"
 
         fun ensureChannel(context: Context) {
             if (Build.VERSION.SDK_INT >= 26) {
@@ -101,6 +104,21 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
                 req,
+            )
+        }
+
+        /**
+         * doWork() can only read the vault while it is unlocked, so the daily
+         * periodic run would almost always find it locked and return early. This
+         * fires a check at the one moment the records are readable — right after
+         * the user unlocks (BV-02).
+         */
+        fun runNow(context: Context) {
+            ensureChannel(context)
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                RUN_NOW_NAME,
+                ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<ReminderWorker>().build(),
             )
         }
     }

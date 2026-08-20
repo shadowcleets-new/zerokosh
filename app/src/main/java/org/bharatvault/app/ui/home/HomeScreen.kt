@@ -1,250 +1,676 @@
 /**
  * @file HomeScreen.kt
- * @description S6 Home + S7 search (§5.1): records grouped by institution,
- *              live filter with Hinglish transliteration, teaching empty state
- *              (§10.5). SECRET/PIN/H values are NEVER indexed.
+ * @description S7 "My Vault", rebuilt against the Lovable mockups
+ *              "Home · Populated" and "Home · Empty": docked search bar, serif
+ *              count headline, live state pills, M3 filter chips, and records
+ *              grouped into connected 26dp list cards.
  *
  * [TABLE OF CONTENTS]
- * 1. SEARCH INDEX (S7)
- * 2. HOME SCREEN
- * 3. RECORD ROW / EMPTY STATE
+ * 1. IMPORTS & DEPENDENCIES
+ * 2. MAIN SCREEN
+ * 3. HEADER (headline, state pills, filter chips)
+ * 4. GROUPED RECORD LIST
+ * 5. EMPTY STATE
  */
 package org.bharatvault.app.ui.home
 
 // #region Imports
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.bharatvault.app.BharatVaultApp
-import org.bharatvault.app.R
-import org.bharatvault.app.ui.common.FavoriteStar
-import org.bharatvault.app.ui.common.InstitutionMonogram
-import org.bharatvault.app.ui.common.TemplateIcon
-import org.bharatvault.core.model.FieldType
+import org.bharatvault.app.ui.common.BrandTile
+import org.bharatvault.app.ui.common.EmphasisSpan
+import org.bharatvault.app.ui.common.GroupCard
+import org.bharatvault.app.ui.common.RecordCategory
+import org.bharatvault.app.ui.common.RowDivider
+import org.bharatvault.app.ui.common.SectionLabel
+import org.bharatvault.app.ui.common.SearchDock
+import org.bharatvault.app.ui.common.StatusPill
+import org.bharatvault.app.ui.common.NoticeTone
+import org.bharatvault.app.ui.common.VaultFilterChip
+import org.bharatvault.app.ui.common.VaultListRow
+import org.bharatvault.app.ui.common.category
+import org.bharatvault.app.ui.common.recordBadge
+import org.bharatvault.app.ui.common.recordMeta
+import org.bharatvault.app.ui.common.BlobAccent
+import org.bharatvault.app.ui.common.BlobPrimary
+import org.bharatvault.app.ui.motion.LocalAnimatedVisibilityScope
+import org.bharatvault.app.ui.motion.LocalSharedTransitionScope
+import org.bharatvault.app.ui.theme.CornerGroup
+import org.bharatvault.app.ui.theme.VaultTheme
 import org.bharatvault.core.model.Record
-import org.bharatvault.core.model.Sensitivity
-import org.bharatvault.core.model.TemplateCatalog
 // #endregion
 
-// #region Search index (S7 — never index SECRET/PIN/H)
-/** Latin→Devanagari common-term table so Hinglish queries hit Hindi-titled records (§5.1 S7). */
-private val Transliteration = mapOf(
-    "bijli" to "बिजली", "bank" to "बैंक", "paisa" to "पैसा", "gas" to "गैस", "pani" to "पानी",
-    "bima" to "बीमा", "card" to "कार्ड", "phone" to "फोन", "ghar" to "घर",
-)
-
-fun searchableText(record: Record, catalog: TemplateCatalog): String {
-    val template = catalog.byId(record.template_id)
-    val indexableFields = record.fields.mapNotNull { (k, v) ->
-        val field = template?.fields?.firstOrNull { it.k == k } ?: return@mapNotNull null
-        val safeType = field.type in setOf(
-            FieldType.TEXT, FieldType.EMAIL, FieldType.PHONE, FieldType.URL, FieldType.PICKER, FieldType.IFSC,
-        )
-        if (safeType && field.sensitivity != Sensitivity.H) v else null // NEVER SECRET/PIN/H
-    }
-    return (listOf(record.title, record.institution) + record.tags + indexableFields)
-        .joinToString(" ")
-        .lowercase()
-}
-
-fun matchesQuery(haystack: String, query: String): Boolean {
-    if (query.isBlank()) return true
-    return query.lowercase().split(" ").filter { it.isNotBlank() }.all { token ->
-        haystack.contains(token) || (Transliteration[token]?.let { haystack.contains(it) } == true)
-    }
-}
-// #endregion
-
-// #region Home screen (S6)
+// #region Main screen
 @Composable
-fun HomeScreen(app: BharatVaultApp, onAdd: () -> Unit, onOpen: (String) -> Unit) {
+fun HomeScreen(
+    app: BharatVaultApp,
+    onOpen: (String) -> Unit,
+    onAdd: () -> Unit,
+) {
+    val c = VaultTheme.colors
     val body by app.repository.body.collectAsState()
-    var query by remember { mutableStateOf("") }
     val records = body?.records.orEmpty()
-    val fallbackGroup = stringResource(R.string.scr_home_group_other)
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.scr_home_add))
+    // BV-11: rememberSaveable so a rotation doesn't drop the query and the
+    // selected chip. The category is stored by name — an enum needs no Saver then.
+    var searching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var filterName by rememberSaveable { mutableStateOf<String?>(null) }
+    val filter = filterName?.let { name -> RecordCategory.entries.firstOrNull { it.name == name } }
+
+    val matching = remember(records, query) {
+        if (query.isBlank()) records
+        else records.filter {
+            it.title.contains(query, true) ||
+                it.institution.contains(query, true) ||
+                it.fields.values.any { v -> v.contains(query, true) }
+        }
+    }
+    val visible = remember(matching, filter) {
+        if (filter == null) matching else matching.filter { it.category == filter }
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(c.paper)
+            .statusBarsPadding()
+            .imePadding(),
+    ) {
+        Box(Modifier.padding(horizontal = 16.dp).padding(top = 12.dp, bottom = 8.dp)) {
+            if (searching) {
+                ActiveSearchBar(
+                    query = query,
+                    onQueryChange = { query = it },
+                    onClose = { searching = false; query = "" },
+                )
+            } else {
+                SearchDock(
+                    placeholder = "Search HDFC, priya@upi, PAN…",
+                    initials = vaultInitials(records),
+                    onClick = { searching = true },
+                )
             }
-        },
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-                placeholder = { Text(stringResource(R.string.scr_home_search_hint)) },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                singleLine = true,
+        }
+
+        if (records.isEmpty()) {
+            EmptyVault(onAdd = onAdd, modifier = Modifier.weight(1f))
+            return@Column
+        }
+
+        LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            // Clears the floating FAB and the bottom dock.
+            contentPadding = PaddingValues(bottom = 132.dp),
+        ) {
+            item {
+                VaultHeader(
+                    total = records.size,
+                    institutions = records.map { it.institution }.filter { it.isNotBlank() }.distinct().size,
+                    autoLockMinutes = app.prefs.autoLockMinutes,
+                )
+            }
+            item {
+                FilterChipRow(
+                    records = matching,
+                    selected = filter,
+                    onSelect = { filterName = it?.name },
+                )
+            }
+
+            val pinned = visible.filter { it.favorite }
+            if (pinned.isNotEmpty()) {
+                recordSection(title = "Pinned", rows = pinned, app = app, onOpen = onOpen)
+            }
+            RecordCategory.entries.forEach { cat ->
+                val rows = visible.filter { it.category == cat && !it.favorite }
+                if (rows.isNotEmpty()) {
+                    recordSection(title = cat.label, rows = rows, app = app, onOpen = onOpen)
+                }
+            }
+
+            if (visible.isEmpty()) {
+                item { NoMatches(query) }
+            }
+            item { Spacer(Modifier.height(8.dp)) }
+        }
+    }
+}
+
+/** Initials for the account chip — derived from the vault, never a real name. */
+private fun vaultInitials(records: List<Record>): String =
+    records.firstOrNull { it.institution.isNotBlank() }
+        ?.institution?.take(2)?.uppercase()
+        ?: "BV"
+// #endregion
+
+// #region Header
+@Composable
+private fun VaultHeader(total: Int, institutions: Int, autoLockMinutes: Int) {
+    val c = VaultTheme.colors
+    Column(Modifier.padding(horizontal = 24.dp).padding(top = 12.dp)) {
+        Text(
+            buildAnnotatedString {
+                append("$total credential${if (total == 1) "" else "s"}, ")
+                withStyle(EmphasisSpan) { append("all offline.") }
+            },
+            style = MaterialTheme.typography.displaySmall,
+            color = c.ink,
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatusPill(
+                // BV-17: "auto-lock 1:00" read as a running MM:SS timer. There is
+                // no foreground idle timeout — it locks N minutes after you leave.
+                text = when (autoLockMinutes) {
+                    0 -> "Unlocked · locks when you leave"
+                    1 -> "Unlocked · locks 1 min after you leave"
+                    else -> "Unlocked · locks $autoLockMinutes min after you leave"
+                },
+                tone = NoticeTone.Positive,
+                showDot = true,
             )
-
-            if (records.isEmpty()) {
-                EmptyHome()
-                return@Column
-            }
-
-            val filtered = records.filter { matchesQuery(searchableText(it, app.catalog.templates), query) }
-            if (filtered.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.scr_home_no_results), style = MaterialTheme.typography.bodyLarge)
-                }
-                return@Column
-            }
-
-            // §5.1 S6: grouped by institution, fallback to template group
-            val groups = filtered
-                .groupBy { record ->
-                    record.institution.ifBlank {
-                        app.catalog.templates.byId(record.template_id)?.id?.let { templateLabel(it) } ?: fallbackGroup
-                    }
-                }
-                .toSortedMap()
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                groups.forEach { (institution, groupRecords) ->
-                    item(key = "header-$institution") {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-                        ) {
-                            InstitutionMonogram(institution, modifier = Modifier.size(28.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(institution, style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
-                    items(groupRecords.sortedByDescending { it.favorite }, key = { it.uuid }) { record ->
-                        RecordRow(record, app) { onOpen(record.uuid) }
-                    }
-                }
-                item { Spacer(Modifier.height(88.dp)) } // clear the FAB
+            if (institutions > 0) {
+                StatusPill("$institutions institution${if (institutions == 1) "" else "s"}")
             }
         }
     }
 }
 
 @Composable
-private fun templateLabel(templateId: String): String {
-    val res = templateStringId(templateId)
-    return if (res != 0) stringResource(res) else templateId
+private fun FilterChipRow(
+    records: List<Record>,
+    selected: RecordCategory?,
+    onSelect: (RecordCategory?) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .padding(top = 16.dp)
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        VaultFilterChip(
+            label = "All",
+            selected = selected == null,
+            count = records.size,
+            onClick = { onSelect(null) },
+        )
+        RecordCategory.entries.forEach { cat ->
+            val n = records.count { it.category == cat }
+            if (n > 0) {
+                VaultFilterChip(
+                    label = cat.label,
+                    selected = selected == cat,
+                    count = n,
+                    onClick = { onSelect(if (selected == cat) null else cat) },
+                )
+            }
+        }
+    }
 }
 
-private fun templateStringId(templateId: String): Int = when (templateId) {
-    "bank_account" -> R.string.tpl_bank_account
-    "card" -> R.string.tpl_card
-    "upi" -> R.string.tpl_upi
-    "demat" -> R.string.tpl_demat
-    "insurance" -> R.string.tpl_insurance
-    "gov_id" -> R.string.tpl_gov_id
-    "epf_pension" -> R.string.tpl_epf_pension
-    "utility" -> R.string.tpl_utility
-    "telecom" -> R.string.tpl_telecom
-    "app_profile" -> R.string.tpl_app_profile
-    "login" -> R.string.tpl_login
-    "secure_note" -> R.string.tpl_secure_note
-    else -> 0
+/** The docked search bar in its editing state. */
+@Composable
+private fun ActiveSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+) {
+    val c = VaultTheme.colors
+    val focus = remember { FocusRequester() }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(CircleShape)
+            .background(c.surface)
+            .border(1.dp, c.line, CircleShape)
+            .padding(start = 16.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            Icons.Outlined.Search,
+            contentDescription = null,
+            tint = c.ink(0.5f),
+            modifier = Modifier.size(20.dp),
+        )
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            singleLine = true,
+            modifier = Modifier.weight(1f).focusRequester(focus),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp, color = c.ink),
+            cursorBrush = SolidColor(c.primary),
+        )
+        Box(
+            Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onClose),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = "Close search",
+                tint = c.ink(0.55f),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+    androidx.compose.runtime.LaunchedEffect(Unit) { focus.requestFocus() }
 }
 // #endregion
 
-// #region Record row / empty state
-@Composable
-private fun RecordRow(record: Record, app: BharatVaultApp, onClick: () -> Unit) {
-    val template = app.catalog.templates.byId(record.template_id)
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+// #region Grouped record list
+private fun androidx.compose.foundation.lazy.LazyListScope.recordSection(
+    title: String,
+    rows: List<Record>,
+    app: BharatVaultApp,
+    onOpen: (String) -> Unit,
+) {
+    item(key = "header-$title") {
+        SectionLabel(
+            text = title,
+            trailing = rows.size.toString(),
+            modifier = Modifier
+                .padding(top = 20.dp, bottom = 8.dp)
+                .padding(horizontal = 24.dp),
+        )
+    }
+    // BV-07: these used to be one item{} holding the whole category so the group
+    // could be drawn as a single card — which meant a 500-record shelf composed
+    // every row on the first frame. Each row is its own lazy item now and the
+    // connected-card look is rebuilt per row from its position in the group.
+    itemsIndexed(rows, key = { _, record -> record.uuid }) { index, record ->
+        GroupedRow(
+            isFirst = index == 0,
+            isLast = index == rows.lastIndex,
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
-            TemplateIcon(template?.icon ?: "key", modifier = Modifier.size(24.dp))
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(record.title, style = MaterialTheme.typography.bodyLarge)
-                    Spacer(Modifier.width(6.dp))
-                    FavoriteStar(record.favorite)
-                }
-                Text(
-                    templateLabel(record.template_id),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            if (index > 0) RowDivider()
+            RecordRow(app = app, record = record, onClick = { onOpen(record.uuid) })
         }
     }
 }
 
-/** §10.5: teaching empty state — sample cards + rotating scam-awareness tips. */
+/**
+ * One row of a connected list card: fills and rings like [GroupCard], but caps
+ * only the corners that sit at the ends of the group, so consecutive rows read as
+ * a single card while remaining independent lazy items.
+ */
 @Composable
-private fun EmptyHome() {
-    val tips = listOf(
-        R.string.msg_safety_tip_1, R.string.msg_safety_tip_2, R.string.msg_safety_tip_3,
-        R.string.msg_safety_tip_4, R.string.msg_safety_tip_5, R.string.msg_safety_tip_6,
+private fun GroupedRow(
+    isFirst: Boolean,
+    isLast: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
+) {
+    val c = VaultTheme.colors
+    val shape = RoundedCornerShape(
+        topStart = if (isFirst) CornerGroup else 0.dp,
+        topEnd = if (isFirst) CornerGroup else 0.dp,
+        bottomStart = if (isLast) CornerGroup else 0.dp,
+        bottomEnd = if (isLast) CornerGroup else 0.dp,
     )
-    val tip = remember { tips.random() }
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 24.dp)) {
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                TemplateIcon("bank", modifier = Modifier.size(24.dp))
-                Spacer(Modifier.width(16.dp))
-                Text(stringResource(R.string.scr_home_empty_sample_bank), style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                TemplateIcon("card", modifier = Modifier.size(24.dp))
-                Spacer(Modifier.width(16.dp))
-                Text(stringResource(R.string.scr_home_empty_sample_card), style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Outlined.Shield,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp),
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(c.surface)
+            .drawBehind {
+                // Side rails on every row; the horizontal caps only at the ends.
+                // clip(shape) above trims these to the rounded corners.
+                val w = 1.dp.toPx()
+                drawLine(c.line, Offset(0f, 0f), Offset(0f, size.height), w)
+                drawLine(c.line, Offset(size.width, 0f), Offset(size.width, size.height), w)
+                if (isFirst) drawLine(c.line, Offset(0f, 0f), Offset(size.width, 0f), w)
+                if (isLast) {
+                    drawLine(c.line, Offset(0f, size.height), Offset(size.width, size.height), w)
+                }
+            },
+        content = content,
+    )
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun RecordRow(app: BharatVaultApp, record: Record, onClick: () -> Unit) {
+    val sharedScope = LocalSharedTransitionScope.current
+    val animScope = LocalAnimatedVisibilityScope.current
+    val brand = record.institution.ifBlank { record.title }
+
+    VaultListRow(
+        title = record.title,
+        meta = recordMeta(app.catalog, record).ifBlank { null },
+        badge = recordBadge(record),
+        onClick = onClick,
+        modifier = if (sharedScope != null && animScope != null) {
+            with(sharedScope) {
+                Modifier.sharedBounds(
+                    rememberSharedContentState(key = "container-${record.uuid}"),
+                    animatedVisibilityScope = animScope,
                 )
-                Spacer(Modifier.width(16.dp))
-                Text(stringResource(tip), style = MaterialTheme.typography.bodyMedium)
+            }
+        } else Modifier,
+        leading = {
+            val tileModifier = if (sharedScope != null && animScope != null) {
+                with(sharedScope) {
+                    Modifier.sharedElement(
+                        rememberSharedContentState(key = "logo-${record.uuid}"),
+                        animatedVisibilityScope = animScope,
+                    )
+                }
+            } else Modifier
+            BrandTile(code = brand, modifier = tileModifier)
+        },
+    )
+}
+
+@Composable
+private fun NoMatches(query: String) {
+    val c = VaultTheme.colors
+    Column(
+        Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "Nothing matches “$query”",
+            style = MaterialTheme.typography.headlineSmall,
+            color = c.ink,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Try an institution, a UPI handle, or the last four digits.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = c.mute,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+// #endregion
+
+// #region Empty state
+private val QuickAdds = listOf("Bank account", "UPI ID", "Aadhaar", "PAN", "TOTP")
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
+    val c = VaultTheme.colors
+    Column(
+        modifier = modifier
+            // BV-23: cap before filling (see Onboarding.kt).
+            .widthIn(max = 560.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 132.dp),
+    ) {
+        Spacer(Modifier.height(16.dp))
+        Text(
+            buildAnnotatedString {
+                append("Your vault is ")
+                withStyle(EmphasisSpan) { append("waiting.") }
+            },
+            style = MaterialTheme.typography.displaySmall,
+            color = c.ink,
+        )
+
+        Spacer(Modifier.height(32.dp))
+        // M3 expressive illustration: tonal wash + two morphed shapes + shield.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(32.dp))
+                .background(c.surface)
+                .border(1.dp, c.line, RoundedCornerShape(32.dp)),
+        ) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        drawRect(
+                            Brush.radialGradient(
+                                listOf(c.primary.copy(alpha = 0.18f), Color.Transparent),
+                                center = Offset(size.width * 0.70f, size.height * 0.30f),
+                                radius = size.width * 0.60f,
+                            ),
+                        )
+                        drawRect(
+                            Brush.radialGradient(
+                                listOf(c.accent.copy(alpha = 0.16f), Color.Transparent),
+                                center = Offset(size.width * 0.20f, size.height * 0.80f),
+                                radius = size.width * 0.50f,
+                            ),
+                        )
+                    },
+            )
+            Box(
+                Modifier
+                    .padding(start = 24.dp, top = 32.dp)
+                    .size(112.dp)
+                    .clip(BlobPrimary)
+                    .background(c.primary.copy(alpha = 0.15f)),
+            )
+            Box(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 32.dp, bottom = 40.dp)
+                    .size(80.dp)
+                    .clip(BlobAccent)
+                    .background(c.accent.copy(alpha = 0.18f)),
+            )
+            Column(
+                Modifier.fillMaxWidth().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(c.primary),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Outlined.Shield,
+                        contentDescription = null,
+                        tint = c.paper,
+                        modifier = Modifier.size(32.dp),
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    "A blank vault, ready.",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = c.ink,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Start with the one credential you use the most. Even one saved " +
+                        "password is safer than twelve in a notes app.",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
+                    color = c.mute,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 240.dp),
+                )
+                Spacer(Modifier.height(24.dp))
+                Row(
+                    Modifier
+                        .height(44.dp)
+                        .clip(CircleShape)
+                        .background(c.ink)
+                        .clickable(onClick = onAdd)
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Add your first record",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = c.paper,
+                    )
+                }
             }
         }
+
+        Spacer(Modifier.height(24.dp))
+        SectionLabel("Start with a template")
+        Spacer(Modifier.height(12.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            QuickAdds.forEach { label ->
+                Row(
+                    Modifier
+                        .height(36.dp)
+                        .clip(CircleShape)
+                        .background(c.card)
+                        .border(1.dp, c.line, CircleShape)
+                        .clickable(onClick = onAdd)
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null,
+                        tint = c.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                        label,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = c.ink(0.8f),
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(c.card)
+                .border(1.dp, c.line, RoundedCornerShape(16.dp))
+                .clickable(onClick = onAdd)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Box(
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(c.accent.copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.FileDownload,
+                    contentDescription = null,
+                    tint = c.accent,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Import an encrypted backup",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontSize = 13.sp,
+                    color = c.ink,
+                )
+                Text("Open a .bvlt file from this device", fontSize = 11.sp, color = c.mute)
+            }
+        }
+
+        Spacer(Modifier.height(20.dp))
+        TrustStrip()
+    }
+}
+
+/** `Never leaves this device. Encrypted at rest.` — the teal reassurance strip. */
+@Composable
+fun TrustStrip(modifier: Modifier = Modifier) {
+    val c = VaultTheme.colors
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(c.accent.copy(alpha = 0.08f))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(Modifier.size(6.dp).background(c.accent, CircleShape))
+        Text(
+            "Never leaves this device. Encrypted at rest.",
+            fontSize = 11.sp,
+            color = c.ink,
+        )
     }
 }
 // #endregion

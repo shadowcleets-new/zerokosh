@@ -56,11 +56,26 @@ kotlin {
 dependencies {
     implementation(project(":core"))
 
+    // BV-24: androidx.biometric 1.1.0 pins androidx.fragment 1.2.5, whose
+    // FragmentActivity.startActivityForResult still enforces the legacy
+    // "request code must fit in 16 bits" rule. ActivityResultRegistry always
+    // generates codes above 65535, so every rememberLauncherForActivityResult
+    // call crashed the process. This is a version floor on a library already on
+    // the classpath transitively, not a new entry on the §6.2 list.
+    constraints {
+        implementation("androidx.fragment:fragment:1.8.6") {
+            because("FragmentActivity must accept ActivityResultRegistry request codes (BV-24)")
+        }
+    }
+
     // §6.2 allowed list — nothing else without R0.5 review.
-    implementation("com.goterl:lazysodium-android:5.1.0") {
+    // BV-21: 5.1.0 shipped a libsodium.so whose LOAD segment is not 16 KB
+    // aligned, which Play now rejects for new releases on Android 15+.
+    implementation("com.goterl:lazysodium-android:5.2.0") {
         exclude(group = "net.java.dev.jna", module = "jna") // pulls the desktop jar; we ship the @aar below
     }
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
+    // BV-21: JNA gained 16 KB page alignment in 5.15.
+    implementation("net.java.dev.jna:jna:5.17.0@aar")
 
     val composeBom = platform("androidx.compose:compose-bom:2026.03.01")
     implementation(composeBom)

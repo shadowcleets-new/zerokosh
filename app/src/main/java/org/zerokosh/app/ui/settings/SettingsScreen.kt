@@ -793,21 +793,4 @@ private fun EnableQuickUnlockDialog(app: ZerokoshApp, onDone: (Boolean) -> Unit)
 // #endregion
 
 // #region About
-@Composable
-private fun AboutSection() {
-    Text(stringResource(R.string.scr_settings_about), style = MaterialTheme.typography.titleMedium)
-    Spacer(Modifier.height(8.dp))
-    Text(stringResource(R.string.scr_about_body), style = MaterialTheme.typography.bodyMedium)
-    Spacer(Modifier.height(4.dp))
-    Text(
-        stringResource(R.string.scr_about_version, "0.1.0"),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Text(
-        stringResource(R.string.scr_about_license),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
 // #endregion

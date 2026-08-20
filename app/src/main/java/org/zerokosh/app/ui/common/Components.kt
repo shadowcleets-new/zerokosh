@@ -60,10 +60,6 @@ val TemplateIcons: Map<String, ImageVector> = mapOf(
     "note" to Icons.Outlined.Description,
 )
 
-@Composable
-fun TemplateIcon(iconKey: String, modifier: Modifier = Modifier, tint: Color = MaterialTheme.colorScheme.primary) {
-    Icon(TemplateIcons[iconKey] ?: Icons.Outlined.Key, contentDescription = null, modifier = modifier, tint = tint)
-}
 // #endregion
 
 // #region Institution monogram (§10.2: colored circle from name hash)
@@ -72,20 +68,6 @@ private val MonogramPalette = listOf(
     Color(0xFF6A5ACD), Color(0xFF00796B), Color(0xFFC2185B), Color(0xFF5D4037),
 )
 
-@Composable
-fun InstitutionMonogram(name: String, modifier: Modifier = Modifier) {
-    val color = MonogramPalette[name.hashCode().absoluteValue % MonogramPalette.size]
-    Box(
-        modifier = modifier.size(40.dp).background(color, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = name.trim().take(1).uppercase().ifEmpty { "?" },
-            color = Color.White,
-            style = MaterialTheme.typography.titleMedium,
-        )
-    }
-}
 // #endregion
 
 // #region Masking (§2.3 / §10.4)
@@ -108,15 +90,4 @@ fun groupCardNumber(digits: String): String = digits.chunked(4).joinToString(" "
 // #endregion
 
 // #region Small widgets
-@Composable
-fun FavoriteStar(favorite: Boolean, modifier: Modifier = Modifier) {
-    if (favorite) {
-        Icon(
-            Icons.Filled.Star,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = modifier.size(16.dp),
-        )
-    }
-}
 // #endregion

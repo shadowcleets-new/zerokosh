@@ -176,16 +176,6 @@ fun SectionLabel(
 // #endregion
 
 // #region Chrome
-/** Android gesture handle — `h-[3px] w-24 rounded-full bg-vault-ink/80`. */
-@Composable
-fun GestureHandle(modifier: Modifier = Modifier, color: Color = VaultTheme.colors.ink(0.8f)) {
-    Box(
-        modifier
-            .width(96.dp)
-            .height(3.dp)
-            .background(color, CircleShape),
-    )
-}
 
 /** Bottom-sheet drag handle — `w-8 h-1 bg-vault-ink/20`. */
 @Composable
@@ -811,46 +801,6 @@ fun VaultListRow(
     }
 }
 
-/** Settings-style row: label left, value right, teal value when it is "on". */
-@Composable
-fun SettingRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    accent: Boolean = false,
-    onClick: (() -> Unit)? = null,
-    trailing: (@Composable () -> Unit)? = null,
-) {
-    val c = VaultTheme.colors
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(
-                if (onClick != null) {
-                    Modifier
-                        .clickable(onClick = onClick, role = Role.Button)
-                        .semantics(mergeDescendants = true) {
-                            contentDescription = "$label, $value"
-                        }
-                } else Modifier,
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = c.ink)
-        if (trailing != null) {
-            trailing()
-        } else {
-            Text(
-                value,
-                fontSize = 12.sp,
-                fontWeight = if (accent) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (accent) c.accent else c.mute,
-            )
-        }
-    }
-}
 // #endregion
 
 // #region Search dock

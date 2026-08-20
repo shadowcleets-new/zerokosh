@@ -102,3 +102,63 @@ dependencies {
     implementation("androidx.camera:camera-view:1.6.1")
     implementation("com.google.zxing:core:3.5.3")
 }
+
+// #region Dead-composable guard
+// Nothing in the standard toolchain catches an unreferenced @Composable, which
+// is how eight of them accumulated here unnoticed:
+//   - "public but unused" is never a compiler warning, because public means a
+//     caller outside the module may exist. This is an application module, so no
+//     such caller can exist and the compiler's caution is simply wrong here.
+//   - unused *private* composables are not flagged either: the Compose compiler
+//     plugin rewrites them, so the unused-symbol analysis never fires.
+// The check therefore has to live at project level. It adds no dependency,
+// which matters because the §6.2 list is locked.
+//
+// Deliberately conservative: a composable counts as dead only when the sole
+// occurrence of its name in the whole tree is its own declaration. Kotlin calls
+// take several shapes — Name(...), Name { } with no parens, ::Name — and
+// matching only "Name(" reports live code as dead. Failing a build on a false
+// positive is worse than missing one, so it counts bare names.
+//
+// Everything the action needs is captured at configuration time; referencing
+// the project from inside doLast breaks the configuration cache.
+val composableSources = fileTree("src/main/java") { include("**/*.kt") }
+val moduleDir = projectDir
+
+val deadComposables by tasks.registering {
+    group = "verification"
+    description = "Fails if a @Composable is declared and never referenced."
+    val sources = composableSources
+    val base = moduleDir
+    inputs.files(sources)
+    outputs.upToDateWhen { false }
+    doLast {
+        val decl = Regex(
+            """@Composable[^\n]*\n(?:\s*@[\w.]+(?:\([^)]*\))?\s*\n)*""" +
+                """\s*(?:internal\s+|private\s+|public\s+)?fun\s+([A-Z][A-Za-z0-9_]*)\s*\(""",
+        )
+        val texts = sources.files.associateWith { it.readText() }
+        val declared = mutableMapOf<String, MutableList<java.io.File>>()
+        texts.forEach { (file, src) ->
+            decl.findAll(src).forEach { m ->
+                declared.getOrPut(m.groupValues[1]) { mutableListOf() }.add(file)
+            }
+        }
+        val dead = declared.filter { (name, sites) ->
+            val bare = Regex("""(?<![A-Za-z0-9_])${Regex.escape(name)}(?![A-Za-z0-9_])""")
+            texts.values.sumOf { bare.findAll(it).count() } <= sites.size
+        }
+        if (dead.isNotEmpty()) {
+            val listing = dead.entries.sortedBy { it.key }.joinToString("\n") { (name, sites) ->
+                "  $name  —  ${sites.first().relativeTo(base)}"
+            }
+            throw GradleException(
+                "${dead.size} @Composable(s) declared and never referenced:\n$listing\n\n" +
+                    "Delete them, or call them. An unreferenced composable still ships in the APK.",
+            )
+        }
+        println("deadComposables: none (${declared.size} composables checked)")
+    }
+}
+tasks.named("check") { dependsOn(deadComposables) }
+// #endregion

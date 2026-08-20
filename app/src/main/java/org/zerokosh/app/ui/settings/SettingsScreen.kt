@@ -39,6 +39,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import org.zerokosh.app.ui.common.RevealToggle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -535,10 +537,15 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
         title = { Text(stringResource(R.string.scr_settings_change_passphrase)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                var showCurrent by remember { mutableStateOf(false) }
+                var showNew by remember { mutableStateOf(false) }
+                var showConfirm by remember { mutableStateOf(false) }
                 OutlinedTextField(
                     value = current, onValueChange = { current = it; wrongCurrent = false },
                     label = { Text(stringResource(R.string.scr_settings_current_passphrase)) },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (showCurrent) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    trailingIcon = { RevealToggle(visible = showCurrent, onToggle = { showCurrent = !showCurrent }) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true, isError = wrongCurrent,
                     supportingText = { if (wrongCurrent) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) }
@@ -546,14 +553,18 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                 OutlinedTextField(
                     value = newPass, onValueChange = { newPass = it },
                     label = { Text(stringResource(R.string.scr_settings_new_passphrase)) },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (showNew) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    trailingIcon = { RevealToggle(visible = showNew, onToggle = { showNew = !showNew }) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = confirm, onValueChange = { confirm = it },
                     label = { Text("Confirm new passphrase") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (showConfirm) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    trailingIcon = { RevealToggle(visible = showConfirm, onToggle = { showConfirm = !showConfirm }) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true, isError = confirm.isNotEmpty() && confirm != newPass
                 )
@@ -603,10 +614,13 @@ private fun NewRecoveryKeyDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
             if (newKey == null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Confirm your passphrase to generate a new Recovery Key. The previous key will stop working.", style = MaterialTheme.typography.bodySmall)
+                    var showPass by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         value = passphrase, onValueChange = { passphrase = it; wrong = false },
                         label = { Text(stringResource(R.string.scr_lock_hint)) },
-                        visualTransformation = PasswordVisualTransformation(),
+                        visualTransformation = if (showPass) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                        trailingIcon = { RevealToggle(visible = showPass, onToggle = { showPass = !showPass }) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true, isError = wrong,
                         supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) }
@@ -745,10 +759,13 @@ private fun EnableQuickUnlockDialog(app: ZerokoshApp, onDone: (Boolean) -> Unit)
         onDismissRequest = { onDone(false) },
         title = { Text(stringResource(R.string.scr_settings_quick_unlock)) },
         text = {
+            var showPass by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = passphrase, onValueChange = { passphrase = it; wrong = false },
                 label = { Text(stringResource(R.string.scr_lock_hint)) },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (showPass) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                trailingIcon = { RevealToggle(visible = showPass, onToggle = { showPass = !showPass }) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true, isError = wrong,
                 supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) },

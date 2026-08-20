@@ -71,6 +71,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -278,6 +279,7 @@ fun LockScreen(app: ZerokoshApp) {
 
             if (showCredential || recoveryMode) {
                 Spacer(Modifier.height(32.dp))
+                var revealed by remember { mutableStateOf(false) }
                 OutlinedTextField(
                     value = if (recoveryMode) recoveryInput else passphrase,
                     onValueChange = {
@@ -295,8 +297,19 @@ fun LockScreen(app: ZerokoshApp) {
                             ),
                         )
                     },
-                    visualTransformation = if (recoveryMode) androidx.compose.ui.text.input.VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation =
+                        if (recoveryMode || revealed) androidx.compose.ui.text.input.VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                    // The recovery key is already shown in clear, so it needs no toggle.
+                    trailingIcon = if (recoveryMode) null else {
+                        {
+                            RevealToggle(
+                                visible = revealed,
+                                onToggle = { revealed = !revealed },
+                                tint = LockOnSurface.copy(alpha = 0.7f),
+                            )
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = if (recoveryMode) KeyboardType.Text else KeyboardType.Password,
                     ),

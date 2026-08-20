@@ -100,6 +100,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -287,9 +288,10 @@ private fun FilledSecretField(
             if (onToggleVisible != null) {
                 Box(
                     Modifier
-                        .size(32.dp)
+                        // 48dp minimum tap target; the painted circle stays small.
+                        .size(48.dp)
                         .clip(CircleShape)
-                        .clickable(onClick = onToggleVisible),
+                        .clickable(onClick = onToggleVisible, role = Role.Button),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(

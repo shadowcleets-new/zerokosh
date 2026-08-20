@@ -69,6 +69,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
@@ -569,6 +572,29 @@ fun BrandTile(
         contentAlignment = Alignment.Center,
     ) {
         CompanyLogo(name = code, size = size - 8.dp)
+    }
+}
+
+/**
+ * Reveal toggle for a masked field. Every place the user types a secret needs
+ * one — typing a long passphrase blind is the single biggest accessibility
+ * barrier in the app, and it is worst exactly where it matters most, on the
+ * lock screen. 48dp because this sits next to the field's own tap target.
+ */
+@Composable
+fun RevealToggle(
+    visible: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = VaultTheme.colors.ink(0.55f),
+) {
+    IconButton(onClick = onToggle, modifier = modifier.size(48.dp)) {
+        Icon(
+            if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+            contentDescription = if (visible) "Hide passphrase" else "Show passphrase",
+            tint = tint,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 

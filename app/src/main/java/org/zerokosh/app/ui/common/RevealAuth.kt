@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.launch
 import org.zerokosh.app.R
 import org.zerokosh.app.data.VaultRepository
@@ -49,6 +50,7 @@ fun PassphraseAuthDialog(
     var passphrase by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
+    var revealed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     AlertDialog(
@@ -59,7 +61,9 @@ fun PassphraseAuthDialog(
                 value = passphrase,
                 onValueChange = { passphrase = it; wrong = false },
                 label = { Text(stringResource(R.string.scr_lock_hint)) },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (revealed) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                trailingIcon = { RevealToggle(visible = revealed, onToggle = { revealed = !revealed }) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = wrong,
                 supportingText = { if (wrong) Text(stringResource(R.string.scr_lock_wrong), color = MaterialTheme.colorScheme.error) },

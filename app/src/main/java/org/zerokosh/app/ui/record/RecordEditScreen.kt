@@ -69,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -469,16 +470,21 @@ fun FieldEditor(
             modifier = modifier, minLines = 3,
         )
         FieldType.SECRET -> SecretField(app, value, onValueChange, label, modifier)
-        FieldType.PIN -> OutlinedTextField(
-            value = value,
-            onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) }, // 3–8 digits (§2.2)
-            label = { Text(label) },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            modifier = modifier, singleLine = true,
-            isError = invalid,
-            supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
-        )
+        FieldType.PIN -> {
+            var pinVisible by remember { mutableStateOf(false) }
+            OutlinedTextField(
+                value = value,
+                onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) }, // 3–8 digits (§2.2)
+                label = { Text(label) },
+                visualTransformation = if (pinVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                trailingIcon = { RevealToggle(visible = pinVisible, onToggle = { pinVisible = !pinVisible }) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                modifier = modifier, singleLine = true,
+                isError = invalid,
+                supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
+            )
+        }
         FieldType.NUMBER -> OutlinedTextField(
             value = value,
             onValueChange = { v -> onValueChange(v.filter(Char::isDigit)) },

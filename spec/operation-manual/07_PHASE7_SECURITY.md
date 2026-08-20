@@ -4,18 +4,18 @@
 
 | Parameter | Exact value |
 |---|---|
-| Provider / alias | `AndroidKeyStore` / `bharatvault_quick_unlock` |
+| Provider / alias | `AndroidKeyStore` / `zerokosh_quick_unlock` |
 | Algorithm | AES-256, transformation `AES/GCM/NoPadding`, tag length 128 |
 | Key gate | `setUserAuthenticationRequired(true)` · `setInvalidatedByBiometricEnrollment(true)` · SDK≥30 `setUserAuthenticationParameters(0, AUTH_BIOMETRIC_STRONG)` · SDK<30 `setUserAuthenticationValidityDurationSeconds(-1)` |
 | What it encrypts | the 32-byte **MasterKey** (derived from passphrase) — NEVER the passphrase, NEVER the VaultKey directly |
-| Blob storage | plain prefs file `bharatvault_quick_unlock` (`quick_unlock_blob`/`quick_unlock_iv`, Base64 NO_WRAP) — contents are Keystore ciphertext, so plain prefs are acceptable |
+| Blob storage | plain prefs file `zerokosh_quick_unlock` (`quick_unlock_blob`/`quick_unlock_iv`, Base64 NO_WRAP) — contents are Keystore ciphertext, so plain prefs are acceptable |
 | Prompt | androidx `BiometricPrompt` + `CryptoObject(cipher)`, `BIOMETRIC_STRONG` only, negative button = cancel |
 | Invalidation | `KeyPermanentlyInvalidatedException` (re-enrolled biometrics) → delete blob + Keystore entry + `prefs.quickUnlockEnabled=false`, hint `scr_lock_use_passphrase_once` — silent fallback per §3.4 |
 | Passphrase change | MUST call `QuickUnlockManager.disable` (stale MasterKey) — enforced by TASK-305 |
 
 ## 7.2 EncryptedSharedPreferences (`data/Prefs.kt` — frozen)
 
-File `bharatvault_prefs`; master key `MasterKey.Builder(context).setKeyScheme(AES256_GCM)`; key scheme `AES256_SIV`, value scheme `AES256_GCM`. Contents allowed: device_id, KDF params, UI settings, fail counters, sync-folder uri, feature toggles. FORBIDDEN contents: passphrase, any key material, any vault field value, TOTP secrets. The vault NEVER touches SharedPreferences (§6.2 note: security-crypto is "only for prefs, not vault").
+File `zerokosh_prefs`; master key `MasterKey.Builder(context).setKeyScheme(AES256_GCM)`; key scheme `AES256_SIV`, value scheme `AES256_GCM`. Contents allowed: device_id, KDF params, UI settings, fail counters, sync-folder uri, feature toggles. FORBIDDEN contents: passphrase, any key material, any vault field value, TOTP secrets. The vault NEVER touches SharedPreferences (§6.2 note: security-crypto is "only for prefs, not vault").
 
 ## 7.3 Network security config (TASK-802 creates; manifest wires it)
 

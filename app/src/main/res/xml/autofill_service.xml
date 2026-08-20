@@ -4,4 +4,4 @@
      file, the provider is invisible to Android and can never be selected (BV-01). -->
 <autofill-service
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="org.bharatvault.app.MainActivity" />
+    android:settingsActivity="org.zerokosh.app.MainActivity" />

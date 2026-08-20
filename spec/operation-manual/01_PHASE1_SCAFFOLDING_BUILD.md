@@ -3,21 +3,21 @@
 ## 1.1 Module layout (locked by Master Spec §6.1 — exactly two modules)
 
 ```
-C:\Users\acer\bharatvault\
+C:\Users\acer\zerokosh\
 ├── settings.gradle.kts            root; includes :core, :app
 ├── build.gradle.kts               plugin versions only (migrates to catalog in TASK-102)
 ├── gradle.properties              jvmargs, androidX flags
 ├── gradle\wrapper\                Gradle 9.3.1 wrapper (committed)
 ├── gradle\libs.versions.toml      version catalog (created by TASK-101)
 ├── core\                          pure Kotlin/JVM — model, crypto iface, vault file, merge,
-│   └── src\main\kotlin\org\bharatvault\core\{model,crypto,vault,totp,generator,util,import}\
-│   └── src\test\kotlin\org\bharatvault\core\   conformance suite (§3.6/§11.2)
+│   └── src\main\kotlin\org\zerokosh\core\{model,crypto,vault,totp,generator,util,import}\
+│   └── src\test\kotlin\org\zerokosh\core\   conformance suite (§3.6/§11.2)
 ├── app\                           Android UI + platform glue
-│   └── src\main\java\org\bharatvault\app\{crypto,data,ui,quickunlock,pdf,reminders,autofill,breach}\
+│   └── src\main\java\org\zerokosh\app\{crypto,data,ui,quickunlock,pdf,reminders,autofill,breach}\
 │   └── src\main\assets\           templates.json · pickers.json · bank_rules.json · app_map.json
 │   └── src\main\res\              values, values-hi (TASK-701), xml, drawable, mipmap-anydpi-v26
 ├── spec\                          Master Spec + JSON resources + this manual
-├── fixtures\                      vault_android.bvlt (§11.2) · chrome_sample.csv
+├── fixtures\                      vault_android.kosh (§11.2) · chrome_sample.csv
 └── l10n\                          glossary_hi.md (created by TASK-703)
 ```
 
@@ -25,7 +25,7 @@ C:\Users\acer\bharatvault\
 
 ## 1.2 Version catalog — exact content (TASK-101 writes this file verbatim)
 
-`C:\Users\acer\bharatvault\gradle\libs.versions.toml`:
+`C:\Users\acer\zerokosh\gradle\libs.versions.toml`:
 
 ```toml
 [versions]
@@ -115,4 +115,4 @@ signingConfigs {
 
 ## 1.5 R8 / ProGuard
 
-`app/proguard-rules.pro` is committed and FROZEN. It keeps Lazysodium + JNA (native reflection), kotlinx-serialization serializers for `org.bharatvault.core.**` and `org.bharatvault.app.data.**`, and strips `Log.v`/`Log.d` in release. There are deliberately NO Retrofit/Room/Gson keep rules — those libraries are prohibited (Rules §0.3). If R8 reports a missing-class warning for a new code path, the fix is a `-dontwarn` or `-keep` line appended to this file — never a dependency change.
+`app/proguard-rules.pro` is committed and FROZEN. It keeps Lazysodium + JNA (native reflection), kotlinx-serialization serializers for `org.zerokosh.core.**` and `org.zerokosh.app.data.**`, and strips `Log.v`/`Log.d` in release. There are deliberately NO Retrofit/Room/Gson keep rules — those libraries are prohibited (Rules §0.3). If R8 reports a missing-class warning for a new code path, the fix is a `-dontwarn` or `-keep` line appended to this file — never a dependency change.

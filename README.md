@@ -1,12 +1,12 @@
-# BharatVault
+# Zerokosh
 
 A free, open-source, local-first password and credential vault built for Indian financial life.
 
-**Only you can open your vault. Not even we can.** BharatVault has no servers, no accounts, no analytics — your encrypted vault never leaves your device unless *you* put it in a sync folder you control (Google Drive, iCloud Drive, OneDrive, anything that syncs a folder).
+**Only you can open your vault. Not even we can.** Zerokosh has no servers, no accounts, no analytics — your encrypted vault never leaves your device unless *you* put it in a sync folder you control (Google Drive, iCloud Drive, OneDrive, anything that syncs a folder).
 
 ## What it models
 
-One Indian bank relationship produces 8–12 distinct secrets. BharatVault has templates for all of them:
+One Indian bank relationship produces 8–12 distinct secrets. Zerokosh has templates for all of them:
 
 - **Bank accounts** — account number, IFSC, customer ID, net-banking login, transaction password, profile password, TPIN
 - **Cards** — with RuPay/Visa/Mastercard detection, ATM PIN, linked account
@@ -18,7 +18,7 @@ One Indian bank relationship produces 8–12 distinct secrets. BharatVault has t
 
 ## Security in one paragraph
 
-The vault is a single encrypted file (`.bvlt`). Your passphrase is stretched with **Argon2id** (libsodium), the vault body is encrypted with **XChaCha20-Poly1305**. A one-time **Recovery Key** (`BVR-…`) is your only backup if you forget the passphrase. Biometric quick-unlock stores a hardware-protected copy of the key on your device — never the passphrase. Full details: [THREAT_MODEL.md](THREAT_MODEL.md) and `spec/` (the complete build specification).
+The vault is a single encrypted file (`.kosh`). Your passphrase is stretched with **Argon2id** (libsodium), the vault body is encrypted with **XChaCha20-Poly1305**. A one-time **Recovery Key** (`KSH-…`) is your only backup if you forget the passphrase. Biometric quick-unlock stores a hardware-protected copy of the key on your device — never the passphrase. Full details: [THREAT_MODEL.md](THREAT_MODEL.md) and `spec/` (the complete build specification).
 
 ## Fully native, per platform
 

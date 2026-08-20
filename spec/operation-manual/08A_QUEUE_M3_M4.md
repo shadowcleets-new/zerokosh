@@ -80,7 +80,7 @@ CHECKPOINT (INFRA): commit "INFRA: migrate to Gradle version catalog · Gates: B
 ## GROUP M3 — sync folder, lifecycle refresh, quick-unlock/passphrase coupling
 
 ### TASK-301 · VaultRepository: expose store swap
-Target (PATCH): `app/src/main/java/org/bharatvault/app/data/VaultRepository.kt`
+Target (PATCH): `app/src/main/java/org/zerokosh/app/data/VaultRepository.kt`
 OLD →
 ```kotlin
     /** Applies a §3.4 biometric quick-unlock result obtained via BiometricPrompt. */
@@ -107,7 +107,7 @@ NEW →
 VERIFY: `BUILD`.
 
 ### TASK-302 · Settings: real sync-folder chooser (replaces placeholder Row)
-Target (PATCH): `app/src/main/java/org/bharatvault/app/ui/settings/SettingsScreen.kt`
+Target (PATCH): `app/src/main/java/org/zerokosh/app/ui/settings/SettingsScreen.kt`
 OLD (verbatim placeholder) →
 ```kotlin
         // §5.6 sync folder + §5.11 import/export land with M3/M5
@@ -134,7 +134,7 @@ NEW →
                         android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 )
                 app.prefs.syncFolderUri = uri.toString()
-                val store = org.bharatvault.app.data.SafVaultStore(context, uri)
+                val store = org.zerokosh.app.data.SafVaultStore(context, uri)
                 scope.launch { app.repository.switchStore(store) }
             }
         }
@@ -162,10 +162,10 @@ Strings (append under the About block anchor `<!-- About -->` — actually inser
     <string name="scr_settings_sync_change">Change</string>
     <string name="msg_sync_folder_error">Could not open that folder. Pick another.</string>
 ```
-VERIFY: `BUILD`. HUMAN-DEVICE: §11.3 step 15 (folder → vault.bvlt appears).
+VERIFY: `BUILD`. HUMAN-DEVICE: §11.3 step 15 (folder → vault.kosh appears).
 
 ### TASK-303 · App: restore sync store on launch
-Target (PATCH): `app/src/main/java/org/bharatvault/app/BharatVaultApp.kt`
+Target (PATCH): `app/src/main/java/org/zerokosh/app/ZerokoshApp.kt`
 OLD →
 ```kotlin
         repository = VaultRepository(AndroidCrypto(), LocalVaultStore(this), prefs)
@@ -178,11 +178,11 @@ NEW →
         ReminderWorker.schedule(this)
     }
 ```
-Add imports: `import org.bharatvault.app.data.SafVaultStore`, `import org.bharatvault.app.reminders.ReminderWorker`.
+Add imports: `import org.zerokosh.app.data.SafVaultStore`, `import org.zerokosh.app.reminders.ReminderWorker`.
 VERIFY: `BUILD`.
 
 ### TASK-304 · App: merge external edits on foreground (§4.5.1)
-Target (PATCH): `app/src/main/java/org/bharatvault/app/MainActivity.kt`
+Target (PATCH): `app/src/main/java/org/zerokosh/app/MainActivity.kt`
 OLD →
 ```kotlin
         backgroundedAtMs = 0
@@ -200,7 +200,7 @@ Add imports: `import androidx.lifecycle.lifecycleScope`, `import kotlinx.corouti
 VERIFY: `BUILD`. HUMAN-DEVICE: §11.3 steps 16–17 (device-B merge, conflict copy).
 
 ### TASK-305 · Passphrase change must disable quick-unlock (stale MasterKey, §7.1)
-Target (PATCH): `app/src/main/java/org/bharatvault/app/ui/settings/SettingsScreen.kt`, inside `ChangePassphraseDialog` success branch.
+Target (PATCH): `app/src/main/java/org/zerokosh/app/ui/settings/SettingsScreen.kt`, inside `ChangePassphraseDialog` success branch.
 OLD →
 ```kotlin
                         if (ok) {
@@ -216,14 +216,14 @@ NEW →
                             onClose()
                         } else {
 ```
-Add import: `import org.bharatvault.app.quickunlock.QuickUnlockManager`.
+Add import: `import org.zerokosh.app.quickunlock.QuickUnlockManager`.
 VERIFY: `BUILD`.
 
-### TASK-306 · Export (encrypted .bvlt copy + red-warning plain CSV) — §5.11
-Target (NEW): `app/src/main/java/org/bharatvault/app/ui/settings/ExportDialog.kt`
+### TASK-306 · Export (encrypted .kosh copy + red-warning plain CSV) — §5.11
+Target (NEW): `app/src/main/java/org/zerokosh/app/ui/settings/ExportDialog.kt`
 Complete code: a `@Composable fun ExportDialog(app, onClose)` with two buttons.
-- "Export encrypted backup" → `CreateDocument("application/octet-stream")` launcher naming `bharatvault-backup.bvlt`; on uri → `context.contentResolver.openOutputStream(uri)?.use { it.write(app.repository.store.read() ?: ByteArray(0)) }`.
-- "Export as plain CSV" → guarded by a two-step red confirm (`AlertDialog`, title `scr_export_csv_warn_title`, body `scr_export_csv_warn_body`, confirm button colored `MaterialTheme.colorScheme.error`) → `CreateDocument("text/csv")` naming `bharatvault-plain.csv`; writes header `name,url,username,password,note` then one line per `login` record built from fields website/username/password/notes, each field passed through a local `csvEscape(s) = if (s.contains(',')||s.contains('"')||s.contains('\n')) "\"" + s.replace("\"","\"\"") + "\"" else s`.
+- "Export encrypted backup" → `CreateDocument("application/octet-stream")` launcher naming `zerokosh-backup.kosh`; on uri → `context.contentResolver.openOutputStream(uri)?.use { it.write(app.repository.store.read() ?: ByteArray(0)) }`.
+- "Export as plain CSV" → guarded by a two-step red confirm (`AlertDialog`, title `scr_export_csv_warn_title`, body `scr_export_csv_warn_body`, confirm button colored `MaterialTheme.colorScheme.error`) → `CreateDocument("text/csv")` naming `zerokosh-plain.csv`; writes header `name,url,username,password,note` then one line per `login` record built from fields website/username/password/notes, each field passed through a local `csvEscape(s) = if (s.contains(',')||s.contains('"')||s.contains('\n')) "\"" + s.replace("\"","\"\"") + "\"" else s`.
 Wire it: PATCH SettingsScreen to add `var showExport by remember { mutableStateOf(false) }`, a `TextButton(onClick = { showExport = true }) { Text(stringResource(R.string.scr_settings_export)) }` beneath the import row area, and `if (showExport) ExportDialog(app) { showExport = false }`.
 Strings:
 ```xml
@@ -241,7 +241,7 @@ CHECKPOINT (M3): commit per §8.3, milestone "M3", pending-device steps 15–22.
 ## GROUP M4 — attachments, custom fields, reminders UI, IFSC lookup
 
 ### TASK-401 · Attachment FILE field editor (≤ 2 MB, §2.1)
-Target (PATCH): `app/src/main/java/org/bharatvault/app/ui/record/RecordEditScreen.kt`
+Target (PATCH): `app/src/main/java/org/zerokosh/app/ui/record/RecordEditScreen.kt`
 Problem it solves: `FieldType.FILE -> { }` is currently a no-op.
 Approach (DECISIONS D-007 — record it): attachments are stored in `VaultBody.attachments` keyed by a generated uuid; the field value holds that uuid. Since `values` is a flat `Map<String,String>` and the repository owns `attachments`, the editor picks bytes, but the actual attachment insertion happens in the repository. Add to `VaultRepository`:
 ```kotlin
@@ -250,7 +250,7 @@ Approach (DECISIONS D-007 — record it): attachments are stored in `VaultBody.a
         val current = _body.value ?: return null
         val uuid = java.util.UUID.randomUUID().toString()
         val b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
-        persist(current.copy(attachments = current.attachments + (uuid to org.bharatvault.core.model.Attachment(name, mime, b64))))
+        persist(current.copy(attachments = current.attachments + (uuid to org.zerokosh.core.model.Attachment(name, mime, b64))))
         return uuid
     }
 ```
@@ -273,10 +273,10 @@ VERIFY: `BUILD`.
 Target (PATCH): `RecordEditScreen.kt`. After the fields loop, for template fields of `FieldType.DATE` add a per-date "Remind me 30 days before" `Switch` bound into a local `reminders: SnapshotStateList<Reminder>`. On save, pass `reminders = reminders.toList()` instead of `existing?.reminders ?: emptyList()`.
 OLD → `                            reminders = existing?.reminders ?: emptyList(),`
 NEW → `                            reminders = reminderState.toList(),`
-Add near the other state: `val reminderState = remember { mutableStateListOf<org.bharatvault.core.model.Reminder>().apply { existing?.reminders?.let { addAll(it) } } }`.
-On first reminder toggled on: call `NotificationPermission.ensure(activity)` (NEW helper, TASK-404-adjacent) — create `app/src/main/java/org/bharatvault/app/reminders/NotificationPermission.kt`:
+Add near the other state: `val reminderState = remember { mutableStateListOf<org.zerokosh.core.model.Reminder>().apply { existing?.reminders?.let { addAll(it) } } }`.
+On first reminder toggled on: call `NotificationPermission.ensure(activity)` (NEW helper, TASK-404-adjacent) — create `app/src/main/java/org/zerokosh/app/reminders/NotificationPermission.kt`:
 ```kotlin
-package org.bharatvault.app.reminders
+package org.zerokosh.app.reminders
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -295,9 +295,9 @@ Strings: `<string name="scr_edit_remind">Remind me before this date</string>`.
 VERIFY: `BUILD`. HUMAN-DEVICE: create a record with an expiry + reminder, confirm a notification the day it triggers (text has NO secret).
 
 ### TASK-404 · IFSC offline lookup (auto-fill bank_name + branch, §2.2/§5.10)
-Target (NEW): `app/src/main/java/org/bharatvault/app/data/IfscLookup.kt`
+Target (NEW): `app/src/main/java/org/zerokosh/app/data/IfscLookup.kt`
 ```kotlin
-package org.bharatvault.app.data
+package org.zerokosh.app.data
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import java.io.File

@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "org.bharatvault.app"
+    namespace = "org.zerokosh.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.bharatvault.app"
+        applicationId = "org.zerokosh.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1 // fixed per release — reproducible builds (§6.8)

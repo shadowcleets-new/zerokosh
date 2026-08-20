@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Only the pre-Compose window and the launcher icon read from here. Every
-     in-app colour lives in ui/theme/Theme.kt as the resolved BharatVault tokens.
+     in-app colour lives in ui/theme/Theme.kt as the resolved Zerokosh tokens.
      BV-16: the previous entries (green #1A6B54, amber #E8A317) were left over
      from an earlier design system and matched nothing in the app. -->
 <resources>

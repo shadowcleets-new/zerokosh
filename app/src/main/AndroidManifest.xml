@@ -8,13 +8,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:name=".BharatVaultApp"
+        android:name=".ZerokoshApp"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:theme="@style/Theme.BharatVault"
+        android:theme="@style/Theme.Zerokosh"
         android:supportsRtl="true">
 
         <activity
@@ -31,7 +31,7 @@
              may bind to it. Without this entry the service class existed but was
              invisible to Android, so it could never be selected (BV-01). -->
         <service
-            android:name=".autofill.BharatVaultAutofillService"
+            android:name=".autofill.ZerokoshAutofillService"
             android:exported="true"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_AUTOFILL_SERVICE">

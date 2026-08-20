@@ -7,7 +7,7 @@ Unidirectional flow, two tiers:
 1. **App state** — `VaultRepository` exposes exactly two StateFlows: `state: StateFlow<VaultState>` (`NoVault | Locked | Unlocked | Damaged`) and `body: StateFlow<VaultBody?>`. All mutations go through repository suspend functions. Screens `collectAsState()` and never cache vault data elsewhere.
 2. **Screen state** — plain `remember { mutableStateOf(...) }` vars local to each composable, enumerated below. No ViewModels, no SavedStateHandles (except `rememberSaveable` where listed): a locked vault must NOT leak into saved instance state.
 
-Root switch (`BharatVaultNav`): `NoVault → OnboardingFlow`, `Locked → LockScreen` (+ `RevealAuth.reset()`), `Unlocked → MainScaffold`, `Damaged → DamagedScreen`. One-time events (toasts) fire at the interaction site via `Toast.makeText` — there is no event bus; do not add Channels/SharedFlow.
+Root switch (`ZerokoshNav`): `NoVault → OnboardingFlow`, `Locked → LockScreen` (+ `RevealAuth.reset()`), `Unlocked → MainScaffold`, `Damaged → DamagedScreen`. One-time events (toasts) fire at the interaction site via `Toast.makeText` — there is no event bus; do not add Channels/SharedFlow.
 
 ## 4.2 Per-screen contract tables (FROZEN screens)
 

@@ -4,7 +4,7 @@ You are the Executor. You write code mechanically from this manual. You do not d
 
 ## 0.1 Hierarchy of law
 
-1. `spec/bharatvault_master_build_manual_v2.md` (Master Spec) — locked decisions R0.2 are absolute.
+1. `spec/zerokosh_master_build_manual_v2.md` (Master Spec) — locked decisions R0.2 are absolute.
 2. This Operation Manual.
 3. Nothing else. No training-data habits, no "best practices" imports, no library upgrades.
 
@@ -19,8 +19,8 @@ The generic Android playbook does NOT apply here. The following are **PROHIBITED
 | Prohibited | Why | What this project uses instead |
 |---|---|---|
 | Retrofit / OkHttp / Ktor / Volley | No network layer exists; §14 bans network calls except §5.9/§13 | `java.net.HttpURLConnection` in `breach/BreachCheck.kt` (the ONLY socket in the app) |
-| Room / SQLDelight / Realm / DataStore | The vault is a single encrypted `.bvlt` file (§4), not a database | `:core` `VaultFileCodec` + `VaultStore` implementations |
-| Hilt / Dagger / Koin / kotlin-inject | Dependency budget R0.7 (≤15, list locked in §6.2) | Manual composition root `BharatVaultApp` (Phase 2) |
+| Room / SQLDelight / Realm / DataStore | The vault is a single encrypted `.kosh` file (§4), not a database | `:core` `VaultFileCodec` + `VaultStore` implementations |
+| Hilt / Dagger / Koin / kotlin-inject | Dependency budget R0.7 (≤15, list locked in §6.2) | Manual composition root `ZerokoshApp` (Phase 2) |
 | Gson / Moshi / Jackson | Not in §6.2 | `kotlinx-serialization-json` (already wired) |
 | Firebase / Crashlytics / any analytics SDK | §14 absolute prohibition | Nothing. There is no telemetry. |
 | Coil / Glide / Picasso | Not in §6.2 | `BitmapFactory` for the one image use-case (attachments) |

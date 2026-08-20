@@ -1,8 +1,8 @@
-# Contributing to BharatVault
+# Contributing to Zerokosh
 
 Thank you! Two rules before anything else:
 
-1. **Read `spec/bharatvault_master_build_manual_v2.md` §0 first.** The locked decisions in R0.2 (crypto scheme, vault format, fully-native stacks, dependency lists, no telemetry) are the product. PRs that violate them are closed without review.
+1. **Read `spec/zerokosh_master_build_manual_v2.md` §0 first.** The locked decisions in R0.2 (crypto scheme, vault format, fully-native stacks, dependency lists, no telemetry) are the product. PRs that violate them are closed without review.
 2. **DCO sign-off required.** Every commit must carry `Signed-off-by: Your Name <email>` (`git commit -s`), certifying the [Developer Certificate of Origin](https://developercertificate.org/).
 
 ## The easiest contributions need no code

@@ -11,7 +11,7 @@ VERIFY: `BUILD` (missing-translation lint is not fatal but every `tpl_*` name mu
 
 ### TASK-702 · Hindi screen strings
 Target (NEW): `app/src/main/res/values-hi/strings.xml`
-Contains a Hindi `<string>` for EVERY name present in `values/strings.xml` (all `scr_*`, `msg_*`, `cd_*`, `app_name` stays "BharatVault"). Tone §10.6: warm, plain, natively written (NOT machine-translated word salad); use the glossary (passphrase = "मुख्य पासवर्ड", Recovery Key = "रिकवरी कुंजी", vault = "तिजोरी"). Placeholders (`%1$s`, `%1$d`) MUST be preserved exactly. Do NOT concatenate fragments (§12).
+Contains a Hindi `<string>` for EVERY name present in `values/strings.xml` (all `scr_*`, `msg_*`, `cd_*`, `app_name` stays "Zerokosh"). Tone §10.6: warm, plain, natively written (NOT machine-translated word salad); use the glossary (passphrase = "मुख्य पासवर्ड", Recovery Key = "रिकवरी कुंजी", vault = "तिजोरी"). Placeholders (`%1$s`, `%1$d`) MUST be preserved exactly. Do NOT concatenate fragments (§12).
 VERIFY: `BUILD`. Then confirm parity:
 ```powershell
 $en = Select-String -Path app\src\main\res\values\strings.xml -Pattern 'name="([^"]+)"' | ForEach-Object { $_.Matches.Groups[1].Value } | Sort-Object
@@ -49,7 +49,7 @@ Then add the breach-check toggle to Settings (default OFF): a `Switch` bound to 
 Strings:
 ```xml
     <string name="scr_settings_breach">Check for leaked passwords</string>
-    <string name="scr_settings_breach_desc">When on, BharatVault can check a password against known breaches by sending only the first 5 characters of its fingerprint — never the password itself.</string>
+    <string name="scr_settings_breach_desc">When on, Zerokosh can check a password against known breaches by sending only the first 5 characters of its fingerprint — never the password itself.</string>
     <string name="scr_breach_safe">Not found in known breaches</string>
     <string name="scr_breach_found">Seen in %1$d breaches — change it</string>
     <string name="msg_breach_error">Couldn\'t check right now. Try again later.</string>

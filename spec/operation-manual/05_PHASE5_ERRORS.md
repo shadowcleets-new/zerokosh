@@ -8,7 +8,7 @@
 | `:core` unlock | `UnlockResult.WrongCredential` | AEAD open of `wrap_mk`/`wrap_rk` fails, malformed recovery key | UI shows exactly "Wrong passphrase" (`scr_lock_wrong`) — NEVER a crypto string (§3.3) |
 | `:core` unlock | `UnlockResult.Corrupt` | file damaged though credential OK | backup-restore path below |
 | repository | `UnlockOutcome` enum | see mapping table 5.2 | LockScreen `handleOutcome` |
-| store | `IllegalStateException` from `check`/`error` | tmp verify failed, SAF tree unavailable | bubbles to caller's coroutine; persist aborts BEFORE touching `vault.bvlt` — the old file stays intact (this is the §4.4 guarantee; do not catch-and-continue) |
+| store | `IllegalStateException` from `check`/`error` | tmp verify failed, SAF tree unavailable | bubbles to caller's coroutine; persist aborts BEFORE touching `vault.kosh` — the old file stays intact (this is the §4.4 guarantee; do not catch-and-continue) |
 | breach | return value `-1` | any non-200, timeout, IOException | `msg_breach_error`; no retry |
 | import | empty `ImportPreview(records=[])` | unparseable file | `scr_import_failed`; no retry |
 

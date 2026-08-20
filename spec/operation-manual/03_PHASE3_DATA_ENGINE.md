@@ -33,7 +33,7 @@ interface CryptoProvider { argon2id(pw, salt, ops, memBytes): ByteArray
     aeadEncrypt(pt, aad, nonce, key): ByteArray; aeadDecrypt(ct, aad, nonce, key): ByteArray?
     randomBytes(n): ByteArray }                                   // impls: AndroidCrypto, test-only LazySodiumTestCrypto
 fun ByteArray.wipe()
-object RecoveryKey { fun encode(bytes16): String /*BVR-…*/; fun decode(s): ByteArray? }
+object RecoveryKey { fun encode(bytes16): String /*KSH-…*/; fun decode(s): ByteArray? }
 object VaultFileCodec { fun encode(...): ByteArray; fun decode(bytes): VaultEnvelope; sha256Hex; b64; unb64 }
 class VaultEnvelope(vaultUuid, lastModifiedMs, header: VaultHeader, bodyNonce, bodyCiphertext, prefix)
 object VaultOperations {
@@ -77,8 +77,8 @@ interface VaultStore {
     fun exists(): Boolean
     fun read(): ByteArray?
     fun writeAtomic(bytes: ByteArray, verify: (ByteArray) -> Boolean)  // §4.4: tmp → fsync → verify → rename
-    fun backupCurrent()                                                 // → vault.bvlt.bak
-    fun conflictSiblings(): List<Pair<String, ByteArray>>               // §4.5.3 vault*.bvlt
+    fun backupCurrent()                                                 // → vault.kosh.bak
+    fun conflictSiblings(): List<Pair<String, ByteArray>>               // §4.5.3 vault*.kosh
     fun deleteSibling(name: String)
     fun readBackup(): ByteArray?
 }
@@ -86,10 +86,10 @@ interface VaultStore {
 
 | Behavior | `LocalVaultStore` (app-private, default) | `SafVaultStore` (user sync folder) |
 |---|---|---|
-| Location | `context.filesDir/vault.bvlt` | `DocumentFile.fromTreeUri(treeUri)` child `vault.bvlt` |
+| Location | `context.filesDir/vault.kosh` | `DocumentFile.fromTreeUri(treeUri)` child `vault.kosh` |
 | Atomic write | java.nio `Files.move(…, ATOMIC_MOVE)` | tmp create → verify → delete old → `DocumentsContract.renameDocument`; provider-refuses-rename fallback writes final directly |
 | fsync | `FileOutputStream.fd.sync()` | provider-dependent flush (accepted limitation) |
-| Allowed filenames | ONLY `vault.bvlt`, `.tmp`, `.bak`, siblings `vault*.bvlt` (§5.6) | same |
+| Allowed filenames | ONLY `vault.kosh`, `.tmp`, `.bak`, siblings `vault*.kosh` (§5.6) | same |
 
 ## 3.4 Repository truth table (WHEN data moves — memorize this)
 
@@ -107,7 +107,7 @@ interface VaultStore {
 
 ```
 GET https://api.pwnedpasswords.com/range/{first-5-hex-of-SHA1(password)}
-Headers: User-Agent: BharatVault · Add-Padding: true
+Headers: User-Agent: Zerokosh · Add-Padding: true
 Timeouts: connect 8000 ms, read 8000 ms · Runs ONLY when Settings toggle is ON and user taps.
 Success 200 → body lines "SUFFIX:count"; local suffix compare → count (0 if absent)
 Any non-200 / exception → return -1 (UI: msg_breach_error). NO retry loop. NO caching.

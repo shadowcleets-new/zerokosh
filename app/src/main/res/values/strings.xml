@@ -3,7 +3,7 @@
      with dots mapped to underscores (Android constraint, DECISIONS.md D-005).
      Tone (§10.6): plain, warm, zero jargon. -->
 <resources>
-    <string name="app_name">BharatVault</string>
+    <string name="app_name">Zerokosh</string>
 
     <!-- S1 Language picker -->
     <string name="scr_language_title">Choose your language</string>
@@ -14,7 +14,7 @@
     <string name="scr_trust_card1_title">Your data stays on this device</string>
     <string name="scr_trust_card1_body">Everything you save lives in one locked file on your phone. It never goes to us — we have nowhere to put it.</string>
     <string name="scr_trust_card2_title">We have no servers — nothing to hack, nothing to sell</string>
-    <string name="scr_trust_card2_body">There is no BharatVault account, no cloud, no sign-up. Only you can open this. Not even we can.</string>
+    <string name="scr_trust_card2_body">There is no Zerokosh account, no cloud, no sign-up. Only you can open this. Not even we can.</string>
     <string name="scr_trust_card3_title">Free forever, open source</string>
     <string name="scr_trust_card3_body">No subscription, no ads. Anyone can read our code and check every promise we make.</string>
     <string name="scr_trust_continue">Continue</string>
@@ -46,7 +46,7 @@
     <string name="scr_recovery_never_again">You will not see this key again after this screen.</string>
     <string name="scr_recovery_pdf_saved">Recovery Kit PDF saved</string>
     <string name="scr_recovery_pdf_instructions">Keep this page with your property papers or other important documents. Anyone with this key can open your vault — treat it like a key to your locker.</string>
-    <string name="scr_recovery_pdf_title">BharatVault Recovery Kit</string>
+    <string name="scr_recovery_pdf_title">Zerokosh Recovery Kit</string>
 
     <!-- S5 Quick unlock opt-in -->
     <string name="scr_quickunlock_title">Unlock with your fingerprint or face</string>
@@ -115,9 +115,9 @@
     <string name="scr_lock_wrong">Wrong passphrase</string>
     <string name="scr_lock_cooldown">Too many tries. Wait %1$d seconds.</string>
     <string name="scr_lock_use_recovery">Use Recovery Key</string>
-    <string name="scr_lock_recovery_hint">BVR-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
     <string name="scr_lock_recovery_invalid">That recovery key isn\'t right — check it letter by letter</string>
-    <string name="scr_lock_biometric_title">Unlock BharatVault</string>
+    <string name="scr_lock_biometric_title">Unlock Zerokosh</string>
     <string name="scr_lock_biometric_subtitle">Use your fingerprint or face</string>
     <string name="scr_lock_use_passphrase_once">Please unlock with your passphrase once</string>
     <string name="msg_file_damaged">File damaged — restored from backup</string>
@@ -149,7 +149,7 @@
     <string name="scr_about_version">Version %1$s</string>
     <string name="scr_about_license">License: GPL-3.0 — free forever</string>
     <string name="scr_about_source">Source code</string>
-    <string name="scr_about_body">BharatVault is free, open-source and has no servers. Only you can open your vault. Not even we can.</string>
+    <string name="scr_about_body">Zerokosh is free, open-source and has no servers. Only you can open your vault. Not even we can.</string>
 
     <!-- S11 Authenticator -->
     <string name="scr_auth_add_qr">Add via QR</string>
@@ -158,7 +158,7 @@
     <string name="scr_auth_camera_denied">Camera permission is needed only to scan the QR code. You can also paste the secret by hand when adding a record.</string>
 
     <!-- §6.7 Autofill -->
-    <string name="scr_autofill_unlock_first">Unlock BharatVault to fill</string>
+    <string name="scr_autofill_unlock_first">Unlock Zerokosh to fill</string>
 
     <!-- §6.7 Login helper (copy-mode fallback) -->
     <string name="scr_login_helper_channel">Login helper</string>
@@ -168,8 +168,8 @@
 
     <!-- §5.7 Reminders -->
     <string name="scr_reminder_channel">Renewal reminders</string>
-    <string name="scr_reminder_title">BharatVault reminder</string>
-    <string name="scr_reminder_body">%1$s is due soon · open BharatVault</string>
+    <string name="scr_reminder_title">Zerokosh reminder</string>
+    <string name="scr_reminder_body">%1$s is due soon · open Zerokosh</string>
 
     <!-- Common -->
     <string name="msg_ok">OK</string>

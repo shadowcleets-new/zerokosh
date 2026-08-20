@@ -35,4 +35,4 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 - `BUILD` / `CORETEST` — defined in `00_EXECUTOR_RULES.md` §0.6.
 - `RELEASE` — `.\gradlew.bat :app:assembleRelease --console=plain` (used only in M8).
-All Gradle commands run from `C:\Users\acer\bharatvault` with `$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"`.
+All Gradle commands run from `C:\Users\acer\zerokosh` with `$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"`.

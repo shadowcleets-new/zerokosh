@@ -42,4 +42,4 @@ Per R0.4: where the spec is genuinely silent, the simplest option preserving R0.
 ## D-004 · 2026-07-09 · Canonical §11.2 fixture records
 
 **Context:** §11.2 requires every platform's fixture vault to contain "the same 3 sample records + 1 attachment" but does not enumerate them.
-**Decision:** Canonical content is defined in `core/src/test/kotlin/org/bharatvault/core/FixtureVault.kt` (also the reference for the Swift and C# cores): a `bank_account` (SBI, uuid 1111…), a `login` (Zomato, uuid 2222…), a `upi` linked to the bank record (uuid 3333…), and one text attachment (uuid 4444…). Passphrase `test-vault-1234`, device uuid all-zeros v4, timestamps fixed at 1751875200000.
+**Decision:** Canonical content is defined in `core/src/test/kotlin/org/zerokosh/core/FixtureVault.kt` (also the reference for the Swift and C# cores): a `bank_account` (SBI, uuid 1111…), a `login` (Zomato, uuid 2222…), a `upi` linked to the bank record (uuid 3333…), and one text attachment (uuid 4444…). Passphrase `test-vault-1234`, device uuid all-zeros v4, timestamps fixed at 1751875200000.

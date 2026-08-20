@@ -1,4 +1,4 @@
-# BharatVault R8 rules (release). No Retrofit/Room/Gson rules — those libraries
+# Zerokosh R8 rules (release). No Retrofit/Room/Gson rules — those libraries
 # are prohibited by spec R0.2/R0.7 and must never appear here.
 
 # --- Lazysodium + JNA (reflection over native structs) ---
@@ -10,16 +10,16 @@
 
 # --- kotlinx.serialization: keep generated serializers for our models ---
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
--keepclassmembers class org.bharatvault.core.** {
+-keepclassmembers class org.zerokosh.core.** {
     *** Companion;
 }
--keepclasseswithmembers class org.bharatvault.core.** {
+-keepclasseswithmembers class org.zerokosh.core.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keepclassmembers class org.bharatvault.app.data.** {
+-keepclassmembers class org.zerokosh.app.data.** {
     *** Companion;
 }
--keepclasseswithmembers class org.bharatvault.app.data.** {
+-keepclasseswithmembers class org.zerokosh.app.data.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

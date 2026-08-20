@@ -1,3 +1,24 @@
+## [2026-08-20 00:30:00] - Renamed BharatVault → Zerokosh
+
+### 1. Intent, Roles, & Context
+- **The Problem:** "Bharat Vault" was generic on two axes — "vault" is the most contested noun in the category (1Password, Bitwarden, Proton Pass, HashiCorp), and "Bharat + category noun" is a naming formula rather than a name. Availability checks then killed the first replacement candidate: "Hasp" collided with a live local-only password manager already on Google Play, plus Thales' 30-year-old Sentinel HASP licensing brand.
+- **Specialist Personas Invoked:** Brand Naming Strategist; Trademark Researcher; Android Release Engineer.
+- **The Strategy:** Zerokosh — English "zero" fused with Sanskrit कोष *kosh* (treasury, repository), on the Zerodha construction. It states the product's argument rather than labelling it: the Trust screen counts zero servers, zero trackers, one file on device. Verified clear before committing: no app, company or repository by that name; zerokosh.com unregistered (RDAP, with a control lookup to confirm the endpoint); Zerodha's Indian mark is Class 36 (financial services) against our Class 9/42 filing.
+
+### 2. Surgical Technical Modifications
+- **Package:** `org.bharatvault.*` → `org.zerokosh.*` across `app` and `core`, via `git mv` so history follows. Chose `org.zerokosh` over `in.zerokosh` because `in` is a Kotlin hard keyword — every package declaration would have needed backtick escaping.
+- **Identity:** `applicationId`/`namespace` → `org.zerokosh.app`; `rootProject.name` → `zerokosh`; `app_name` → Zerokosh; `Theme.BharatVault` → `Theme.Zerokosh`.
+- **Classes renamed (files and declarations):** `BharatVaultApp` → `ZerokoshApp`, `BharatVaultNav` → `ZerokoshNav`, `BharatVaultAutofillService` → `ZerokoshAutofillService`, `BharatVaultTheme` → `ZerokoshTheme`.
+- **Format constants — these break compatibility with any prior install:** vault file `vault.bvlt` → `vault.kosh`; recovery prefix `BVR-` → `KSH-`; prefs store `bharatvault_prefs` → `zerokosh_prefs`; Keystore alias `bharatvault_quick_unlock` → `zerokosh_quick_unlock`; WorkManager and notification-channel ids likewise. Acceptable because versionCode 1 has never been published.
+- **Docs:** README, THREAT_MODEL, CONTRIBUTING, SECURITY, DECISIONS and `spec/` rewritten; `spec/bharatvault_master_build_manual_v2.md` renamed.
+- **Deliberately untouched:** `.ai-context/` (archived copy of the Lovable source — renaming it would falsify the design reference) and prior CHANGELOG entries, which correctly record work done under the old name and cite the Lovable project genuinely still called "Bharat Vault".
+- **Irreversible Actions:** the old `org.bharatvault.app` package was uninstalled from the test device; its vault was orphaned by the filename change regardless.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test` **42/42**, `:app:assembleDebug` SUCCESS, zero residual matches for `bharatvault|BharatVault|BVR|bvlt` under `app/` and `core/src/`.
+- **On-device (Pixel 9 / Android 17):** installs as `org.zerokosh.app`, launches showing "Zerokosh", full onboarding runs, and the Recovery Kit renders `ZEROKOSH RECOVERY` with a live `KSH-0S4A4-68C2D-…` key — proving the rename reaches the crypto layer. On disk: `files/vault.kosh`, `shared_prefs/zerokosh_prefs.xml`.
+- **Next Sprint Phase:** register zerokosh.com and zerokosh.in; get an Indian trademark agent's opinion on Zerodha's well-known-mark status under §11(2) before filing Class 9/42; optionally rename the repo directory itself.
+
 ## [2026-08-19 23:45:00] - Fixed All 28 Review Findings + 2 Uncovered While Fixing
 
 ### 1. Intent, Roles, & Context

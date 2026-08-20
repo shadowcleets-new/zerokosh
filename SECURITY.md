@@ -4,7 +4,7 @@
 
 Please report vulnerabilities privately — do not open a public issue.
 
-- Email: **security@bharatvault.org** (interim: open a GitHub Security Advisory on this repository via *Security → Report a vulnerability*)
+- Email: **security@zerokosh.org** (interim: open a GitHub Security Advisory on this repository via *Security → Report a vulnerability*)
 - You will receive an acknowledgement within **72 hours**.
 
 ## Coordinated disclosure
@@ -13,11 +13,11 @@ We follow a **90-day disclosure window**: we ask that you give us up to 90 days 
 
 ## Scope
 
-In scope: the BharatVault applications, the `.bvlt` vault format, the crypto scheme in `spec/` §3, autofill integration, and the build/release pipeline.
+In scope: the Zerokosh applications, the `.kosh` vault format, the crypto scheme in `spec/` §3, autofill integration, and the build/release pipeline.
 
 Out of scope (see [THREAT_MODEL.md](THREAT_MODEL.md)): compromised or rooted operating systems, targeted state-level attackers, and vulnerabilities in the underlying OS or in libsodium itself (report those upstream).
 
-## What BharatVault promises
+## What Zerokosh promises
 
 - No servers, no accounts, no telemetry — there is no backend to breach.
 - All vault data is encrypted with libsodium (Argon2id + XChaCha20-Poly1305) before it touches any disk.

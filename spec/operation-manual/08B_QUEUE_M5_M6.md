@@ -7,7 +7,7 @@ The import ENGINE (`core/import/CsvImport.kt`) and the autofill SERVICE + LoginH
 ## GROUP M5 — import UI, authenticator QR (already wired), import tests
 
 ### TASK-501 · Import screen (S14) — preview count before commit (§5.11)
-Target (NEW): `app/src/main/java/org/bharatvault/app/ui/import/ImportScreen.kt`
+Target (NEW): `app/src/main/java/org/zerokosh/app/ui/import/ImportScreen.kt`
 Complete behavior:
 - `@Composable fun ImportScreen(app, onDone)`.
 - State: `preview: ImportPreview? = null`, `busy=false`.
@@ -32,10 +32,10 @@ VERIFY: `BUILD`.
 VERIFY: `BUILD`. HUMAN-DEVICE: §11.5 iOS row N/A; Android — scan a Google Authenticator `otpauth://` QR → live code appears in S11.
 
 ### TASK-503 · Import round-trip test (Chrome 100 rows lossless — §0.7 M5 gate)
-Target (NEW): `core/src/test/kotlin/org/bharatvault/core/CsvImportTest.kt`
+Target (NEW): `core/src/test/kotlin/org/zerokosh/core/CsvImportTest.kt`
 ```kotlin
-package org.bharatvault.core
-import org.bharatvault.core.import.CsvImport
+package org.zerokosh.core
+import org.zerokosh.core.import.CsvImport
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -122,7 +122,7 @@ NEW →
         </activity>
 
         <service
-            android:name=".autofill.BharatVaultAutofillService"
+            android:name=".autofill.ZerokoshAutofillService"
             android:exported="true"
             android:label="@string/scr_autofill_service_label"
             android:permission="android.permission.BIND_AUTOFILL_SERVICE">
@@ -146,9 +146,9 @@ Target (NEW): `app/src/main/res/xml/autofill_service.xml`
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="org.bharatvault.app.MainActivity" />
+    android:settingsActivity="org.zerokosh.app.MainActivity" />
 ```
-Strings: `<string name="scr_autofill_service_label">BharatVault</string>`.
+Strings: `<string name="scr_autofill_service_label">Zerokosh</string>`.
 VERIFY: `BUILD`.
 
 ### TASK-603 · Login-helper entry point in S9 (copy-mode, §6.7)
@@ -174,14 +174,14 @@ NEW →
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.scr_detail_delete))
                     }
 ```
-Add imports: `import org.bharatvault.app.autofill.LoginHelper`, `import org.bharatvault.app.reminders.NotificationPermission`, `import androidx.compose.material.icons.outlined.ContentPaste`.
+Add imports: `import org.zerokosh.app.autofill.LoginHelper`, `import org.zerokosh.app.reminders.NotificationPermission`, `import androidx.compose.material.icons.outlined.ContentPaste`.
 VERIFY: `BUILD`.
 
 ### TASK-604 · Autofill matcher test
-Target (NEW): `app/src/test/kotlin/org/bharatvault/app/AutofillMatchTest.kt` (unit test on the pure matching helpers). Since `matchRecords`/`domainHost` are `private`, extract them: PATCH `BharatVaultAutofillService` to move `domainHost` and `extractDomainHint` into a top-level `internal object AutofillMatch { fun domainHost(url); fun extractDomainHint(pkg); fun matches(record, packageName, webDomain, appMap): Boolean }`, and have the service delegate. Then test:
+Target (NEW): `app/src/test/kotlin/org/zerokosh/app/AutofillMatchTest.kt` (unit test on the pure matching helpers). Since `matchRecords`/`domainHost` are `private`, extract them: PATCH `ZerokoshAutofillService` to move `domainHost` and `extractDomainHint` into a top-level `internal object AutofillMatch { fun domainHost(url); fun extractDomainHint(pkg); fun matches(record, packageName, webDomain, appMap): Boolean }`, and have the service delegate. Then test:
 ```kotlin
-package org.bharatvault.app
-import org.bharatvault.app.autofill.AutofillMatch
+package org.zerokosh.app
+import org.zerokosh.app.autofill.AutofillMatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 class AutofillMatchTest {

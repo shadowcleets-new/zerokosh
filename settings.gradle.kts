@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "bharatvault"
+rootProject.name = "zerokosh"
 include(":core", ":app")

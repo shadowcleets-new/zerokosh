@@ -17,14 +17,14 @@ This is the COMPLETE target manifest. Tasks patch the committed file toward exac
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".BharatVaultApp"
+        android:name=".ZerokoshApp"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:theme="@style/Theme.BharatVault"
+        android:theme="@style/Theme.Zerokosh"
         android:supportsRtl="true">
 
         <activity
@@ -39,7 +39,7 @@ This is the COMPLETE target manifest. Tasks patch the committed file toward exac
 
         <!-- §6.7 AutofillService (M6) -->
         <service
-            android:name=".autofill.BharatVaultAutofillService"
+            android:name=".autofill.ZerokoshAutofillService"
             android:exported="true"
             android:label="@string/scr_autofill_service_label"
             android:permission="android.permission.BIND_AUTOFILL_SERVICE">
@@ -87,13 +87,13 @@ Denied → feature silently does nothing beyond the one system prompt; never blo
 
 | Work | Class | Trigger | Constraints | Policy |
 |---|---|---|---|---|
-| Daily reminder scan (§5.7) | `reminders.ReminderWorker` | `PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS)` unique name `bharatvault_daily_reminders` | **none** (offline-first; notifications are local) | `ExistingPeriodicWorkPolicy.KEEP`; scheduled from `BharatVaultApp.onCreate` (TASK-403) |
+| Daily reminder scan (§5.7) | `reminders.ReminderWorker` | `PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS)` unique name `zerokosh_daily_reminders` | **none** (offline-first; notifications are local) | `ExistingPeriodicWorkPolicy.KEEP`; scheduled from `ZerokoshApp.onCreate` (TASK-403) |
 | Clipboard clear fallback (§5.3) | `ClipboardHelper.ClipboardClearWorker` | one-time, `setInitialDelay(32 s)` per sensitive copy | none | fire-and-forget; clears only if clip label is ours AND 30 s elapsed |
 
-Reminder behavior (frozen in `ReminderWorker`): runs only when the vault happens to be unlocked in-process (locked → `Result.success()`, silently skipped — §5.7 never decrypts in background); fires one notification per due `Reminder(field_id, days_before)` and auto-covers the §5.7 default fields (`expiry`, `premium_due_date`, `membership_renewal`, `renewal_date`) at 30 days; text = `scr_reminder_body(record.title)` — NEVER contains a secret value. Channels: `bharatvault_reminders` (DEFAULT importance), `bharatvault_login_helper` (HIGH).
+Reminder behavior (frozen in `ReminderWorker`): runs only when the vault happens to be unlocked in-process (locked → `Result.success()`, silently skipped — §5.7 never decrypts in background); fires one notification per due `Reminder(field_id, days_before)` and auto-covers the §5.7 default fields (`expiry`, `premium_due_date`, `membership_renewal`, `renewal_date`) at 30 days; text = `scr_reminder_body(record.title)` — NEVER contains a secret value. Channels: `zerokosh_reminders` (DEFAULT importance), `zerokosh_login_helper` (HIGH).
 
 ## 6.4 Services & receivers
 
-- `BharatVaultAutofillService` — see Phase 8 TASK-601; runs in the app process, reaches the object graph via `application as BharatVaultApp`; locked vault → single auth-gated dataset "Unlock BharatVault to fill" that launches `MainActivity` via IntentSender.
-- `LoginHelperReceiver` — `exported="false"`, action `org.bharatvault.app.COPY_LOGIN_STEP`, copies the step value via `ClipboardHelper.copySensitive` (30 s clear).
+- `ZerokoshAutofillService` — see Phase 8 TASK-601; runs in the app process, reaches the object graph via `application as ZerokoshApp`; locked vault → single auth-gated dataset "Unlock Zerokosh to fill" that launches `MainActivity` via IntentSender.
+- `LoginHelperReceiver` — `exported="false"`, action `org.zerokosh.app.COPY_LOGIN_STEP`, copies the step value via `ClipboardHelper.copySensitive` (30 s clear).
 - No foreground services, no boot receivers, no exported components beyond the two above + launcher activity.

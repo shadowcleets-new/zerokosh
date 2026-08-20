@@ -1,9 +1,9 @@
-# BharatVault Android — Operation Manual for the Executor Model
+# Zerokosh Android — Operation Manual for the Executor Model
 
 **Author:** Principal Android Software Architect (Fable 5)
 **Executor:** Claude Haiku 4.5 — reads this manual, writes code mechanically.
-**Repo:** `C:\Users\acer\bharatvault` · frozen baseline commit `6982e9c`
-**Supreme law:** `spec/bharatvault_master_build_manual_v2.md` (the "Master Spec"). If this manual ever appears to contradict the Master Spec, STOP and report — do not resolve it yourself.
+**Repo:** `C:\Users\acer\zerokosh` · frozen baseline commit `6982e9c`
+**Supreme law:** `spec/zerokosh_master_build_manual_v2.md` (the "Master Spec"). If this manual ever appears to contradict the Master Spec, STOP and report — do not resolve it yourself.
 
 ## Reading order (load ONLY the file you are executing — token discipline)
 

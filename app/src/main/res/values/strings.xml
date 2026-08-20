@@ -115,6 +115,7 @@
     <string name="scr_lock_wrong">Wrong passphrase</string>
     <string name="scr_lock_cooldown">Too many tries. Wait %1$d seconds.</string>
     <string name="scr_lock_use_recovery">Use Recovery Key</string>
+    <string name="scr_lock_use_passphrase">Use passphrase</string>
     <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
     <string name="scr_lock_recovery_invalid">That recovery key isn\'t right — check it letter by letter</string>
     <string name="scr_lock_biometric_title">Unlock Zerokosh</string>

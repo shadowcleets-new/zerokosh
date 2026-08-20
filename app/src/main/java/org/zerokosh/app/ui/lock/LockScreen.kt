@@ -390,11 +390,26 @@ fun LockScreen(app: ZerokoshApp) {
                         showCredential = true
                     }
                 }
-                DarkOutlineButton(stringResource(R.string.scr_lock_use_recovery)) {
+                // The label has to name where this button GOES, not where it has
+                // been: it toggles the mode, so leaving it permanently reading
+                // "Use Recovery Key" meant that once you were in recovery mode
+                // nothing on screen said so, and the only way back was a button
+                // claiming to do the thing you were already doing.
+                DarkOutlineButton(
+                    stringResource(
+                        if (recoveryMode) R.string.scr_lock_use_passphrase
+                        else R.string.scr_lock_use_recovery,
+                    ),
+                ) {
                     recoveryMode = !recoveryMode
                     showCredential = true
                     wrong = false
                     recoveryInvalid = false
+                    // Drop whatever was typed for the other mode. Without this a
+                    // passphrase typed by mistake stays sitting in the recovery
+                    // field, failing against a format it was never meant to match.
+                    passphrase = ""
+                    recoveryInput = ""
                 }
             }
             Spacer(Modifier.height(24.dp))

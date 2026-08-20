@@ -128,6 +128,7 @@ import org.zerokosh.app.ui.common.PrimaryPillButton
 import org.zerokosh.app.ui.common.RowDivider
 import org.zerokosh.app.ui.common.StepProgress
 import org.zerokosh.app.ui.common.SubtleTextButton
+import org.zerokosh.app.ui.common.VaultToggleRow
 import org.zerokosh.app.ui.theme.CornerGroup
 import org.zerokosh.app.ui.theme.CornerHero
 import org.zerokosh.app.ui.theme.JetBrainsMono
@@ -832,6 +833,7 @@ fun CreatePassphraseScreen(
         bottomBar = {
             PrimaryPillButton(
                 label = if (busy) "Sealing…" else "Seal the vault",
+                loading = busy,
                 onClick = {
                     busy = true
                     onboarding.sealToDevice = seal
@@ -859,22 +861,15 @@ fun CreatePassphraseScreen(
     ) {
         Column(Modifier.padding(horizontal = 16.dp)) {
             if (pinAllowed) {
-                // M3 segmented button.
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .clip(CircleShape)
-                        .background(c.surface)
-                        .border(1.dp, c.line, CircleShape),
-                ) {
-                    SegmentButton("Passphrase", !pinMode, Modifier.weight(1f)) {
-                        pinMode = false; pass = ""; confirm = ""
-                    }
-                    SegmentButton("6-digit PIN", pinMode, Modifier.weight(1f)) {
-                        pinMode = true; pass = ""; confirm = ""
-                    }
-                }
+                VaultToggleRow(
+                    options = listOf("Passphrase", "6-digit PIN"),
+                    selectedIndex = if (pinMode) 1 else 0,
+                    onSelect = { index ->
+                        pinMode = index == 1
+                        pass = ""
+                        confirm = ""
+                    },
+                )
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -1014,40 +1009,6 @@ fun CreatePassphraseScreen(
     }
 }
 
-@Composable
-private fun SegmentButton(
-    label: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    val c = VaultTheme.colors
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-            .background(if (selected) c.primary.copy(alpha = 0.14f) else Color.Transparent)
-            .clickable(onClick = onClick),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (selected) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                tint = c.primary,
-                modifier = Modifier.size(16.dp),
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = if (selected) c.primary else c.ink(0.55f),
-        )
-    }
-}
 
 @Composable
 private fun PassphraseCheck(label: String, ok: Boolean?) {
@@ -1586,6 +1547,7 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
                 onClick = { finish(useBiometrics) },
                 enabled = !finishing,
                 showArrow = !finishing,
+                loading = finishing,
             )
             Spacer(Modifier.height(10.dp))
             SubtleTextButton("Skip for now — I'll type my passphrase", onClick = { finish(false) })

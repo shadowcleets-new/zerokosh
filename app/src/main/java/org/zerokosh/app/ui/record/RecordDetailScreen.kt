@@ -13,8 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,7 +63,10 @@ import org.zerokosh.core.model.Sensitivity
 import org.zerokosh.core.model.TemplateField
 import org.zerokosh.core.totp.Totp
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(
+    ExperimentalSharedTransitionApi::class,
+    androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 fun RecordDetailScreen(
     app: ZerokoshApp,
@@ -75,7 +80,6 @@ fun RecordDetailScreen(
     val template = app.catalog.templates.byId(record.template_id)
     val scope = rememberCoroutineScope()
     var confirmDelete by remember { mutableStateOf(false) }
-    var showMenu by remember { mutableStateOf(false) }
 
     val sharedScope = LocalSharedTransitionScope.current
     val animScope = LocalAnimatedVisibilityScope.current
@@ -87,172 +91,169 @@ fun RecordDetailScreen(
     val vaultSurface = MaterialTheme.colorScheme.surface
     val vaultLine = MaterialTheme.colorScheme.surfaceVariant
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(vaultPaper)
-            .statusBarsPadding()
-            .let {
-                if (sharedScope != null && animScope != null) {
-                    with(sharedScope) {
-                        it.sharedBounds(
-                            rememberSharedContentState(key = "container-${uuid}"),
-                            animatedVisibilityScope = animScope
-                        )
-                    }
-                } else it
-            }
-    ) {
-        // Hero Section
-        Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(176.dp)
-                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                .fillMaxSize()
+                .background(vaultPaper)
+                .statusBarsPadding()
+                .let {
+                    if (sharedScope != null && animScope != null) {
+                        with(sharedScope) {
+                            it.sharedBounds(
+                                rememberSharedContentState(key = "container-${uuid}"),
+                                animatedVisibilityScope = animScope
+                            )
+                        }
+                    } else it
+                }
         ) {
-            // Background color and decorative circle
-            Box(modifier = Modifier.fillMaxSize().background(vaultPrimary.copy(alpha = 0.1f)))
+            // Hero Section
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 24.dp, y = (-32).dp)
-                    .size(160.dp)
-                    .clip(CircleShape)
-                    .background(vaultPrimary.copy(alpha = 0.15f))
-            )
-
-            // Content at the bottom
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .height(176.dp)
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             ) {
+                // Background color and decorative circle
+                Box(modifier = Modifier.fillMaxSize().background(vaultPrimary.copy(alpha = 0.1f)))
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .let {
-                            if (sharedScope != null && animScope != null) {
-                                with(sharedScope) {
-                                    it.sharedElement(
-                                        rememberSharedContentState(key = "logo-${uuid}"),
-                                        animatedVisibilityScope = animScope
-                                    )
-                                }
-                            } else it
-                        },
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.TopEnd)
+                        .offset(x = 24.dp, y = (-32).dp)
+                        .size(160.dp)
+                        .clip(CircleShape)
+                        .background(vaultPrimary.copy(alpha = 0.15f))
+                )
+
+                // Content at the bottom
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .padding(start = 24.dp, end = 24.dp, bottom = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    BrandTile(code = record.institution.ifBlank { record.title }, size = 56.dp)
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = record.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = vaultInk,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = listOf(
-                            record.institution.ifBlank { templateName(record.template_id) },
-                            "last edit " + relativeTime(record.modified_at),
-                        ).joinToString(" · "),
-                        fontSize = 11.sp,
-                        color = vaultMute,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Box {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(vaultSurface)
-                            .border(1.dp, vaultLine, CircleShape)
-                            .clickable { showMenu = true },
+                            .size(56.dp)
+                            .let {
+                                if (sharedScope != null && animScope != null) {
+                                    with(sharedScope) {
+                                        it.sharedElement(
+                                            rememberSharedContentState(key = "logo-${uuid}"),
+                                            animatedVisibilityScope = animScope
+                                        )
+                                    }
+                                } else it
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Filled.MoreHoriz,
-                            contentDescription = "Options",
-                            tint = vaultInk,
-                            modifier = Modifier.size(16.dp)
+                        BrandTile(code = record.institution.ifBlank { record.title }, size = 56.dp)
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = record.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = vaultInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = listOf(
+                                record.institution.ifBlank { templateName(record.template_id) },
+                                "last edit " + relativeTime(record.modified_at),
+                            ).joinToString(" · "),
+                            fontSize = 11.sp,
+                            color = vaultMute,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
+                }
+            }
+
+            // Fields List
+            val orderedFields = template?.fields?.filter { record.fields[it.k]?.isNotEmpty() == true } ?: emptyList()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
+            ) {
+                items(orderedFields, key = { it.k }) { field ->
+                    val value = record.fields[field.k] ?: return@items
+                    when (field.type) {
+                        FieldType.TOTP -> TotpRow(field, value, template?.id ?: "")
+                        FieldType.LINK -> LinkRow(app, field, value, template?.id ?: "", onOpenRecord)
+                        else -> FieldRow(app, field, value, template?.id ?: "")
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                items(record.custom_fields.size) { i ->
+                    val custom = record.custom_fields[i]
+                    FieldRow(
+                        app = app,
+                        field = TemplateField(k = custom.label, t = custom.type, s = if (custom.type == "SECRET") "H" else "L"),
+                        value = custom.value,
+                        templateId = record.template_id,
+                        labelOverride = custom.label,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = { showMenu = false; onEdit() }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                            onClick = { showMenu = false; confirmDelete = true }
+                        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Never leaves this device. Encrypted at rest.",
+                            fontSize = 11.sp,
+                            color = vaultInk
                         )
                     }
                 }
             }
         }
 
-        // Fields List
-        val orderedFields = template?.fields?.filter { record.fields[it.k]?.isNotEmpty() == true } ?: emptyList()
-        LazyColumn(
+        // Edit and Delete used to hide behind a "..." overflow menu. The
+        // Expressive floating toolbar surfaces both over the scrolling content,
+        // which is what the toolbar exists for -- and the LazyColumn already
+        // reserved 120dp of bottom padding for it.
+        HorizontalFloatingToolbar(
+            expanded = true,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 120.dp)
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp),
+            colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+            floatingActionButton = {
+                FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                }
+            },
         ) {
-            items(orderedFields, key = { it.k }) { field ->
-                val value = record.fields[field.k] ?: return@items
-                when (field.type) {
-                    FieldType.TOTP -> TotpRow(field, value, template?.id ?: "")
-                    FieldType.LINK -> LinkRow(app, field, value, template?.id ?: "", onOpenRecord)
-                    else -> FieldRow(app, field, value, template?.id ?: "")
-                }
-                Spacer(modifier = Modifier.height(10.dp))
+            IconButton(onClick = onClose) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-            items(record.custom_fields.size) { i ->
-                val custom = record.custom_fields[i]
-                FieldRow(
-                    app = app,
-                    field = TemplateField(k = custom.label, t = custom.type, s = if (custom.type == "SECRET") "H" else "L"),
-                    value = custom.value,
-                    templateId = record.template_id,
-                    labelOverride = custom.label,
+            IconButton(onClick = { confirmDelete = true }) {
+                Icon(
+                    Icons.Filled.DeleteOutline,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error,
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Never leaves this device. Encrypted at rest.",
-                        fontSize = 11.sp,
-                        color = vaultInk
-                    )
-                }
             }
         }
     }

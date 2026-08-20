@@ -10,6 +10,8 @@
  * 2. LIVE CODE ROW
  * 3. QR SCANNER & MANUAL ENTRY DIALOG
  */
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package org.zerokosh.app.ui.authenticator
 
 // #region Imports
@@ -244,7 +246,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
             } else {
                 SearchDock(
                     placeholder = "Search codes, issuers…",
-                    initials = "BV",
+                    initials = "ZK",
                     onClick = { searching = true },
                 )
             }
@@ -439,29 +441,16 @@ private fun TotpCard(entry: TotpEntry, accented: Boolean) {
                 }
             }
             Spacer(Modifier.width(12.dp))
-            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.size(40.dp)) {
-                    val stroke = 3.dp.toPx()
-                    val inset = stroke / 2
-                    drawArc(
-                        color = c.line,
-                        startAngle = 0f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        topLeft = Offset(inset, inset),
-                        size = Size(size.width - stroke, size.height - stroke),
-                        style = Stroke(width = stroke),
-                    )
-                    drawArc(
-                        color = ringColor,
-                        startAngle = -90f,
-                        sweepAngle = 360f * fraction,
-                        useCenter = false,
-                        topLeft = Offset(inset, inset),
-                        size = Size(size.width - stroke, size.height - stroke),
-                        style = Stroke(width = stroke, cap = StrokeCap.Round),
-                    )
-                }
+            // Was a hand-drawn Canvas with two drawArc calls. The Expressive
+            // circular wavy indicator animates its own amplitude, so the
+            // countdown reads as live rather than as a static swept arc.
+            Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+                CircularWavyProgressIndicator(
+                    progress = { fraction },
+                    modifier = Modifier.size(44.dp),
+                    color = ringColor,
+                    trackColor = c.line,
+                )
                 Text(
                     "${secondsLeft}s",
                     fontFamily = JetBrainsMono,

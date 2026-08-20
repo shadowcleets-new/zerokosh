@@ -14,12 +14,15 @@
  * 4. MAIN SCAFFOLD (dock + FAB + inner routes)
  * 5. DAMAGED SCREEN
  */
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package org.zerokosh.app.ui
 
 // #region Imports
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
@@ -44,17 +47,33 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,6 +95,9 @@ import org.zerokosh.app.ui.common.NoticeCard
 import org.zerokosh.app.ui.common.NoticeTone
 import org.zerokosh.app.ui.common.RevealAuth
 import org.zerokosh.app.ui.common.VaultExtendedFab
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.platform.LocalConfiguration
+import org.zerokosh.app.ui.common.VaultNavRail
 import org.zerokosh.app.ui.common.VaultNavBar
 import org.zerokosh.app.ui.common.VaultTab
 import org.zerokosh.app.ui.gallery.TemplateGalleryScreen
@@ -161,6 +183,18 @@ private fun OnboardingFlow(app: ZerokoshApp) {
 // #endregion
 
 // #region Main scaffold
+/**
+ * Shortcuts on the Add FAB menu, in the order they appear bottom-up. Ids must
+ * exist in templates.json; TemplateCatalogTest guards that they cannot be
+ * renamed away underneath us.
+ */
+private val QuickAdd = listOf(
+    Triple("login", "Login", Icons.Outlined.Password),
+    Triple("card", "Card", Icons.Outlined.CreditCard),
+    Triple("upi", "UPI", Icons.Outlined.QrCode2),
+    Triple("bank_account", "Bank account", Icons.Outlined.AccountBalance),
+)
+
 private val TabRoutes = mapOf(
     VaultTab.Vault to "home",
     VaultTab.Codes to "authenticator",
@@ -209,25 +243,86 @@ private fun MainScaffold(app: ZerokoshApp) {
             launchSingleTop = true
         }
     }
+    val openTemplate = { templateId: String ->
+        nav.navigate("edit/$templateId?preset=") { popUpTo("home") }
+    }
+    // The Add FAB used to be a one-way trip to the 20-item template gallery.
+    // The Expressive FAB menu puts the four templates that cover most additions
+    // one tap away and keeps the gallery as the escape hatch.
+    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
+    // Leaving the Vault tab must not strand an open menu offscreen.
+    LaunchedEffect(activeTab) { if (activeTab != VaultTab.Vault) fabMenuExpanded = false }
+
+    val selectTab = { tab: VaultTab ->
+        nav.navigate(TabRoutes.getValue(tab)) {
+            popUpTo("home") { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    // M3's medium breakpoint: at 600dp and up a bottom bar wastes the vertical
+    // space that is already scarce in landscape, so the destinations move to a
+    // side rail instead.
+    val wideWindow = LocalConfiguration.current.screenWidthDp >= 600
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (activeTab != null) {
-                VaultNavBar(active = activeTab, onSelect = { tab ->
-                    nav.navigate(TabRoutes.getValue(tab)) {
-                        popUpTo("home") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                })
+            if (activeTab != null && !wideWindow) {
+                VaultNavBar(active = activeTab, onSelect = selectTab)
             }
         },
         floatingActionButton = {
             // The mockup floats an extended FAB above the dock on the two list
             // screens; Templates and Settings carry their own actions.
             when (activeTab) {
-                VaultTab.Vault -> VaultExtendedFab("Add", openGallery)
+                VaultTab.Vault -> FloatingActionButtonMenu(
+                    expanded = fabMenuExpanded,
+                    button = {
+                        ToggleFloatingActionButton(
+                            checked = fabMenuExpanded,
+                            onCheckedChange = { fabMenuExpanded = it },
+                            containerColor = ToggleFloatingActionButtonDefaults.containerColor(
+                                initialColor = VaultTheme.colors.primary,
+                                finalColor = VaultTheme.colors.ink,
+                            ),
+                        ) {
+                            val icon by remember {
+                                derivedStateOf {
+                                    if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
+                                }
+                            }
+                            Icon(
+                                painter = rememberVectorPainter(icon),
+                                contentDescription = if (fabMenuExpanded) "Close menu" else "Add",
+                                tint = VaultTheme.colors.paper,
+                                modifier = with(ToggleFloatingActionButtonDefaults) {
+                                    Modifier.animateIcon({ checkedProgress })
+                                },
+                            )
+                        }
+                    },
+                ) {
+                    QuickAdd.forEach { (templateId, label, icon) ->
+                        FloatingActionButtonMenuItem(
+                            onClick = {
+                                fabMenuExpanded = false
+                                openTemplate(templateId)
+                            },
+                            icon = { Icon(icon, contentDescription = null) },
+                            text = { Text(label) },
+                        )
+                    }
+                    FloatingActionButtonMenuItem(
+                        onClick = {
+                            fabMenuExpanded = false
+                            openGallery()
+                        },
+                        icon = { Icon(Icons.Outlined.GridView, contentDescription = null) },
+                        text = { Text("All templates") },
+                    )
+                }
                 VaultTab.Codes -> VaultExtendedFab(
                     label = "Scan",
                     onClick = openGallery,
@@ -237,67 +332,72 @@ private fun MainScaffold(app: ZerokoshApp) {
             }
         },
     ) { padding ->
-        SharedTransitionLayout {
-            CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
-                NavHost(
-                    navController = nav,
-                    startDestination = "home",
-                    modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
-                    enterTransition = { globalEnterTransition() },
-                    exitTransition = { globalExitTransition() },
-                    popEnterTransition = { globalPopEnterTransition() },
-                    popExitTransition = { globalPopExitTransition() },
-                ) {
-                    composable("home") {
-                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
-                            HomeScreen(
+        Row(Modifier.fillMaxSize()) {
+            if (activeTab != null && wideWindow) {
+                VaultNavRail(active = activeTab, onSelect = selectTab)
+            }
+            SharedTransitionLayout {
+                CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
+                    NavHost(
+                        navController = nav,
+                        startDestination = "home",
+                        modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
+                        enterTransition = { globalEnterTransition() },
+                        exitTransition = { globalExitTransition() },
+                        popEnterTransition = { globalPopEnterTransition() },
+                        popExitTransition = { globalPopExitTransition() },
+                    ) {
+                        composable("home") {
+                            CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
+                                HomeScreen(
+                                    app = app,
+                                    onOpen = { uuid -> nav.navigate("detail/$uuid") },
+                                    onAdd = openGallery,
+                                )
+                            }
+                        }
+                        composable("authenticator") { AuthenticatorScreen(app) }
+                        composable("settings") { SettingsScreen(app) }
+                        composable("gallery") {
+                            TemplateGalleryScreen(
                                 app = app,
-                                onOpen = { uuid -> nav.navigate("detail/$uuid") },
-                                onAdd = openGallery,
+                                onPick = { templateId, presetName ->
+                                    nav.navigate("edit/$templateId?preset=${presetName ?: ""}") {
+                                        popUpTo("home")
+                                    }
+                                },
+                                onClose = {
+                                    nav.navigate("home") {
+                                        popUpTo("home") { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                },
                             )
                         }
-                    }
-                    composable("authenticator") { AuthenticatorScreen(app) }
-                    composable("settings") { SettingsScreen(app) }
-                    composable("gallery") {
-                        TemplateGalleryScreen(
-                            app = app,
-                            onPick = { templateId, presetName ->
-                                nav.navigate("edit/$templateId?preset=${presetName ?: ""}") {
-                                    popUpTo("home")
-                                }
-                            },
-                            onClose = {
-                                nav.navigate("home") {
-                                    popUpTo("home") { inclusive = true }
-                                    launchSingleTop = true
-                                }
-                            },
-                        )
-                    }
-                    composable("detail/{uuid}") { entry ->
-                        val uuid = entry.arguments?.getString("uuid") ?: return@composable
-                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
-                            RecordDetailScreen(
+                        composable("detail/{uuid}") { entry ->
+                            val uuid = entry.arguments?.getString("uuid") ?: return@composable
+                            CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
+                                RecordDetailScreen(
+                                    app = app,
+                                    uuid = uuid,
+                                    onEdit = { nav.navigate("edit/byid?uuid=$uuid") },
+                                    onOpenRecord = { linked -> nav.navigate("detail/$linked") },
+                                    onClose = { nav.popBackStack() },
+                                )
+                            }
+                        }
+                        composable("edit/{templateId}?uuid={uuid}&preset={preset}") { entry ->
+                            val templateId = entry.arguments?.getString("templateId") ?: return@composable
+                            val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
+                            val preset = entry.arguments?.getString("preset")?.ifEmpty { null }
+                            RecordEditScreen(
                                 app = app,
-                                uuid = uuid,
-                                onEdit = { nav.navigate("edit/byid?uuid=$uuid") },
-                                onOpenRecord = { linked -> nav.navigate("detail/$linked") },
-                                onClose = { nav.popBackStack() },
+                                templateIdArg = templateId,
+                                editUuid = uuid,
+                                presetName = preset,
+                                onDone = { nav.popBackStack() },
                             )
                         }
-                    }
-                    composable("edit/{templateId}?uuid={uuid}&preset={preset}") { entry ->
-                        val templateId = entry.arguments?.getString("templateId") ?: return@composable
-                        val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
-                        val preset = entry.arguments?.getString("preset")?.ifEmpty { null }
-                        RecordEditScreen(
-                            app = app,
-                            templateIdArg = templateId,
-                            editUuid = uuid,
-                            presetName = preset,
-                            onDone = { nav.popBackStack() },
-                        )
                     }
                 }
             }

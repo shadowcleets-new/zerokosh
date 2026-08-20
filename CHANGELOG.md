@@ -1,3 +1,28 @@
+## [2026-08-20 11:40:00] - Material 3 Expressive makeover
+
+### 1. Intent, Roles, & Context
+- **The Problem:** the Lovable rebuild reproduced the mockup by hand — CSS elliptical `border-radius` blobs ported into a custom `Shape`, a nav dock built from `Row`/`Column` with a manually drawn pill indicator, a segmented control faked with a background swap, a TOTP countdown drawn with two `drawArc` calls, six hand-cut progress bars. Every one of those is a component Material 3 Expressive now ships, done better and animated.
+- **Specialist Personas Invoked:** Apple-caliber UI Motion Designer & CXO; Android Platform Engineer; Accessibility Auditor.
+- **The Strategy:** *Expressive as mechanism, Lovable as identity.* Adopt M3 Expressive's components and `MotionScheme`, but keep the OKLCH-derived colour scheme, the Newsreader/Instrument Sans/JetBrains Mono type scale and the corner geometry, so the Organic Editorial direction survives the swap. Where the alpha API's interaction model conflicted with the mockup, the mockup won.
+
+### 2. Surgical Technical Modifications
+- **Modified Files:**
+  - `ui/theme/Theme.kt` (L28-96): `MaterialTheme` → `MaterialExpressiveTheme` with `MotionScheme.expressive()`; deleted the dead `IosSpring` bezier and `DurationFast/Base/Slow` constants — read `MaterialTheme.motionScheme` at the call site instead.
+  - `ui/common/VaultUi.kt`: hand-rolled `BlobShape` (incl. a port of the CSS radius-overlap normalisation) → `VaultBlobs` on `MaterialShapes.Puffy` / `Clover4Leaf` / `Cookie9Sided`; `VaultNavBar` (~65 lines) → `ShortNavigationBar`; `StepProgress` (six drawn bars) → `LinearWavyProgressIndicator` on a spatial spring; `VaultFilterChip` → M3 `FilterChip` with an animated corner morph on selection; `PrimaryPillButton` gained `loading` backed by `LoadingIndicator`; added `VaultToggleRow` (`ToggleButton`) and `VaultNavRail` (`WideNavigationRail`).
+  - `ui/ZerokoshNav.kt`: Add FAB → `FloatingActionButtonMenu` + `ToggleFloatingActionButton`, with four quick templates (login, card, upi, bank_account) and "All templates" as the escape hatch; `BackHandler` closes it; a `LaunchedEffect` collapses it on tab change. Bottom bar swaps to the side rail at ≥600dp.
+  - `ui/authenticator/AuthenticatorScreen.kt` (~L443): `Canvas` + two `drawArc` → `CircularWavyProgressIndicator`.
+  - `ui/onboarding/Onboarding.kt`: `SegmentButton` deleted, replaced by `VaultToggleRow`; "Sealing…" and the S6 finish button now show `LoadingIndicator`.
+  - `ui/gallery/TemplateGalleryScreen.kt`: "Suggested for you" stacked `GroupCard` → `HorizontalMultiBrowseCarousel`.
+  - `ui/record/RecordDetailScreen.kt`: the "…" overflow `DropdownMenu` deleted; Edit/Delete/Back now sit in a `HorizontalFloatingToolbar`.
+  - `ui/home/HomeScreen.kt`, `ui/authenticator/AuthenticatorScreen.kt`: avatar initials `"BV"` → `"ZK"` — two leftovers the rename missed.
+- **Irreversible Actions:** none. Isolated from the toolchain commit (`1faa172`) so it reverts independently.
+- **Payload/Schema Changes:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug` clean; `:app:lintDebug` 0 errors (684 warnings, unchanged baseline); `:core:test` 42/42. API signatures read from the `material3-android-1.5.0-alpha25` **sources jar** rather than guessed — the earlier flat `javap` extract had silently omitted the `carousel` subpackage.
+- **Resulting App State:** verified end-to-end on a Pixel 9 through a fresh onboarding run — wavy step progress, the toggle pair flipping the counter `0/10 → 0/6`, seal, recovery-kit gate (correctly disabled until the kit is saved *and* the offline checkbox is ticked), FAB menu expanding to all five items and routing straight into the Login template, filter chips moving their check on selection, the detail floating toolbar's Edit/Back, the gallery carousel's small-item keyline and tap-through, a live TOTP ring counting `11s → 5s → 29s`, and the bottom bar ⇄ side rail swap in both rotation directions. The SAF picker opened without crashing — BV-24 still fixed.
+- **Next Sprint Phase:** decide on `SearchBar`/`SearchBarState` — the one item from the approved list left undone, because M3's model moves results into a separate expanding surface while the mockup filters the list in place. Also still open: the `C:\Users\acer\bharatvault` directory rename, registering zerokosh.com/.in, and a trademark agent's read on Zerodha §11(2).
+
 ## [2026-08-20 00:30:00] - Renamed BharatVault → Zerokosh
 
 ### 1. Intent, Roles, & Context

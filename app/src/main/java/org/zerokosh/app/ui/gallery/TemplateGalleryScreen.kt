@@ -13,6 +13,8 @@
  * 5. SUGGESTED ROWS & BRAND TILES
  * 6. TEMPLATE NAME LOOKUP
  */
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package org.zerokosh.app.ui.gallery
 
 // #region Imports
@@ -65,6 +67,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.zerokosh.app.ZerokoshApp
@@ -649,14 +654,37 @@ fun TemplateGalleryScreen(
                     }
                 }
                 item(span = { GridItemSpan(2) }) {
-                    GroupCard(container = c.card) {
-                        suggested.forEachIndexed { i, item ->
-                            if (i > 0) RowDivider()
-                            VaultListRow(
-                                title = item.title,
-                                meta = null,
-                                onClick = { onPick(item.templateId, item.presetName) },
-                                leading = { BrandTile(code = item.logoName) },
+                    // Was a stacked GroupCard of list rows. The Expressive
+                    // multi-browse carousel scales items as they scroll, so the
+                    // shortlist reads as a shelf to browse rather than another
+                    // list to read past -- and it stops the suggestions from
+                    // pushing the full grid below the fold.
+                    val carouselState = rememberCarouselState { suggested.size }
+                    HorizontalMultiBrowseCarousel(
+                        state = carouselState,
+                        preferredItemWidth = 150.dp,
+                        itemSpacing = 10.dp,
+                        modifier = Modifier.fillMaxWidth().height(116.dp),
+                    ) { index ->
+                        val item = suggested[index]
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .maskClip(RoundedCornerShape(CornerCard))
+                                .background(c.card)
+                                .clickable(role = Role.Button) {
+                                    onPick(item.templateId, item.presetName)
+                                }
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            BrandTile(code = item.logoName, size = 40.dp)
+                            Text(
+                                item.title,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = c.ink,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }

@@ -17,6 +17,8 @@
  * 9. NAVIGATION (M3 dock + extended FAB)
  * 10. SHAPES (organic M3 blob)
  */
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package org.zerokosh.app.ui.common
 
 // #region Imports
@@ -58,11 +60,29 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ShortNavigationBarItemDefaults
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailDefaults
+import androidx.compose.material3.WideNavigationRailItem
+import androidx.compose.material3.WideNavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -236,26 +256,25 @@ fun OnboardingTopBar(
     }
 }
 
-/** M3 segmented linear progress — one 4dp-tall bar per onboarding step. */
+/**
+ * Onboarding progress. Was six hand-drawn 4dp bars; the Expressive wavy
+ * indicator carries the same information with motion the static bars could not,
+ * and animates between steps on the theme's own spatial spring.
+ */
 @Composable
 fun StepProgress(current: Int, total: Int = 6, modifier: Modifier = Modifier) {
     val c = VaultTheme.colors
-    Row(
+    val progress by animateFloatAsState(
+        targetValue = (current.toFloat() / total).coerceIn(0f, 1f),
+        animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
+        label = "stepProgress",
+    )
+    LinearWavyProgressIndicator(
+        progress = { progress },
         modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        repeat(total) { i ->
-            Box(
-                Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .background(
-                        if (i < current) c.primary else c.ink(0.12f),
-                        CircleShape,
-                    ),
-            )
-        }
-    }
+        color = c.primary,
+        trackColor = c.ink(0.12f),
+    )
 }
 
 /**
@@ -298,6 +317,7 @@ fun PrimaryPillButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     showArrow: Boolean = true,
+    loading: Boolean = false,
     container: Color = VaultTheme.colors.ink,
     contentColor: Color = VaultTheme.colors.paper,
 ) {
@@ -315,14 +335,55 @@ fun PrimaryPillButton(
         ),
         contentPadding = PaddingValues(horizontal = 24.dp),
     ) {
+        // LoadingIndicator is a morphing sequence of MaterialShapes rather than
+        // a spinner, so a busy button stays in the same design language.
+        if (loading) {
+            LoadingIndicator(modifier = Modifier.size(24.dp), color = contentColor)
+            Spacer(Modifier.width(12.dp))
+        }
         Text(label, style = MaterialTheme.typography.labelLarge)
-        if (showArrow) {
+        if (showArrow && !loading) {
             Spacer(Modifier.width(8.dp))
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
             )
+        }
+    }
+}
+
+/**
+ * Two mutually exclusive options as Expressive toggle buttons. ToggleButton
+ * morphs its own corner shape on check -- the behaviour the mockup's flat
+ * segmented control was approximating with a background colour swap.
+ */
+@Composable
+fun VaultToggleRow(
+    options: List<String>,
+    selectedIndex: Int,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val c = VaultTheme.colors
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        options.forEachIndexed { index, label ->
+            ToggleButton(
+                checked = index == selectedIndex,
+                onCheckedChange = { onSelect(index) },
+                modifier = Modifier.weight(1f),
+                colors = ToggleButtonDefaults.toggleButtonColors(
+                    containerColor = c.surface,
+                    contentColor = c.ink(0.55f),
+                    checkedContainerColor = c.primary.copy(alpha = 0.14f),
+                    checkedContentColor = c.primary,
+                ),
+            ) {
+                Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+            }
         }
     }
 }
@@ -554,43 +615,56 @@ fun VaultFilterChip(
     count: Int? = null,
 ) {
     val c = VaultTheme.colors
-    Row(
-        modifier = modifier
-            .height(36.dp)
-            .clip(CircleShape)
-            .background(if (selected) c.primary else Color.Transparent)
-            .border(1.dp, if (selected) c.primary else c.line, CircleShape)
-            .clickable(onClick = onClick, role = Role.Button)
-            .semantics(mergeDescendants = true) {
-                contentDescription = if (count != null) "$label, $count" else label
-                if (selected) stateDescription = "Selected"
+    // Expressive chips morph their corner geometry on selection rather than only
+    // swapping fill, so the state change is legible without relying on colour.
+    val corner by animateDpAsState(
+        targetValue = if (selected) 12.dp else 18.dp,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "chipCorner",
+    )
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        modifier = modifier.semantics(mergeDescendants = true) {
+            contentDescription = if (count != null) "$label, $count" else label
+        },
+        shape = RoundedCornerShape(corner),
+        leadingIcon = if (selected) {
+            {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                )
             }
-            .padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        if (selected) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                tint = c.paper,
-                modifier = Modifier.size(14.dp),
-            )
-        }
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) c.paper else c.ink(0.7f),
-        )
-        if (count != null) {
-            Text(
-                count.toString(),
-                fontFamily = JetBrainsMono,
-                fontSize = 10.5.sp,
-                color = if (selected) c.paper.copy(alpha = 0.7f) else c.ink(0.4f),
-            )
-        }
-    }
+        } else {
+            null
+        },
+        trailingIcon = count?.let {
+            {
+                Text(
+                    it.toString(),
+                    fontFamily = JetBrainsMono,
+                    fontSize = 10.5.sp,
+                    color = if (selected) c.paper.copy(alpha = 0.7f) else c.ink(0.4f),
+                )
+            }
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = Color.Transparent,
+            labelColor = c.ink(0.7f),
+            selectedContainerColor = c.primary,
+            selectedLabelColor = c.paper,
+            selectedLeadingIconColor = c.paper,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = c.line,
+            selectedBorderColor = c.primary,
+        ),
+        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+    )
 }
 
 /** The state pills under a headline: "Unlocked · auto-lock 2:00", "9 institutions". */
@@ -840,59 +914,90 @@ fun VaultNavBar(
     modifier: Modifier = Modifier,
 ) {
     val c = VaultTheme.colors
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(c.paper)
-            .topHairline(c.line)
-            .navigationBarsPadding()
-            .padding(horizontal = 8.dp)
-            .padding(top = 8.dp, bottom = 12.dp),
+    // Was ~65 lines of hand-built Row/Column with a manually drawn pill
+    // indicator. ShortNavigationBar is the M3 Expressive bottom bar: it animates
+    // the indicator, handles insets, and carries Role.Tab semantics itself.
+    ShortNavigationBar(
+        modifier = modifier.topHairline(c.line),
+        containerColor = c.paper,
+        contentColor = c.ink,
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            VaultTab.entries.forEach { tab ->
-                val isActive = tab == active
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = { onSelect(tab) },
-                        )
-                        .semantics(mergeDescendants = true) {
-                            role = Role.Tab
-                            contentDescription = tab.label
-                            if (isActive) stateDescription = "Selected"
-                        }
-                        .padding(top = 6.dp, bottom = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Box(
-                        Modifier
-                            .height(32.dp)
-                            .width(64.dp)
-                            .clip(CircleShape)
-                            .background(if (isActive) c.primary.copy(alpha = 0.15f) else Color.Transparent),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            tab.icon(isActive),
-                            contentDescription = tab.label,
-                            tint = if (isActive) c.primary else c.ink(0.55f),
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
+        VaultTab.entries.forEach { tab ->
+            val isActive = tab == active
+            ShortNavigationBarItem(
+                selected = isActive,
+                onClick = { onSelect(tab) },
+                icon = {
+                    Icon(
+                        tab.icon(isActive),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                label = {
                     Text(
                         tab.label,
                         fontSize = 11.sp,
                         fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
-                        color = if (isActive) c.ink else c.ink(0.55f),
                     )
-                }
-            }
+                },
+                colors = ShortNavigationBarItemDefaults.colors(
+                    selectedIconColor = c.primary,
+                    selectedTextColor = c.ink,
+                    selectedIndicatorColor = c.primary.copy(alpha = 0.15f),
+                    unselectedIconColor = c.ink(0.55f),
+                    unselectedTextColor = c.ink(0.55f),
+                ),
+            )
+        }
+    }
+}
+
+/**
+ * The same four destinations as a side rail, for windows at least 600dp wide
+ * (landscape phones, tablets, foldables). Bottom bars waste vertical space in
+ * landscape and put the targets under the user's thumbs-off-screen; M3's
+ * adaptive guidance switches to a rail at the medium breakpoint.
+ */
+@Composable
+fun VaultNavRail(
+    active: VaultTab,
+    onSelect: (VaultTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val c = VaultTheme.colors
+    WideNavigationRail(
+        modifier = modifier,
+        colors = WideNavigationRailDefaults.colors(containerColor = c.paper),
+    ) {
+        VaultTab.entries.forEach { tab ->
+            val isActive = tab == active
+            WideNavigationRailItem(
+                selected = isActive,
+                onClick = { onSelect(tab) },
+                railExpanded = false,
+                icon = {
+                    Icon(
+                        tab.icon(isActive),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                label = {
+                    Text(
+                        tab.label,
+                        fontSize = 11.sp,
+                        fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
+                    )
+                },
+                colors = WideNavigationRailItemDefaults.colors(
+                    selectedIconColor = c.primary,
+                    selectedTextColor = c.ink,
+                    selectedIndicatorColor = c.primary.copy(alpha = 0.15f),
+                    unselectedIconColor = c.ink(0.55f),
+                    unselectedTextColor = c.ink(0.55f),
+                ),
+            )
         }
     }
 }
@@ -933,62 +1038,26 @@ fun VaultExtendedFab(
 
 // #region Shapes
 /**
- * CSS `border-radius: a% b% c% d% / e% f% g% h%` — the M3 "morphed shape" blobs
- * on the Welcome hero and the empty-state illustration. Each corner gets an
- * independent horizontal and vertical radius, which is what makes the silhouette
- * read as organic rather than as a rounded rectangle.
+ * The mockup drew its hero blobs as CSS elliptical `border-radius` values, which
+ * this file used to reproduce with a hand-rolled Shape (and a hand-rolled port of
+ * the CSS radius-overlap normalisation). M3 Expressive ships the real thing:
+ * MaterialShapes is a set of 35 RoundedPolygons designed for exactly this, backed
+ * by androidx.graphics.shapes — so they can also morph, which a static Path could
+ * never do.
+ *
+ * Read as composables because toShape() resolves against the current density.
  */
-class BlobShape(
-    private val hTopLeft: Float, private val hTopRight: Float,
-    private val hBottomRight: Float, private val hBottomLeft: Float,
-    private val vTopLeft: Float, private val vTopRight: Float,
-    private val vBottomRight: Float, private val vBottomLeft: Float,
-) : Shape {
-    override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
-        layoutDirection: LayoutDirection,
-        density: Density,
-    ): Outline {
-        val w = size.width
-        val h = size.height
-        if (w <= 0f || h <= 0f) return Outline.Generic(Path())
+object VaultBlobs {
+    /** Large soft organic mass — the hero's primary blob. */
+    val Primary: Shape
+        @Composable get() = MaterialShapes.Puffy.toShape()
 
-        // BV-19: CSS scales every radius by a common factor when the pair on any
-        // one side exceeds that side's length (CSS Backgrounds §5.1). Without it
-        // BlobPrimary's right side — 45% + 60% = 105% — drew a short backwards
-        // segment where the two corner arcs overlapped.
-        fun ratio(sum: Float, side: Float) = if (sum > side) side / sum else 1f
-        val f = minOf(
-            ratio(w * (hTopLeft + hTopRight) / 100f, w),
-            ratio(w * (hBottomLeft + hBottomRight) / 100f, w),
-            ratio(h * (vTopLeft + vBottomLeft) / 100f, h),
-            ratio(h * (vTopRight + vBottomRight) / 100f, h),
-        )
-        fun hx(p: Float) = w * p / 100f * f
-        fun vy(p: Float) = h * p / 100f * f
+    /** Petalled counterweight — the accent satellite. */
+    val Accent: Shape
+        @Composable get() = MaterialShapes.Clover4Leaf.toShape()
 
-        val path = Path().apply {
-            moveTo(hx(hTopLeft), 0f)
-            lineTo(w - hx(hTopRight), 0f)
-            arcTo(Rect(w - 2 * hx(hTopRight), 0f, w, 2 * vy(vTopRight)), 270f, 90f, false)
-            lineTo(w, h - vy(vBottomRight))
-            arcTo(Rect(w - 2 * hx(hBottomRight), h - 2 * vy(vBottomRight), w, h), 0f, 90f, false)
-            lineTo(hx(hBottomLeft), h)
-            arcTo(Rect(0f, h - 2 * vy(vBottomLeft), 2 * hx(hBottomLeft), h), 90f, 90f, false)
-            lineTo(0f, vy(vTopLeft))
-            arcTo(Rect(0f, 0f, 2 * hx(hTopLeft), 2 * vy(vTopLeft)), 180f, 90f, false)
-            close()
-        }
-        return Outline.Generic(path)
-    }
+    /** Small dark pebble anchoring the composition. */
+    val Ink: Shape
+        @Composable get() = MaterialShapes.Cookie9Sided.toShape()
 }
-
-/** `border-radius: 48% 52% 62% 38% / 55% 45% 60% 40%` — the large primary blob. */
-val BlobPrimary = BlobShape(48f, 52f, 62f, 38f, 55f, 45f, 60f, 40f)
-
-/** `border-radius: 60% 40% 45% 55% / 50% 60% 40% 50%` — the accent satellite. */
-val BlobAccent = BlobShape(60f, 40f, 45f, 55f, 50f, 60f, 40f, 50f)
-
-/** `border-radius: 38% 62% 55% 45% / 60% 40% 60% 40%` — the small ink pebble. */
-val BlobInk = BlobShape(38f, 62f, 55f, 45f, 60f, 40f, 60f, 40f)
 // #endregion

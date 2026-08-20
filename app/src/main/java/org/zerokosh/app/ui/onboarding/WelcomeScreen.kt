@@ -74,9 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import org.zerokosh.app.ZerokoshApp
-import org.zerokosh.app.ui.common.BlobAccent
-import org.zerokosh.app.ui.common.BlobInk
-import org.zerokosh.app.ui.common.BlobPrimary
+import org.zerokosh.app.ui.common.VaultBlobs
 import org.zerokosh.app.ui.common.OutlinedPillButton
 import org.zerokosh.app.ui.common.PrimaryPillButton
 import org.zerokosh.app.ui.theme.VaultTheme
@@ -224,7 +222,7 @@ private fun ShapeHero(modifier: Modifier = Modifier) {
                 .offset(x = 32.dp, y = 64.dp)
                 .size(160.dp)
                 .rotate(-6f)
-                .clip(BlobPrimary)
+                .clip(VaultBlobs.Primary)
                 .background(c.primary.copy(alpha = 0.95f)),
         )
         Box(
@@ -232,14 +230,14 @@ private fun ShapeHero(modifier: Modifier = Modifier) {
                 .align(Alignment.TopEnd)
                 .offset(x = (-24).dp, y = 96.dp)
                 .size(112.dp)
-                .clip(BlobAccent)
+                .clip(VaultBlobs.Accent)
                 .background(c.accent),
         )
         Box(
             Modifier
                 .offset(x = 96.dp, y = 208.dp)
                 .size(80.dp)
-                .clip(BlobInk)
+                .clip(VaultBlobs.Ink)
                 .background(c.ink),
         )
         // Satellite dot.

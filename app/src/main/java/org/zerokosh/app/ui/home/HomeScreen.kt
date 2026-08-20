@@ -90,8 +90,7 @@ import org.zerokosh.app.ui.common.VaultListRow
 import org.zerokosh.app.ui.common.category
 import org.zerokosh.app.ui.common.recordBadge
 import org.zerokosh.app.ui.common.recordMeta
-import org.zerokosh.app.ui.common.BlobAccent
-import org.zerokosh.app.ui.common.BlobPrimary
+import org.zerokosh.app.ui.common.VaultBlobs
 import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
 import org.zerokosh.app.ui.motion.LocalSharedTransitionScope
 import org.zerokosh.app.ui.theme.CornerGroup
@@ -200,7 +199,7 @@ fun HomeScreen(
 private fun vaultInitials(records: List<Record>): String =
     records.firstOrNull { it.institution.isNotBlank() }
         ?.institution?.take(2)?.uppercase()
-        ?: "BV"
+        ?: "ZK"
 // #endregion
 
 // #region Header
@@ -510,7 +509,7 @@ private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
                 Modifier
                     .padding(start = 24.dp, top = 32.dp)
                     .size(112.dp)
-                    .clip(BlobPrimary)
+                    .clip(VaultBlobs.Primary)
                     .background(c.primary.copy(alpha = 0.15f)),
             )
             Box(
@@ -518,7 +517,7 @@ private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
                     .align(Alignment.BottomEnd)
                     .padding(end = 32.dp, bottom = 40.dp)
                     .size(80.dp)
-                    .clip(BlobAccent)
+                    .clip(VaultBlobs.Accent)
                     .background(c.accent.copy(alpha = 0.18f)),
             )
             Column(

@@ -14,15 +14,19 @@
  * 6. SHAPES & MOTION
  * 7. THEME ENTRY POINT
  */
-@file:OptIn(androidx.compose.ui.text.ExperimentalTextApi::class) // Font(variationSettings=)
+@file:OptIn(
+    androidx.compose.ui.text.ExperimentalTextApi::class, // Font(variationSettings=)
+    androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class,
+)
 
 package org.zerokosh.app.ui.theme
 
 // #region Imports
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -287,11 +291,11 @@ val CornerGroup = 26.dp
 val CornerTile = 16.dp
 val CornerHero = 28.dp
 
-/** `cubic-bezier(0.32, 0.72, 0, 1)` — the "ios-spring" easing used throughout. */
-val IosSpring = CubicBezierEasing(0.32f, 0.72f, 0f, 1f)
-const val DurationFast = 180
-const val DurationBase = 300
-const val DurationSlow = 600
+// The mockup's hand-tuned `cubic-bezier(0.32, 0.72, 0, 1)` easing and its three
+// duration constants are gone: MaterialExpressiveTheme installs a MotionScheme,
+// and MaterialTheme.motionScheme.defaultSpatialSpec() / fastEffectsSpec() give
+// physically-modelled springs that a fixed bezier cannot. Read the scheme at the
+// call site rather than reaching for a constant.
 // #endregion
 
 // #region Theme entry point
@@ -357,10 +361,15 @@ fun ZerokoshTheme(
     CompositionLocalProvider(
         LocalVaultColors provides if (darkTheme) DarkVaultColors else LightVaultColors,
     ) {
-        MaterialTheme(
+        // Expressive as mechanism, Lovable as identity: we take M3's motion
+        // scheme and component behaviour but keep our own OKLCH-derived colour
+        // scheme, Newsreader/Instrument Sans/JetBrains Mono type and corner
+        // geometry, so the Organic Editorial direction survives the makeover.
+        MaterialExpressiveTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
-            typography = BharatTypography,
+            motionScheme = MotionScheme.expressive(),
             shapes = BharatShapes,
+            typography = BharatTypography,
             content = content,
         )
     }

@@ -165,6 +165,24 @@ fun RecordEditScreen(
                             values["expiry"] = "20" + mmyy.substring(2) + "-" + mmyy.substring(0, 2)
                         }
                         card.cardholderName?.let { values["name_on_card"] = it }
+                        // Network comes from the card number's IIN, not the chip —
+                        // detectNetwork already drives the badge on this field, so
+                        // this is the same answer written down rather than a new
+                        // source of truth.
+                        card.pan?.let { pan ->
+                            CardUtils.detectNetwork(pan)?.let { n ->
+                                values["card_network"] = when (n) {
+                                    CardUtils.Network.RUPAY -> "RuPay"
+                                    CardUtils.Network.VISA -> "Visa"
+                                    CardUtils.Network.MASTERCARD -> "Mastercard"
+                                    CardUtils.Network.AMEX -> "American Express"
+                                    CardUtils.Network.DINERS -> "Diners Club"
+                                    CardUtils.Network.MAESTRO -> "Maestro"
+                                }
+                            }
+                        }
+                        // Only when the card said so itself; kind is never guessed.
+                        card.kind?.let { values["card_type"] = it }
                         showTapCard = false
                     },
                     onDismiss = { showTapCard = false },

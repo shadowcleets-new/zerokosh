@@ -22,6 +22,8 @@ private const val TAG_PAN = 0x5A
 private const val TAG_CARDHOLDER_NAME = 0x5F20
 private const val TAG_EXPIRY = 0x5F24
 private const val TAG_TRACK2_CONTACTLESS = 0x9F6B
+private const val TAG_APPLICATION_LABEL = 0x50
+private const val TAG_PREFERRED_NAME = 0x9F12
 // #endregion
 
 // #region Result model
@@ -35,8 +37,31 @@ data class EmvCard(
     /** Four digits, MMYY, ready for the card template's MONTHYEAR field. */
     val expiryMonthYear: String? = null,
     val cardholderName: String? = null,
+    /**
+     * Tag 50 / 9F12 as the card wrote them — "VISA DEBIT", "RuPay", "DEBIT
+     * MASTERCARD". Kept raw as well as interpreted, because issuers put wildly
+     * different things here and the raw value is the only way to tell why a
+     * guess went wrong.
+     */
+    val applicationLabel: String? = null,
 ) {
-    val isEmpty: Boolean get() = pan == null && expiryMonthYear == null && cardholderName == null
+    /**
+     * Debit / Credit / Prepaid, when the card said so itself. Nothing here is
+     * inferred from the card number: a BIN cannot tell debit from credit, and a
+     * confident wrong answer on that is worse than an empty field the user fills.
+     */
+    val kind: String? get() {
+        val label = applicationLabel?.uppercase() ?: return null
+        return when {
+            "PREPAID" in label -> "Prepaid"
+            "DEBIT" in label -> "Debit"
+            "CREDIT" in label -> "Credit"
+            else -> null
+        }
+    }
+    val isEmpty: Boolean
+        get() = pan == null && expiryMonthYear == null &&
+            cardholderName == null && applicationLabel == null
 
     /** Last four digits, for showing the user which card was read without echoing the PAN. */
     val panLastFour: String? get() = pan?.takeLast(4)?.takeIf { it.length == 4 }
@@ -103,6 +128,7 @@ object EmvReader {
         var pan: String? = null
         var expiry: String? = null
         var name: String? = null
+        var label: String? = null
 
         for (response in responses) {
             val nodes = Tlv.parse(response)
@@ -120,6 +146,18 @@ object EmvReader {
             if (expiry == null) {
                 Tlv.find(nodes, TAG_EXPIRY)?.let { expiry = decodeExpiryTag(it.value) }
             }
+            // Application Label first, Preferred Name as the fallback: the
+            // former is mandatory in the FCI, the latter is optional.
+            if (label == null) {
+                for (tag in listOf(TAG_APPLICATION_LABEL, TAG_PREFERRED_NAME)) {
+                    val text = Tlv.find(nodes, tag)?.value
+                        ?.toString(Charsets.US_ASCII)?.trim()
+                    if (!text.isNullOrBlank()) {
+                        label = text
+                        break
+                    }
+                }
+            }
             if (name == null) {
                 Tlv.find(nodes, TAG_CARDHOLDER_NAME)?.let { node ->
                     val raw = node.value.toString(Charsets.US_ASCII).trim()
@@ -131,7 +169,12 @@ object EmvReader {
                 }
             }
         }
-        return EmvCard(pan = pan, expiryMonthYear = expiry, cardholderName = name)
+        return EmvCard(
+            pan = pan,
+            expiryMonthYear = expiry,
+            cardholderName = name,
+            applicationLabel = label,
+        )
     }
 }
 // #endregion

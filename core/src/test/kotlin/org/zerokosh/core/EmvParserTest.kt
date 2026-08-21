@@ -148,4 +148,35 @@ class EmvParserTest {
         val card = EmvReader.extract(listOf(record))
         assertTrue(card::class.java.declaredFields.none { it.name.contains("cvv", true) })
     }
+    // ---- application label / card kind ----------------------------------
+    @Test
+    fun `reads the application label and calls a debit card debit`() {
+        // 50 "VISA DEBIT"
+        val record = hex("70 0C 50 0A 56495341204445424954")
+        val card = EmvReader.extract(listOf(record))
+        assertEquals("VISA DEBIT", card.applicationLabel)
+        assertEquals("Debit", card.kind)
+    }
+
+    @Test
+    fun `calls a credit card credit`() {
+        // 50 "CREDIT"
+        val card = EmvReader.extract(listOf(hex("70 08 50 06 435245444954")))
+        assertEquals("Credit", card.kind)
+    }
+
+    @Test
+    fun `a bare network label yields no kind rather than a guess`() {
+        // 50 "RuPay" says nothing about debit vs credit
+        val card = EmvReader.extract(listOf(hex("70 07 50 05 5275506179")))
+        assertEquals("RuPay", card.applicationLabel)
+        assertNull(card.kind)
+    }
+
+    @Test
+    fun `falls back to the preferred name when there is no label`() {
+        // 9F12 "DEBIT MASTERCARD"
+        val record = hex("70 13 9F12 10 4445424954204D415354455243415244")
+        assertEquals("Debit", EmvReader.extract(listOf(record)).kind)
+    }
 }

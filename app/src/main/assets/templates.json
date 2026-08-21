@@ -128,6 +128,11 @@
           "s": "L"
         },
         {
+          "k": "card_network",
+          "t": "PICKER:card_networks",
+          "s": "L"
+        },
+        {
           "k": "card_variant",
           "t": "TEXT",
           "s": "L"

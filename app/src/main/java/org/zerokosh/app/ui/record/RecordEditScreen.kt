@@ -181,8 +181,22 @@ fun RecordEditScreen(
                                 }
                             }
                         }
-                        // Only when the card said so itself; kind is never guessed.
-                        card.kind?.let { values["card_type"] = it }
+                        // Precedence: the chip wins where it speaks, because the
+                        // card asserted it. The bundled IIN table fills what the
+                        // chip left silent — which is most cards, since only some
+                        // issuers write DEBIT/CREDIT into the Application Label.
+                        val iin = card.pan?.let { app.catalog.cardIins.lookup(it) }
+                        (card.kind ?: iin?.kind)?.let { values["card_type"] = it }
+                        // Bank and variant are table-only; neither is on the chip.
+                        // The bank goes to `institution`, the record's grouping field —
+                        // the card template has no bank_name of its own, so writing one
+                        // would save a field nothing renders.
+                        // Existing entries are never clobbered: a prefill must not
+                        // overwrite something the user already typed.
+                        iin?.bank?.let { if (institution.isBlank()) institution = it }
+                        iin?.variant?.let {
+                            if (values["card_variant"].isNullOrBlank()) values["card_variant"] = it
+                        }
                         showTapCard = false
                     },
                     onDismiss = { showTapCard = false },

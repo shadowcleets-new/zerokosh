@@ -32,6 +32,17 @@ import androidx.compose.ui.unit.sp
  */
 private val logoResIds = java.util.concurrent.ConcurrentHashMap<String, Int>()
 
+/**
+ * Picker entries whose display name does not normalise onto the drawable that
+ * ships for that brand. Kept explicit rather than fuzzy — a wrong logo on a
+ * user's bank is worse than a monogram.
+ */
+private val logoAliases = mapOf(
+    "niyoglobal" to "niyo",
+    "unicard" to "unicards",
+    "fampay" to "famapp",
+)
+
 @SuppressLint("DiscouragedApi")
 @Composable
 fun CompanyLogo(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp) {
@@ -40,7 +51,8 @@ fun CompanyLogo(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp) {
 
     val resId = remember(normalizedName) {
         logoResIds.getOrPut(normalizedName) {
-            context.resources.getIdentifier("logo_$normalizedName", "drawable", context.packageName)
+            val key = logoAliases[normalizedName] ?: normalizedName
+            context.resources.getIdentifier("logo_$key", "drawable", context.packageName)
         }
     }
     val shape = RoundedCornerShape(16.dp)

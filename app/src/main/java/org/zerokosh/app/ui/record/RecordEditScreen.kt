@@ -99,6 +99,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import org.zerokosh.app.ui.common.VaultFieldCard
+import org.zerokosh.app.ui.common.VaultPickerSheet
+import org.zerokosh.app.ui.common.pickerHasLogos
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.size
@@ -819,11 +821,13 @@ private fun PickerField(
         FieldCardMenu(
             label = label,
             selected = value,
-            options = options + otherLabel,
+            options = options,
             onSelect = { picked ->
                 if (picked == otherLabel) freeText = true else onValueChange(picked)
             },
             modifier = modifier,
+            logos = pickerHasLogos(field.typeParam),
+            pinned = otherLabel,
         )
     }
 }
@@ -864,6 +868,8 @@ private fun FieldCardMenu(
     options: List<String>,
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
+    logos: Boolean = false,
+    pinned: String? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     val c = VaultTheme.colors
@@ -889,14 +895,19 @@ private fun FieldCardMenu(
                 maxLines = 1,
             )
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = { onSelect(option); expanded = false },
-                )
-            }
-        }
+    }
+    // A dropdown made the user scroll 80 banks to reach "Yes Bank". The sheet
+    // searches, shows the logo, and opens on whatever is already selected.
+    if (expanded) {
+        VaultPickerSheet(
+            title = label,
+            options = options,
+            selected = selected,
+            onSelect = onSelect,
+            onDismiss = { expanded = false },
+            logos = logos,
+            pinned = pinned,
+        )
     }
 }
 

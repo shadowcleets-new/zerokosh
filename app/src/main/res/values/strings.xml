@@ -173,6 +173,8 @@
     <string name="scr_reminder_body">%1$s is due soon · open Zerokosh</string>
 
     <!-- Common -->
+    <string name="scr_edit_month">Month</string>
+    <string name="scr_edit_year">Year</string>
     <string name="msg_ok">OK</string>
     <string name="msg_cancel">Cancel</string>
     <string name="msg_back">Back</string>

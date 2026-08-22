@@ -750,12 +750,14 @@ private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label
                         selected = month.toString().padStart(2, '0'),
                         onSelect = { month = it.toInt() },
                         modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.scr_edit_month),
                     )
                     DropdownSelector(
                         options = (now.year..now.year + 20).map { it.toString() },
                         selected = year.toString(),
                         onSelect = { year = it.toInt() },
                         modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.scr_edit_year),
                     )
                 }
             },
@@ -938,14 +940,25 @@ fun DropdownSelector(
     label: String? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+    // The caller's modifier belongs on the box, not on the field inside it. A
+    // Row weight passed down here landed on a child of the box instead of on a
+    // Row child, so it was ignored: the month dropdown took its full intrinsic
+    // width and squeezed the year one to nothing.
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier,
+    ) {
         OutlinedTextField(
             value = selected,
             onValueChange = {},
             readOnly = true,
+            singleLine = true,
             label = label?.let { { Text(it) } },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->

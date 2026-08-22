@@ -1,5 +1,7 @@
 package org.zerokosh.core
 
+import org.zerokosh.core.emv.looksLikeRandomUid
+import kotlin.test.assertFalse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -178,5 +180,19 @@ class EmvParserTest {
         // 9F12 "DEBIT MASTERCARD"
         val record = hex("70 13 9F12 10 4445424954204D415354455243415244")
         assertEquals("Debit", EmvReader.extract(listOf(record)).kind)
+    }
+
+    @Test
+    fun `a randomised uid is what a phone presents`() {
+        // Android card emulation announces a 4-byte UID beginning 0x08
+        assertTrue(looksLikeRandomUid(byteArrayOf(0x08, 0x11, 0x22, 0x33)))
+    }
+
+    @Test
+    fun `a real card uid is not mistaken for a phone`() {
+        assertFalse(looksLikeRandomUid(byteArrayOf(0x04, 0x11, 0x22, 0x33)))
+        // 7-byte UIDs are never the randomised single-size form
+        assertFalse(looksLikeRandomUid(byteArrayOf(0x08, 1, 2, 3, 4, 5, 6)))
+        assertFalse(looksLikeRandomUid(null))
     }
 }

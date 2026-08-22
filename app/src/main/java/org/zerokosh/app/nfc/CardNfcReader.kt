@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.zerokosh.core.emv.EmvCard
 import org.zerokosh.core.emv.EmvReader
+import org.zerokosh.core.emv.looksLikeRandomUid
 import org.zerokosh.core.emv.Tlv
 // #endregion
 
@@ -56,6 +57,21 @@ private fun readRecord(record: Int, sfi: Int): ByteArray =
     byteArrayOf(
         0x00, 0xB2.toByte(), record.toByte(), ((sfi shl 3) or 4).toByte(), 0x00,
     )
+
+/**
+ * Wallet apps do not hold the number printed on the card. Google Pay and
+ * Samsung Pay provision a device token (a DPAN) under EMVCo tokenisation; the
+ * real number never leaves the issuer. So this is not a limitation worth
+ * working around — a read that "succeeded" would store a number that is not
+ * the user's card and cannot be used anywhere else.
+ */
+private const val PHONE_NOT_A_CARD =
+    "That looks like another phone, not a card. Wallet apps only ever emit a " +
+        "device token, never the number printed on your card, so it cannot be " +
+        "copied this way. Tap the physical card instead."
+
+private const val NO_NUMBER_FOUND =
+    "Read the card but found no number on it. Try holding it still against the back of the phone."
 
 /** A response is usable only when it ends in the 0x9000 success word. */
 private fun ByteArray.isOk(): Boolean =
@@ -126,8 +142,11 @@ object CardNfcReader {
 
             val card = EmvReader.extract(responses)
             if (card.pan == null) {
+                // A phone in a wallet app answers the field but not the read, and
+                // the generic "hold it still" advice sends the user round in
+                // circles trying a thing that cannot work.
                 throw IllegalStateException(
-                    "Read the card but found no number on it. Try holding it still against the back of the phone.",
+                    if (looksLikeRandomUid(tag.id)) PHONE_NOT_A_CARD else NO_NUMBER_FOUND,
                 )
             }
             card

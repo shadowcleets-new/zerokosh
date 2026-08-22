@@ -178,3 +178,17 @@ object EmvReader {
     }
 }
 // #endregion
+
+// #region Tag identity
+/**
+ * True when a contactless target announced a randomised UID.
+ *
+ * ISO 14443-3 reserves a leading 0x08 in a single-size UID for exactly that,
+ * and Android's own card emulation uses it — so a phone pretending to be a card
+ * lands here. Plastic can randomise too, which is why this only ever changes
+ * what the user is told after a read has already failed, never whether one is
+ * attempted.
+ */
+fun looksLikeRandomUid(uid: ByteArray?): Boolean =
+    uid != null && uid.size == 4 && uid[0] == 0x08.toByte()
+// #endregion

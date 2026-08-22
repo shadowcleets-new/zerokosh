@@ -98,6 +98,13 @@ import org.zerokosh.core.util.CardUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import org.zerokosh.app.ui.common.VaultFieldCard
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.ui.semantics.Role
 // #endregion
 
 // #region Screen state & save
@@ -293,41 +300,32 @@ fun RecordEditScreen(
                 }
             }
 
+            // The mockup is one flat list of field cards at 8dp, inside 24dp
+            // side padding — not grouped cards. px-6 space-y-2 in the source.
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(32.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-            WhiteCard(corner = 20.dp) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                VaultFieldCard(
+                    label = stringResource(R.string.scr_edit_title_hint),
+                    supporting = if (titleMissing) {
+                        stringResource(R.string.scr_edit_required_title)
+                    } else {
+                        null
+                    },
+                    supportingColor = MaterialTheme.colorScheme.error,
                 ) {
-                    OutlinedTextField(
+                    FieldInput(
                         value = title,
                         onValueChange = { title = it; titleMissing = false },
-                        label = { Text(stringResource(R.string.scr_edit_title_hint)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = titleMissing,
-                        supportingText = {
-                            if (titleMissing) Text(stringResource(R.string.scr_edit_required_title), color = MaterialTheme.colorScheme.error)
-                        },
-                    )
-                    OutlinedTextField(
-                        value = institution,
-                        onValueChange = { institution = it },
-                        label = { Text(stringResource(R.string.scr_edit_institution_hint)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
                     )
                 }
-            }
+                VaultFieldCard(label = stringResource(R.string.scr_edit_institution_hint)) {
+                    FieldInput(value = institution, onValueChange = { institution = it })
+                }
             if (template.fields.isNotEmpty()) {
-                WhiteCard(corner = 20.dp) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+                run {
+                    run {
                         template.fields.forEach { field ->
                             FieldEditor(
                                 app = app,
@@ -519,97 +517,86 @@ fun FieldEditor(
     val label = fieldLabel(templateId, field.k)
     val invalid = showInvalid && !FieldValidation.isValid(field, value)
     val modifier = Modifier.fillMaxWidth()
+    val invalidText = if (invalid) stringResource(R.string.scr_edit_invalid) else null
+    val errorColour = MaterialTheme.colorScheme.error
 
+    // Every branch renders into the mockup's field card. Only the input inside
+    // it differs: monospace for anything transcribed, masked for secrets, a
+    // dropdown for pickers.
     when (field.type) {
-        FieldType.TEXT -> PlainField(value, onValueChange, label, modifier, invalid)
-        FieldType.NOTE -> OutlinedTextField(
-            value = value, onValueChange = onValueChange, label = { Text(label) },
-            modifier = modifier, minLines = 3,
-        )
         FieldType.SECRET -> SecretField(app, value, onValueChange, label, modifier)
-        FieldType.PIN -> {
-            var pinVisible by remember { mutableStateOf(false) }
-            OutlinedTextField(
-                value = value,
-                onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) }, // 3–8 digits (§2.2)
-                label = { Text(label) },
-                visualTransformation = if (pinVisible) VisualTransformation.None
-                else PasswordVisualTransformation(),
-                trailingIcon = { RevealToggle(visible = pinVisible, onToggle = { pinVisible = !pinVisible }) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = modifier, singleLine = true,
-                isError = invalid,
-                supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
-            )
-        }
-        FieldType.NUMBER -> OutlinedTextField(
-            value = value,
-            onValueChange = { v -> onValueChange(v.filter(Char::isDigit)) },
-            label = { Text(label) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = modifier, singleLine = true,
-            isError = invalid,
-            supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
-        )
-        FieldType.PHONE -> OutlinedTextField(
-            value = value, onValueChange = onValueChange, label = { Text(label) },
-            placeholder = { Text("+91") }, // §2.2 default prefix hint
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            modifier = modifier, singleLine = true,
-        )
-        FieldType.EMAIL -> OutlinedTextField(
-            value = value, onValueChange = onValueChange, label = { Text(label) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = modifier, singleLine = true,
-            isError = value.isNotEmpty() && !value.contains('@'),
-        )
-        FieldType.URL -> OutlinedTextField(
-            value = value, onValueChange = onValueChange, label = { Text(label) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-            modifier = modifier, singleLine = true,
-        )
-        FieldType.DATE -> DateField(value, onValueChange, label, modifier)
-        FieldType.MONTHYEAR -> MonthYearField(value, onValueChange, label, modifier)
-        FieldType.IFSC -> OutlinedTextField(
-            value = value,
-            onValueChange = { v -> onValueChange(v.uppercase().take(11)) }, // uppercase (§2.2)
-            label = { Text(label) },
-            modifier = modifier, singleLine = true,
-            textStyle = SecretTextStyle,
-            isError = invalid,
-            supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
-        )
         FieldType.CARDNUM -> CardNumberField(value, onValueChange, label, modifier, onTapCard)
-        FieldType.TOTP -> OutlinedTextField(
-            value = value, onValueChange = onValueChange, label = { Text(label) },
-            placeholder = { Text(stringResource(R.string.scr_edit_totp_hint)) },
-            modifier = modifier, singleLine = true,
-            textStyle = SecretTextStyle,
-        )
         FieldType.PICKER -> PickerField(app, field, value, onValueChange, label, modifier)
         FieldType.LINK -> LinkField(app, field, value, onValueChange, label, modifier)
+        FieldType.DATE -> DateField(value, onValueChange, label, modifier)
+        FieldType.MONTHYEAR -> MonthYearField(value, onValueChange, label, modifier)
         FieldType.FILE -> { /* attachments arrive with M4 templates */ }
+
+        FieldType.PIN -> {
+            var pinVisible by remember { mutableStateOf(false) }
+            VaultFieldCard(
+                label = label,
+                modifier = modifier,
+                supporting = invalidText,
+                supportingColor = errorColour,
+                trailing = { RevealToggle(visible = pinVisible, onToggle = { pinVisible = !pinVisible }) },
+            ) {
+                FieldInput(
+                    value = value,
+                    onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) },
+                    mono = true,
+                    dimmed = !pinVisible,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    visualTransformation = if (pinVisible) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                )
+            }
+        }
+
+        FieldType.NOTE -> VaultFieldCard(label = label, modifier = modifier) {
+            FieldInput(value = value, onValueChange = onValueChange, singleLine = false)
+        }
+
+        else -> {
+            // The plain text family. They differ only by keyboard, filter and
+            // whether the value is something a human transcribes.
+            val mono = field.type in setOf(FieldType.NUMBER, FieldType.IFSC, FieldType.TOTP)
+            val keyboard = when (field.type) {
+                FieldType.NUMBER -> KeyboardType.Number
+                FieldType.PHONE -> KeyboardType.Phone
+                FieldType.EMAIL -> KeyboardType.Email
+                FieldType.URL -> KeyboardType.Uri
+                else -> KeyboardType.Text
+            }
+            val filter: (String) -> String = when (field.type) {
+                FieldType.NUMBER -> { v -> v.filter(Char::isDigit) }
+                FieldType.IFSC -> { v -> v.uppercase().take(11) } // uppercase (§2.2)
+                else -> { v -> v }
+            }
+            val supporting = when {
+                invalidText != null -> invalidText
+                field.type == FieldType.EMAIL && value.isNotEmpty() && !value.contains('@') ->
+                    stringResource(R.string.scr_edit_invalid)
+                else -> null
+            }
+            VaultFieldCard(
+                label = label,
+                modifier = modifier,
+                supporting = supporting,
+                supportingColor = errorColour,
+            ) {
+                FieldInput(
+                    value = value,
+                    onValueChange = { onValueChange(filter(it)) },
+                    mono = mono,
+                    keyboardOptions = KeyboardOptions(keyboardType = keyboard),
+                )
+            }
+        }
     }
 }
 
-@Composable
-private fun PlainField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier,
-    invalid: Boolean,
-) {
-    OutlinedTextField(
-        value = value, onValueChange = onValueChange, label = { Text(label) },
-        // TextFieldLabelPosition is only on the TextFieldState-based overload,
-        // so Cutout waits on that migration. The expressive shape applies here.
-        shape = OutlinedTextFieldDefaults.roundedShape,
-        modifier = modifier, singleLine = true,
-        isError = invalid,
-        supportingText = { if (invalid) Text(stringResource(R.string.scr_edit_invalid), color = MaterialTheme.colorScheme.error) },
-    )
-}
+
 
 /** §2.2 SECRET: masked, monospace, reveal button, generator button (§5.8). */
 @Composable
@@ -622,29 +609,33 @@ private fun SecretField(
 ) {
     var visible by remember { mutableStateOf(false) }
     var showGenerator by remember { mutableStateOf(false) }
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        textStyle = SecretTextStyle,
+    VaultFieldCard(
+        label = label,
         modifier = modifier,
-        singleLine = true,
-        trailingIcon = {
-            Row {
-                IconButton(onClick = { visible = !visible }) {
-                    Icon(
-                        if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                        contentDescription = stringResource(if (visible) R.string.scr_detail_hide else R.string.scr_detail_reveal),
-                    )
-                }
+        trailing = {
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                RevealToggle(visible = visible, onToggle = { visible = !visible })
                 IconButton(onClick = { showGenerator = true }) {
-                    Icon(Icons.Outlined.Casino, contentDescription = stringResource(R.string.scr_edit_generate))
+                    Icon(
+                        Icons.Outlined.Casino,
+                        contentDescription = stringResource(R.string.scr_edit_generate),
+                        tint = VaultTheme.colors.ink(0.55f),
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
         },
-    )
+    ) {
+        FieldInput(
+            value = value,
+            onValueChange = onValueChange,
+            mono = true,
+            dimmed = !visible,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = if (visible) VisualTransformation.None
+            else PasswordVisualTransformation(),
+        )
+    }
     if (showGenerator) {
         GeneratorSheet(
             app = app,
@@ -663,29 +654,37 @@ private fun SecretField(
 @Composable
 private fun DateField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier) {
     var showPicker by remember { mutableStateOf(false) }
-    OutlinedTextField(
-        value = value, onValueChange = {}, readOnly = true, label = { Text(label) },
-        placeholder = { Text("YYYY-MM-DD") },
+    VaultFieldCard(
+        label = label,
         modifier = modifier,
-        trailingIcon = {
+        trailing = {
             IconButton(onClick = { showPicker = true }) {
-                Icon(Icons.Outlined.CalendarToday, contentDescription = "Pick a date")
+                Icon(
+                    Icons.Outlined.CalendarToday,
+                    contentDescription = "Pick a date",
+                    tint = VaultTheme.colors.ink(0.55f),
+                    modifier = Modifier.size(20.dp),
+                )
             }
         },
-    )
-    if (showPicker) {
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = runCatching {
-                LocalDate.parse(value).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-            }.getOrNull(),
+    ) {
+        FieldInput(
+            value = value,
+            onValueChange = {},
+            mono = true,
+            placeholder = "YYYY-MM-DD",
         )
+    }
+    if (showPicker) {
+        val state = rememberDatePickerState()
         DatePickerDialog(
             onDismissRequest = { showPicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    state.selectedDateMillis?.let { ms ->
+                    state.selectedDateMillis?.let { millis ->
                         onValueChange(
-                            Instant.ofEpochMilli(ms).atZone(ZoneOffset.UTC).toLocalDate().toString(), // YYYY-MM-DD (§2.1)
+                            java.time.Instant.ofEpochMilli(millis)
+                                .atZone(java.time.ZoneOffset.UTC).toLocalDate().toString(),
                         )
                     }
                     showPicker = false
@@ -702,31 +701,39 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
 @Composable
 private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier) {
     var showPicker by remember { mutableStateOf(false) }
-    OutlinedTextField(
-        value = value, onValueChange = {}, readOnly = true, label = { Text(label) },
-        placeholder = { Text("YYYY-MM") },
+    VaultFieldCard(
+        label = label,
         modifier = modifier,
-        trailingIcon = { IconButton(onClick = { showPicker = true }) {
-                Icon(Icons.Outlined.CalendarToday, contentDescription = "Pick a date")
-            } },
-    )
+        trailing = {
+            IconButton(onClick = { showPicker = true }) {
+                Icon(
+                    Icons.Outlined.CalendarToday,
+                    contentDescription = "Pick a date",
+                    tint = VaultTheme.colors.ink(0.55f),
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        },
+    ) {
+        FieldInput(value = value, onValueChange = {}, mono = true, placeholder = "YYYY-MM")
+    }
     if (showPicker) {
-        val now = LocalDate.now()
+        val now = java.time.LocalDate.now()
         var month by remember { mutableStateOf(value.substringAfter('-', "").toIntOrNull() ?: now.monthValue) }
         var year by remember { mutableStateOf(value.substringBefore('-', "").toIntOrNull() ?: now.year) }
         AlertDialog(
             onDismissRequest = { showPicker = false },
             title = { Text(label) },
             text = {
-                Row {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     DropdownSelector(
                         options = (1..12).map { it.toString().padStart(2, '0') },
                         selected = month.toString().padStart(2, '0'),
                         onSelect = { month = it.toInt() },
-                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        modifier = Modifier.weight(1f),
                     )
                     DropdownSelector(
-                        options = (now.year - 20..now.year + 20).map(Int::toString),
+                        options = (now.year..now.year + 20).map { it.toString() },
                         selected = year.toString(),
                         onSelect = { year = it.toInt() },
                         modifier = Modifier.weight(1f),
@@ -735,13 +742,50 @@ private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label
             },
             confirmButton = {
                 TextButton(onClick = {
-                    onValueChange("$year-${month.toString().padStart(2, '0')}")
+                    onValueChange("$year-" + month.toString().padStart(2, '0'))
                     showPicker = false
                 }) { Text(stringResource(R.string.msg_ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { showPicker = false }) { Text(stringResource(R.string.msg_cancel)) }
             },
+        )
+    }
+}
+
+/**
+ * A bare text input for use inside [VaultFieldCard]. No decoration of its own —
+ * the card supplies the label, padding and border, exactly as the mockup does.
+ * Secrets and anything a human has to transcribe render monospace.
+ */
+@Composable
+private fun FieldInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    mono: Boolean = false,
+    dimmed: Boolean = false,
+    placeholder: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    singleLine: Boolean = true,
+) {
+    val c = VaultTheme.colors
+    val style = (if (mono) SecretTextStyle else MaterialTheme.typography.bodyLarge)
+        .copy(fontSize = 14.sp, color = if (dimmed) c.ink(0.5f) else c.ink)
+    Box(modifier) {
+        if (value.isEmpty() && placeholder != null) {
+            Text(placeholder, style = style.copy(color = c.ink(0.3f)))
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = style,
+            singleLine = singleLine,
+            cursorBrush = SolidColor(c.primary),
+            keyboardOptions = keyboardOptions,
+            visualTransformation = visualTransformation,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -759,23 +803,26 @@ private fun PickerField(
     val options = app.catalog.pickers[field.typeParam].orEmpty()
     var freeText by remember { mutableStateOf(value.isNotEmpty() && value !in options) }
     if (freeText) {
-        OutlinedTextField(
-            value = value, onValueChange = onValueChange,
-            label = { Text("$label — ${stringResource(R.string.scr_edit_picker_other_hint)}") },
-            modifier = modifier, singleLine = true,
-        )
-        TextButton(onClick = { freeText = false; onValueChange("") }) {
-            Text(stringResource(R.string.msg_back))
+        VaultFieldCard(
+            label = "$label — ${stringResource(R.string.scr_edit_picker_other_hint)}",
+            modifier = modifier,
+            trailing = {
+                TextButton(onClick = { freeText = false; onValueChange("") }) {
+                    Text(stringResource(R.string.msg_back))
+                }
+            },
+        ) {
+            FieldInput(value = value, onValueChange = onValueChange)
         }
     } else {
         val otherLabel = stringResource(R.string.scr_edit_picker_other)
-        DropdownSelector(
-            options = options + otherLabel,
+        FieldCardMenu(
+            label = label,
             selected = value,
+            options = options + otherLabel,
             onSelect = { picked ->
                 if (picked == otherLabel) freeText = true else onValueChange(picked)
             },
-            label = label,
             modifier = modifier,
         )
     }
@@ -794,15 +841,63 @@ private fun LinkField(
     val body = app.repository.body.collectAsState().value
     val candidates = body?.records?.filter { it.template_id == field.typeParam }.orEmpty()
     val noneLabel = stringResource(R.string.scr_edit_link_none)
-    DropdownSelector(
-        options = listOf(noneLabel) + candidates.map { it.title },
+    FieldCardMenu(
+        label = label,
         selected = candidates.firstOrNull { it.uuid == value }?.title ?: noneLabel,
+        options = listOf(noneLabel) + candidates.map { it.title },
         onSelect = { picked ->
             onValueChange(candidates.firstOrNull { it.title == picked }?.uuid ?: "")
         },
-        label = label,
         modifier = modifier,
     )
+}
+
+/**
+ * A choice rendered as the mockup's field card: label, current value, chevron.
+ * Tapping anywhere on the card opens the menu — the whole card is the target,
+ * not a 24dp arrow.
+ */
+@Composable
+private fun FieldCardMenu(
+    label: String,
+    selected: String,
+    options: List<String>,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val c = VaultTheme.colors
+    Box {
+        VaultFieldCard(
+            label = label,
+            modifier = modifier.clickable(role = Role.Button) { expanded = true },
+            trailing = {
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint = c.ink(0.55f),
+                    modifier = Modifier.size(20.dp),
+                )
+            },
+        ) {
+            Text(
+                text = selected.ifBlank { "—" },
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 14.sp,
+                    color = if (selected.isBlank()) c.ink(0.3f) else c.ink,
+                ),
+                maxLines = 1,
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = { onSelect(option); expanded = false },
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -850,18 +945,12 @@ private fun CardNumberField(
 ) {
     val network = CardUtils.detectNetwork(value)
     val luhnOk = value.length < 12 || CardUtils.luhnValid(value)
-    OutlinedTextField(
-        value = value,
-        onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(19)) }, // stored without spaces (§2.2)
-        label = { Text(label) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        visualTransformation = CardGroupingTransformation,
-        textStyle = SecretTextStyle,
+    VaultFieldCard(
+        label = label,
         modifier = modifier,
-        singleLine = true,
-        // The tap-to-read button and the detected-network badge share this slot.
-        // The button is offered only where the hardware can honour it.
-        trailingIcon = {
+        supporting = if (!luhnOk) stringResource(R.string.scr_edit_luhn_warning) else null,
+        supportingColor = MaterialTheme.colorScheme.secondary, // warn, don't block
+        trailing = {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 if (onTapCard != null) {
                     IconButton(onClick = onTapCard) {
@@ -869,6 +958,7 @@ private fun CardNumberField(
                             Icons.Outlined.Contactless,
                             contentDescription = "Read the card by tapping it",
                             tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -884,15 +974,19 @@ private fun CardNumberField(
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(end = 12.dp),
                     )
                 }
             }
         },
-        supportingText = {
-            if (!luhnOk) Text(stringResource(R.string.scr_edit_luhn_warning), color = MaterialTheme.colorScheme.secondary) // warn, don't block
-        },
-    )
+    ) {
+        FieldInput(
+            value = value,
+            onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(19)) }, // stored without spaces (§2.2)
+            mono = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            visualTransformation = CardGroupingTransformation,
+        )
+    }
 }
 
 /** Groups digits in 4s while typing; storage stays digit-only. */

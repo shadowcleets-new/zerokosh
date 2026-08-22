@@ -137,6 +137,7 @@ import org.zerokosh.app.ui.theme.JetBrainsMono
 import org.zerokosh.app.ui.theme.MetaTextStyle
 import org.zerokosh.app.ui.theme.Newsreader
 import org.zerokosh.app.ui.theme.SectionLabelStyle
+import org.zerokosh.app.ui.theme.FieldLabelStyle
 import org.zerokosh.app.ui.theme.VaultTheme
 // #endregion
 
@@ -595,6 +596,57 @@ fun RevealToggle(
             tint = tint,
             modifier = Modifier.size(20.dp),
         )
+    }
+}
+
+/**
+ * The mockup's edit field, exactly: `p-3.5 bg-white rounded-2xl ring-1
+ * ring-black/5`, a 10px uppercase label, and the value 4dp under it.
+ *
+ * Not an OutlinedTextField. The mockup has no outline, no floating label and no
+ * grouping — each field is its own card in a flat 8dp-spaced list. Callers put a
+ * bare BasicTextField in [content] so the value reads as text rather than as a
+ * form control.
+ */
+@Composable
+fun VaultFieldCard(
+    label: String,
+    modifier: Modifier = Modifier,
+    supporting: String? = null,
+    supportingColor: Color? = null,
+    trailing: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    val c = VaultTheme.colors
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerTile))
+            .background(c.card)
+            .border(1.dp, c.ink(0.05f), RoundedCornerShape(CornerTile))
+            .padding(14.dp),
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = FieldLabelStyle,
+            color = c.mute,
+        )
+        Spacer(Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { content() }
+            if (trailing != null) {
+                Spacer(Modifier.width(8.dp))
+                trailing()
+            }
+        }
+        if (supporting != null) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = supporting,
+                style = MaterialTheme.typography.bodySmall,
+                color = supportingColor ?: c.mute,
+            )
+        }
     }
 }
 

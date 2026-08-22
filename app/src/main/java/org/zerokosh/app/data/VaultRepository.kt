@@ -177,6 +177,7 @@ class VaultRepository(
 
     /** §5.2: zero keys, drop plaintext, back to S13. */
     fun lock() {
+        org.zerokosh.app.nfc.PendingCard.clear()
         vaultKey?.wipe()
         vaultKey = null
         envelope = null

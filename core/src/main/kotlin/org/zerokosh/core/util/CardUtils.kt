@@ -3,7 +3,19 @@ package org.zerokosh.core.util
 /** §5.10: Luhn validation + card-network detection by prefix table. */
 object CardUtils {
 
-    enum class Network { RUPAY, VISA, MASTERCARD, AMEX, DINERS, MAESTRO }
+    /**
+     * [label] is the exact `card_networks` picker option, so a detected network
+     * can be written straight into the field. Two spellings of "Mastercard"
+     * would leave the picker showing "Other" for a value it does contain.
+     */
+    enum class Network(val label: String) {
+        RUPAY("RuPay"),
+        VISA("Visa"),
+        MASTERCARD("Mastercard"),
+        AMEX("American Express"),
+        DINERS("Diners Club"),
+        MAESTRO("Maestro"),
+    }
 
     fun luhnValid(digits: String): Boolean {
         if (digits.length < 12 || !digits.all { it.isDigit() }) return false

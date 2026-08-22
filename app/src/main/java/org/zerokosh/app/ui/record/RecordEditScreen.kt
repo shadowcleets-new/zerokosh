@@ -100,6 +100,9 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import org.zerokosh.app.ui.common.VaultFieldCard
 import org.zerokosh.app.ui.common.VaultPickerSheet
+import androidx.compose.runtime.LaunchedEffect
+import org.zerokosh.app.nfc.PendingCard
+import org.zerokosh.core.emv.EmvCard
 import org.zerokosh.core.model.seedFieldsFromPreset
 import org.zerokosh.app.ui.common.pickerHasLogos
 import androidx.compose.ui.graphics.SolidColor
@@ -149,6 +152,18 @@ fun RecordEditScreen(
             }
         }
     }
+    // A card tapped from the FAB opens this screen with the read already done.
+    // Taken once and dropped — a second composition must not re-apply it over
+    // edits the user has since made.
+    LaunchedEffect(Unit) {
+        if (existing == null && templateId == "card") {
+            PendingCard.take()?.let { card ->
+                applyTappedCard(card, app, values) { institution = it }
+                if (title.isBlank()) title = cardTitle(card, app, institution)
+            }
+        }
+    }
+
     var titleMissing by remember { mutableStateOf(false) }
     // The mockup's "+ Add another field": the record model and the detail view
     // already carry custom fields, this is where they get authored.
@@ -185,44 +200,8 @@ fun RecordEditScreen(
             if (showTapCard) {
                 TapCardSheet(
                     onCard = { card ->
-                        card.pan?.let { values["card_number"] = it }
-                        card.expiryMonthYear?.let { mmyy ->
-                            // The MONTHYEAR field stores YYYY-MM.
-                            values["expiry"] = "20" + mmyy.substring(2) + "-" + mmyy.substring(0, 2)
-                        }
-                        card.cardholderName?.let { values["name_on_card"] = it }
-                        // Network comes from the card number's IIN, not the chip —
-                        // detectNetwork already drives the badge on this field, so
-                        // this is the same answer written down rather than a new
-                        // source of truth.
-                        card.pan?.let { pan ->
-                            CardUtils.detectNetwork(pan)?.let { n ->
-                                values["card_network"] = when (n) {
-                                    CardUtils.Network.RUPAY -> "RuPay"
-                                    CardUtils.Network.VISA -> "Visa"
-                                    CardUtils.Network.MASTERCARD -> "Mastercard"
-                                    CardUtils.Network.AMEX -> "American Express"
-                                    CardUtils.Network.DINERS -> "Diners Club"
-                                    CardUtils.Network.MAESTRO -> "Maestro"
-                                }
-                            }
-                        }
-                        // Precedence: the chip wins where it speaks, because the
-                        // card asserted it. The bundled IIN table fills what the
-                        // chip left silent — which is most cards, since only some
-                        // issuers write DEBIT/CREDIT into the Application Label.
-                        val iin = card.pan?.let { app.catalog.cardIins.lookup(it) }
-                        (card.kind ?: iin?.kind)?.let { values["card_type"] = it }
-                        // Bank and variant are table-only; neither is on the chip.
-                        // The bank goes to `institution`, the record's grouping field —
-                        // the card template has no bank_name of its own, so writing one
-                        // would save a field nothing renders.
-                        // Existing entries are never clobbered: a prefill must not
-                        // overwrite something the user already typed.
-                        iin?.bank?.let { if (institution.isBlank()) institution = it }
-                        iin?.variant?.let {
-                            if (values["card_variant"].isNullOrBlank()) values["card_variant"] = it
-                        }
+                        applyTappedCard(card, app, values) { institution = it }
+                        if (title.isBlank()) title = cardTitle(card, app, institution)
                         showTapCard = false
                     },
                     onDismiss = { showTapCard = false },
@@ -821,6 +800,60 @@ private fun FieldInput(
             modifier = Modifier.fillMaxWidth(),
         )
     }
+}
+
+/**
+ * Writes a tapped card onto a card record. Shared so that tapping from the FAB
+ * and tapping from an open card form fill by exactly the same rules.
+ *
+ * Never clobbers what the user already typed: a prefill is a suggestion.
+ */
+private fun applyTappedCard(
+    card: EmvCard,
+    app: ZerokoshApp,
+    values: MutableMap<String, String>,
+    setInstitution: (String) -> Unit,
+) {
+    card.pan?.let { values["card_number"] = it }
+    card.expiryMonthYear?.let { mmyy ->
+        // The MONTHYEAR field stores YYYY-MM.
+        values["expiry"] = "20" + mmyy.substring(2) + "-" + mmyy.substring(0, 2)
+    }
+    card.cardholderName?.let { values["name_on_card"] = it }
+    // Network comes from the card number's IIN, not the chip — detectNetwork
+    // already drives the badge on this field, so this is the same answer written
+    // down rather than a new source of truth.
+    card.pan?.let { pan ->
+        CardUtils.detectNetwork(pan)?.let { n -> values["card_network"] = n.label }
+    }
+    // Precedence: the chip wins where it speaks, because the card asserted it.
+    // The bundled IIN table fills what the chip left silent — which is most
+    // cards, since only some issuers write DEBIT/CREDIT into the Application
+    // Label.
+    val iin = card.pan?.let { app.catalog.cardIins.lookup(it) }
+    (card.kind ?: iin?.kind)?.let { values["card_type"] = it }
+    // Bank and variant are table-only; neither is on the chip. The bank goes to
+    // `institution`, the record's grouping field — the card template has no
+    // bank_name of its own, so writing one would save a field nothing renders.
+    iin?.bank?.let(setInstitution)
+    iin?.variant?.let {
+        if (values["card_variant"].isNullOrBlank()) values["card_variant"] = it
+    }
+}
+
+/**
+ * A name for a card the user tapped rather than named. "HDFC Bank Credit" beats
+ * an empty title on the vault list, and beats a PAN fragment — the number is the
+ * one thing that should not be sitting in a record's headline.
+ */
+private fun cardTitle(card: EmvCard, app: ZerokoshApp, institution: String): String {
+    val iin = card.pan?.let { app.catalog.cardIins.lookup(it) }
+    val bank = institution.ifBlank { iin?.bank.orEmpty() }
+    val kind = card.kind ?: iin?.kind
+    val network = card.pan?.let { CardUtils.detectNetwork(it)?.label }
+    return listOfNotNull(bank.ifBlank { null }, kind ?: network)
+        .joinToString(" ")
+        .ifBlank { card.applicationLabel.orEmpty() }
 }
 
 /** §2.2 PICKER: bundled list + "Other" free text (DECISIONS.md D-002). */

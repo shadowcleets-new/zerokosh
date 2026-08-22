@@ -49,6 +49,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountBalance
+import org.zerokosh.app.ui.record.TapCardSheet
+import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Password
@@ -196,6 +198,12 @@ private val QuickAdd = listOf(
     Triple("bank_account", "Bank account", Icons.Outlined.AccountBalance),
 )
 
+/**
+ * The tap entry sits beside them rather than in the list: it opens a reader,
+ * not a blank form, so it is a different kind of action.
+ */
+private const val TAP_CARD_ID = "__tap_card__"
+
 private val TabRoutes = mapOf(
     VaultTab.Vault to "home",
     VaultTab.Codes to "authenticator",
@@ -257,6 +265,15 @@ private fun MainScaffold(app: ZerokoshApp) {
     // The Expressive FAB menu puts the four templates that cover most additions
     // one tap away and keeps the gallery as the escape hatch.
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    // Not rememberSaveable: a half-finished read is not worth restoring, and the
+    // sheet holds a live NFC reader session.
+    var showTapCard by remember { mutableStateOf(false) }
+    val onCardTapped = { card: org.zerokosh.core.emv.EmvCard ->
+        // Handed over in memory, never as a route argument — see PendingCard.
+        org.zerokosh.app.nfc.PendingCard.offer(card)
+        showTapCard = false
+        openEdit("card", null, null)
+    }
     var fabVisible by remember { mutableStateOf(true) }
     BackHandler(fabMenuExpanded) { fabMenuExpanded = false }
     // Leaving the Vault tab must not strand an open menu offscreen.
@@ -326,6 +343,14 @@ private fun MainScaffold(app: ZerokoshApp) {
                         }
                     },
                 ) {
+                    FloatingActionButtonMenuItem(
+                        onClick = {
+                            fabMenuExpanded = false
+                            showTapCard = true
+                        },
+                        icon = { Icon(Icons.Outlined.Contactless, contentDescription = null) },
+                        text = { Text("Tap a card") },
+                    )
                     QuickAdd.forEach { (templateId, label, icon) ->
                         FloatingActionButtonMenuItem(
                             onClick = {
@@ -427,6 +452,9 @@ private fun MainScaffold(app: ZerokoshApp) {
                         }
                     }
                 }
+            }
+            if (showTapCard) {
+                TapCardSheet(onCard = onCardTapped, onDismiss = { showTapCard = false })
             }
         }
     }

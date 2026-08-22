@@ -29,9 +29,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -97,7 +95,12 @@ fun VaultPickerSheet(
     pinned: String? = null,
 ) {
     val c = VaultTheme.colors
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    // Hidden + Expanded only: a half-open state on a searchable list just means
+    // the user drags before they can type.
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+    )
     var query by remember { mutableStateOf("") }
     val searchable = options.size >= SearchThreshold
     val shown = remember(query, options) {
@@ -115,7 +118,15 @@ fun VaultPickerSheet(
         sheetState = sheetState,
         containerColor = c.paper,
     ) {
-        Column(Modifier.fillMaxWidth().imePadding().navigationBarsPadding()) {
+        // A searchable sheet gets a fixed height rather than one derived from its
+        // content. Sized to content, raising the keyboard translated the whole
+        // sheet off the bottom of the screen instead of shrinking the list.
+        // ModalBottomSheet already consumes the IME and navigation-bar insets.
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .then(if (searchable) Modifier.fillMaxHeight(0.9f) else Modifier),
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
@@ -141,7 +152,7 @@ fun VaultPickerSheet(
             }
             LazyColumn(
                 state = if (query.isBlank()) listState else filteredState,
-                modifier = Modifier.heightIn(max = 520.dp),
+                modifier = Modifier.weight(1f, fill = false),
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {

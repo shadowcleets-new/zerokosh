@@ -100,6 +100,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import org.zerokosh.app.ui.common.VaultFieldCard
 import org.zerokosh.app.ui.common.VaultPickerSheet
+import org.zerokosh.core.model.seedFieldsFromPreset
 import org.zerokosh.app.ui.common.pickerHasLogos
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.foundation.text.BasicTextField
@@ -125,11 +126,19 @@ fun RecordEditScreen(
     val template = app.catalog.templates.byId(templateId) ?: run { onDone(); return }
 
     var title by rememberSaveable { mutableStateOf(existing?.title ?: presetName.orEmpty()) }
-    var institution by rememberSaveable { mutableStateOf(existing?.institution.orEmpty()) }
+    // The gallery choice IS the institution — that is what the field groups by.
+    var institution by rememberSaveable {
+        mutableStateOf(existing?.institution ?: presetName.orEmpty())
+    }
     val values = remember {
         mutableStateMapOf<String, String>().apply {
             existing?.fields?.forEach { (k, v) -> put(k, v) }
-            if (presetName != null && templateId == "app_profile") put("app_name", presetName)
+            // Picking "ICICI Bank" in the gallery and then hunting for ICICI
+            // Bank in an 80-row picker is the same question asked twice.
+            if (existing == null && presetName != null) {
+                putAll(seedFieldsFromPreset(template, presetName, app.catalog.pickers))
+                if (templateId == "app_profile") put("app_name", presetName)
+            }
         }
     }
     var titleMissing by remember { mutableStateOf(false) }

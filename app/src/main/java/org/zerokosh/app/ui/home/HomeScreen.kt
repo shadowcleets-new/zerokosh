@@ -97,6 +97,7 @@ import org.zerokosh.app.ui.common.VaultBlobs
 import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
 import org.zerokosh.app.ui.motion.LocalSharedTransitionScope
 import org.zerokosh.app.ui.theme.CornerGroup
+import androidx.compose.ui.semantics.Role
 import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.core.model.Record
 // #endregion
@@ -108,6 +109,7 @@ fun HomeScreen(
     onScrollHideFab: (Boolean) -> Unit = {},
     onOpen: (String) -> Unit,
     onAdd: () -> Unit,
+    onQuickAdd: (templateId: String, preset: String?, brand: String?) -> Unit,
 ) {
     val c = VaultTheme.colors
     val body by app.repository.body.collectAsState()
@@ -156,7 +158,7 @@ fun HomeScreen(
         }
 
         if (records.isEmpty()) {
-            EmptyVault(onAdd = onAdd, modifier = Modifier.weight(1f))
+            EmptyVault(onAdd = onAdd, onQuickAdd = onQuickAdd, modifier = Modifier.weight(1f))
             return@Column
         }
 
@@ -478,11 +480,38 @@ private fun NoMatches(query: String) {
 // #endregion
 
 // #region Empty state
-private val QuickAdds = listOf("Bank account", "UPI ID", "Aadhaar", "PAN", "TOTP")
+/**
+ * A quick add names its template outright. Every one of these used to open the
+ * 315-entry gallery, so tapping "PAN" asked the user to go and find PAN — the
+ * shortcut cost more taps than the thing it shortcut.
+ *
+ * preset and brand mirror the matching gallery entry so both routes produce the
+ * same record.
+ */
+private data class QuickAdd(
+    val label: String,
+    val templateId: String,
+    val preset: String? = null,
+    val brand: String? = null,
+)
+
+private val QuickAdds = listOf(
+    QuickAdd("Bank account", "bank_account"),
+    QuickAdd("UPI ID", "upi", brand = "UPI"),
+    QuickAdd("Aadhaar", "aadhaar_card", preset = "Aadhaar", brand = "Aadhaar"),
+    QuickAdd("PAN", "pan_card", preset = "PAN Card", brand = "PAN"),
+    // A TOTP secret lives on the login template's totp field. There is no
+    // authenticator template of its own to send this to.
+    QuickAdd("TOTP", "login"),
+)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
+private fun EmptyVault(
+    onAdd: () -> Unit,
+    onQuickAdd: (templateId: String, preset: String?, brand: String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val c = VaultTheme.colors
     Column(
         modifier = modifier
@@ -608,14 +637,16 @@ private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            QuickAdds.forEach { label ->
+            QuickAdds.forEach { quick ->
                 Row(
                     Modifier
                         .height(36.dp)
                         .clip(CircleShape)
                         .background(c.card)
                         .border(1.dp, c.line, CircleShape)
-                        .clickable(onClick = onAdd)
+                        .clickable(role = Role.Button) {
+                            onQuickAdd(quick.templateId, quick.preset, quick.brand)
+                        }
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -627,7 +658,7 @@ private fun EmptyVault(onAdd: () -> Unit, modifier: Modifier = Modifier) {
                         modifier = Modifier.size(14.dp),
                     )
                     Text(
-                        label,
+                        quick.label,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = c.ink(0.8f),

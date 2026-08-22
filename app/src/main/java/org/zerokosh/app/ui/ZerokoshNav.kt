@@ -244,9 +244,15 @@ private fun MainScaffold(app: ZerokoshApp) {
             launchSingleTop = true
         }
     }
-    val openTemplate = { templateId: String ->
-        nav.navigate("edit/$templateId?preset=") { popUpTo("home") }
+    // The one place the edit route is built. Encoded because "Punjab & Sind
+    // Bank" and "L&T Finance" would otherwise split the query string and arrive
+    // truncated to "Punjab ".
+    val openEdit = { templateId: String, presetName: String?, brand: String? ->
+        val p = android.net.Uri.encode(presetName ?: "")
+        val b = android.net.Uri.encode(brand ?: "")
+        nav.navigate("edit/$templateId?preset=$p&brand=$b") { popUpTo("home") }
     }
+    val openTemplate = { templateId: String -> openEdit(templateId, null, null) }
     // The Add FAB used to be a one-way trip to the 20-item template gallery.
     // The Expressive FAB menu puts the four templates that cover most additions
     // one tap away and keeps the gallery as the escape hatch.
@@ -370,6 +376,7 @@ private fun MainScaffold(app: ZerokoshApp) {
                                     onScrollHideFab = { hide -> fabVisible = !hide },
                                     onOpen = { uuid -> nav.navigate("detail/$uuid") },
                                     onAdd = openGallery,
+                                    onQuickAdd = openEdit,
                                 )
                             }
                         }
@@ -378,16 +385,7 @@ private fun MainScaffold(app: ZerokoshApp) {
                         composable("gallery") {
                             TemplateGalleryScreen(
                                 app = app,
-                                onPick = { templateId, presetName, brand ->
-                                    // Encode: "Punjab & Sind Bank" and "L&T Finance"
-                                    // would otherwise split the query string and
-                                    // arrive truncated to "Punjab ".
-                                    val p = android.net.Uri.encode(presetName ?: "")
-                                    val b = android.net.Uri.encode(brand ?: "")
-                                    nav.navigate("edit/$templateId?preset=$p&brand=$b") {
-                                        popUpTo("home")
-                                    }
-                                },
+                                onPick = openEdit,
                                 onClose = {
                                     nav.navigate("home") {
                                         popUpTo("home") { inclusive = true }

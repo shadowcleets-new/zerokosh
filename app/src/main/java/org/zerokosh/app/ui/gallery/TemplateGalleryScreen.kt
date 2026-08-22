@@ -483,7 +483,10 @@ private fun galleryCatalog(): List<GalleryItem> =
 @Composable
 fun TemplateGalleryScreen(
     app: ZerokoshApp,
-    onPick: (templateId: String, presetName: String?) -> Unit,
+    // brand is the organisation behind the entry — "HDFC Bank" for the HDFC
+    // Credit Card, "Microsoft" for Xbox and Teams alike. It picks the logo and
+    // it is what the record groups by.
+    onPick: (templateId: String, presetName: String?, brand: String?) -> Unit,
     onClose: () -> Unit,
 ) {
     val c = VaultTheme.colors
@@ -675,7 +678,7 @@ fun TemplateGalleryScreen(
                                 .maskClip(RoundedCornerShape(CornerCard))
                                 .background(c.card)
                                 .clickable(role = Role.Button) {
-                                    onPick(item.templateId, item.presetName)
+                                    onPick(item.templateId, item.presetName, item.logoName)
                                 }
                                 .padding(14.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -706,7 +709,7 @@ fun TemplateGalleryScreen(
                 BrandGridTile(
                     item = item,
                     fields = fieldCount(item.templateId),
-                    onClick = { onPick(item.templateId, item.presetName) },
+                    onClick = { onPick(item.templateId, item.presetName, item.logoName) },
                 )
             }
 
@@ -748,7 +751,7 @@ fun TemplateGalleryScreen(
         ) {
             PrimaryPillButton(
                 label = "Blank template",
-                onClick = { onPick("secure_note", null) },
+                onClick = { onPick("secure_note", null, null) },
                 modifier = Modifier.weight(1f),
                 showArrow = false,
             )
@@ -757,7 +760,7 @@ fun TemplateGalleryScreen(
                     .size(52.dp)
                     .clip(CircleShape)
                     .background(c.primary.copy(alpha = 0.12f))
-                    .clickable { onPick("card", null) },
+                    .clickable { onPick("card", null, null) },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

@@ -118,6 +118,13 @@ fun RecordEditScreen(
     templateIdArg: String,
     editUuid: String?,
     presetName: String?,
+    /**
+     * The organisation behind the gallery entry, where it differs from the
+     * product: "HDFC Bank" for the HDFC Credit Card, "Microsoft" for Xbox and
+     * Teams alike. It resolves the logo and it is what the record groups by,
+     * so a card and an account at the same bank sit together.
+     */
+    brandName: String? = null,
     onDone: () -> Unit,
 ) {
     val body = app.repository.body.collectAsState().value
@@ -126,9 +133,10 @@ fun RecordEditScreen(
     val template = app.catalog.templates.byId(templateId) ?: run { onDone(); return }
 
     var title by rememberSaveable { mutableStateOf(existing?.title ?: presetName.orEmpty()) }
-    // The gallery choice IS the institution — that is what the field groups by.
+    // The gallery choice IS the institution — that is what the field groups by,
+    // and what BrandTile resolves the logo from.
     var institution by rememberSaveable {
-        mutableStateOf(existing?.institution ?: presetName.orEmpty())
+        mutableStateOf(existing?.institution ?: brandName ?: presetName.orEmpty())
     }
     val values = remember {
         mutableStateMapOf<String, String>().apply {

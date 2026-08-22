@@ -378,8 +378,13 @@ private fun MainScaffold(app: ZerokoshApp) {
                         composable("gallery") {
                             TemplateGalleryScreen(
                                 app = app,
-                                onPick = { templateId, presetName ->
-                                    nav.navigate("edit/$templateId?preset=${presetName ?: ""}") {
+                                onPick = { templateId, presetName, brand ->
+                                    // Encode: "Punjab & Sind Bank" and "L&T Finance"
+                                    // would otherwise split the query string and
+                                    // arrive truncated to "Punjab ".
+                                    val p = android.net.Uri.encode(presetName ?: "")
+                                    val b = android.net.Uri.encode(brand ?: "")
+                                    nav.navigate("edit/$templateId?preset=$p&brand=$b") {
                                         popUpTo("home")
                                     }
                                 },
@@ -403,15 +408,22 @@ private fun MainScaffold(app: ZerokoshApp) {
                                 )
                             }
                         }
-                        composable("edit/{templateId}?uuid={uuid}&preset={preset}") { entry ->
+                        composable("edit/{templateId}?uuid={uuid}&preset={preset}&brand={brand}") { entry ->
                             val templateId = entry.arguments?.getString("templateId") ?: return@composable
                             val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
-                            val preset = entry.arguments?.getString("preset")?.ifEmpty { null }
+                            // Uri.decode whether or not navigation already did:
+                            // these names carry no literal %, so decoding a
+                            // plain string is a no-op.
+                            val preset = entry.arguments?.getString("preset")
+                                ?.ifEmpty { null }?.let(android.net.Uri::decode)
+                            val brand = entry.arguments?.getString("brand")
+                                ?.ifEmpty { null }?.let(android.net.Uri::decode)
                             RecordEditScreen(
                                 app = app,
                                 templateIdArg = templateId,
                                 editUuid = uuid,
                                 presetName = preset,
+                                brandName = brand,
                                 onDone = { nav.popBackStack() },
                             )
                         }

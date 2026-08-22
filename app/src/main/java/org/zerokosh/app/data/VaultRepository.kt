@@ -45,6 +45,16 @@ sealed interface VaultState {
 }
 
 enum class UnlockOutcome { SUCCESS, WRONG_CREDENTIAL, DAMAGED_RESTORED, DAMAGED, COOLDOWN }
+
+/** What importing a .kosh file did. [Merged] counts are what the user is told. */
+sealed interface ImportOutcome {
+    data class Merged(val added: Int, val updated: Int, val conflicts: Int) : ImportOutcome
+
+    /** The backup's own passphrase, which need not be this vault's. */
+    data object WrongPassphrase : ImportOutcome
+    data object NotAVault : ImportOutcome
+    data object Locked : ImportOutcome
+}
 // #endregion
 
 class VaultRepository(
@@ -302,6 +312,46 @@ class VaultRepository(
             true
         }
     }
+
+    /**
+     * §4.5 merge a .kosh file the user picked into this vault.
+     *
+     * The file is unlocked with its own passphrase, not this vault's — a backup
+     * worth importing is often older than the last passphrase change, and it may
+     * be a different vault entirely.
+     *
+     * Nothing is replaced. The merge is a union by uuid: newer modified_at wins,
+     * and a losing side whose content differs survives as a conflict copy. An
+     * import can therefore add records but never silently drop one.
+     */
+    suspend fun importVaultFile(fileBytes: ByteArray, passphrase: ByteArray): ImportOutcome =
+        withContext(Dispatchers.Default) {
+            val current = _body.value
+            if (current == null || vaultKey == null) return@withContext ImportOutcome.Locked
+            val unlocked = runCatching {
+                VaultOperations.unlockWithPassphrase(fileBytes, passphrase, crypto)
+            }.getOrElse { return@withContext ImportOutcome.NotAVault }
+            when (unlocked) {
+                is UnlockResult.WrongCredential -> ImportOutcome.WrongPassphrase
+                is UnlockResult.Corrupt -> ImportOutcome.NotAVault
+                is UnlockResult.Success -> {
+                    val before = current.records.associateBy { it.uuid }
+                    val merged = VaultMerge.merge(current, unlocked.body, System.currentTimeMillis())
+                    val fresh = merged.records.filter { it.uuid !in before }
+                    val outcome = ImportOutcome.Merged(
+                        // A conflict copy is a new record too, but the user needs
+                        // it called out — it means both sides had edits.
+                        added = fresh.count { !it.title.endsWith(VaultMerge.CONFLICT_SUFFIX) },
+                        updated = merged.records.count { r ->
+                            before[r.uuid]?.let { it != r } == true
+                        },
+                        conflicts = fresh.count { it.title.endsWith(VaultMerge.CONFLICT_SUFFIX) },
+                    )
+                    if (merged != current) persist(merged)
+                    outcome
+                }
+            }
+        }
 
     /** §4.5.3: merge and remove `vault*.kosh` conflict siblings with our vault_uuid. */
     private suspend fun mergeConflictSiblings() {

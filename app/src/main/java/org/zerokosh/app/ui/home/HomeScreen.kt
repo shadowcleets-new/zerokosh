@@ -98,6 +98,7 @@ import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
 import org.zerokosh.app.ui.motion.LocalSharedTransitionScope
 import org.zerokosh.app.ui.theme.CornerGroup
 import androidx.compose.ui.semantics.Role
+import org.zerokosh.app.ui.backup.rememberImportBackup
 import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.core.model.Record
 // #endregion
@@ -112,6 +113,7 @@ fun HomeScreen(
     onQuickAdd: (templateId: String, preset: String?, brand: String?) -> Unit,
 ) {
     val c = VaultTheme.colors
+    val importBackup = rememberImportBackup(app)
     val body by app.repository.body.collectAsState()
     val records = body?.records.orEmpty()
 
@@ -158,7 +160,14 @@ fun HomeScreen(
         }
 
         if (records.isEmpty()) {
-            EmptyVault(onAdd = onAdd, onQuickAdd = onQuickAdd, modifier = Modifier.weight(1f))
+            EmptyVault(
+                onAdd = onAdd,
+                onQuickAdd = onQuickAdd,
+                // The row says "Open a .kosh file from this device" and used to
+                // open the template gallery.
+                onImport = importBackup,
+                modifier = Modifier.weight(1f),
+            )
             return@Column
         }
 
@@ -510,6 +519,7 @@ private val QuickAdds = listOf(
 private fun EmptyVault(
     onAdd: () -> Unit,
     onQuickAdd: (templateId: String, preset: String?, brand: String?) -> Unit,
+    onImport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val c = VaultTheme.colors
@@ -674,7 +684,7 @@ private fun EmptyVault(
                 .clip(RoundedCornerShape(16.dp))
                 .background(c.card)
                 .border(1.dp, c.line, RoundedCornerShape(16.dp))
-                .clickable(onClick = onAdd)
+                .clickable(onClick = onImport, role = Role.Button)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),

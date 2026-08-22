@@ -19,6 +19,12 @@ object VaultMerge {
 
     const val TOMBSTONE_TTL_MS: Long = 90L * 24 * 60 * 60 * 1000
 
+    /**
+     * Marks the losing side of a content conflict. Exposed so a caller can count
+     * them and tell the user, rather than re-typing the literal and drifting.
+     */
+    const val CONFLICT_SUFFIX = " (conflict copy)"
+
     fun merge(
         local: VaultBody,
         remote: VaultBody,
@@ -46,7 +52,7 @@ object VaultMerge {
                     if (older.contentDiffersFrom(newer)) {
                         conflictCopies += older.copy(
                             uuid = freshUuid(),
-                            title = "${older.title} (conflict copy)",
+                            title = older.title + CONFLICT_SUFFIX,
                         )
                     }
                     newer

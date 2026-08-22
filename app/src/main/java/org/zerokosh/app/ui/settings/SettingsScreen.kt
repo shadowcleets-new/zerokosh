@@ -55,6 +55,7 @@ import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.Kicker
 import org.zerokosh.app.ui.common.SectionLabel
 import org.zerokosh.app.ui.common.WhiteCard
+import org.zerokosh.app.ui.backup.rememberImportBackup
 import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
@@ -134,6 +135,8 @@ fun SettingsScreen(app: ZerokoshApp) {
             }
         }
     }
+
+    val importBackup = rememberImportBackup(app)
 
     // Dropdown states
     var showAutoLockDropdown by remember { mutableStateOf(false) }
@@ -362,6 +365,27 @@ fun SettingsScreen(app: ZerokoshApp) {
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = VaultTheme.colors.primary,
+                )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // The other half of export. Outlined rather than tinted: importing
+            // merges into the open vault, so it is the heavier of the two.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, VaultTheme.colors.line, RoundedCornerShape(16.dp))
+                    .clickable(onClick = importBackup)
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "Import a .kosh backup",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = VaultTheme.colors.ink(0.8f),
                 )
             }
 

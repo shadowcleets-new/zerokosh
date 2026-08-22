@@ -173,6 +173,15 @@
     <string name="scr_reminder_body">%1$s is due soon · open Zerokosh</string>
 
     <!-- Common -->
+    <string name="import_title">Import a backup</string>
+    <string name="import_passphrase_hint">Enter the passphrase that unlocks this backup file. It may differ from the one you use now.</string>
+    <string name="import_passphrase_label">Backup passphrase</string>
+    <string name="import_action">Import</string>
+    <string name="import_merged">%1$d added, %2$d updated. Nothing was replaced.</string>
+    <string name="import_nothing_new">Everything in that backup was already here.</string>
+    <string name="import_conflicts">%1$d record(s) had edits on both sides. Both versions were kept — look for “(conflict copy)”.</string>
+    <string name="import_not_a_vault">That file could not be read as a Zerokosh vault.</string>
+    <string name="import_locked">Unlock your vault before importing.</string>
     <string name="scr_edit_month">Month</string>
     <string name="scr_edit_year">Year</string>
     <string name="msg_ok">OK</string>

@@ -695,7 +695,19 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
         )
     }
     if (showPicker) {
-        val state = rememberDatePickerState()
+        // Open on the date the field already holds. Left at its default the
+        // state selects nothing and displays the current month, so correcting a
+        // passport expiry of 2031-04 started the user back at today. The
+        // displayed month follows the selection, so seeding one fixes both.
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = remember(value) {
+                runCatching {
+                    java.time.LocalDate.parse(value)
+                        .atStartOfDay(java.time.ZoneOffset.UTC)
+                        .toInstant().toEpochMilli()
+                }.getOrNull()
+            },
+        )
         DatePickerDialog(
             onDismissRequest = { showPicker = false },
             confirmButton = {

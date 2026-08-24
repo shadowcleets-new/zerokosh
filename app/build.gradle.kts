@@ -1,10 +1,28 @@
 // :app — Android UI + platform glue (§6). Dependency list is LOCKED to §6.2;
 // adding anything else requires human review (R0.5/R0.7).
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
+
+// #region Release signing
+// Key material never enters the repository. keystore.properties is gitignored
+// and CI supplies the same four values as environment variables instead.
+//
+// When neither is present the release build stays UNSIGNED on purpose: that is
+// what F-Droid needs, since it builds from source and signs with its own key.
+// A missing keystore must not be a build failure for anyone but us.
+private val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use(::load)
+}
+
+private fun signingValue(key: String, env: String): String? =
+    keystoreProperties.getProperty(key)?.takeIf(String::isNotBlank)
+        ?: System.getenv(env)?.takeIf(String::isNotBlank)
 
 android {
     namespace = "org.zerokosh.app"
@@ -18,11 +36,40 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        create("upload") {
+            val store = signingValue("storeFile", "ZEROKOSH_STORE_FILE")
+            if (store != null) {
+                storeFile = rootProject.file(store)
+                storePassword = signingValue("storePassword", "ZEROKOSH_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "ZEROKOSH_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "ZEROKOSH_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Null when no keystore is configured, which leaves the bundle
+            // unsigned rather than failing the build.
+            signingConfig = signingConfigs.getByName("upload").takeIf { it.storeFile != null }
+        }
+
+        // The shipping R8 configuration, installable. Minification is where a
+        // release build breaks — lazysodium and the serializers are both
+        // reflection-driven — and that cannot be found by building alone.
+        //
+        // A different applicationId so it sits BESIDE an installed Zerokosh:
+        // replacing one signed with a different key means uninstalling first,
+        // and uninstalling a vault app destroys the vault.
+        create("releaseCheck") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".releasecheck"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
         }
     }
 

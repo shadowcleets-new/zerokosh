@@ -17,3 +17,8 @@ core/bin/
 
 # Upload key material — never committed
 keystore.properties
+
+# One-off patch and scrape scripts — written to run once, kept only until they did
+fix*.py
+test2.py
+test.png

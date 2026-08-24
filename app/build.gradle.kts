@@ -34,6 +34,15 @@ android {
         targetSdk = 36
         versionCode = 1 // fixed per release — reproducible builds (§6.8)
         versionName = "0.1.0"
+
+        // JNA's aar still carries armeabi, mips and mips64. Android dropped
+        // MIPS at NDK r17 and armeabi at r16; no device Play can reach runs
+        // them, so they were 398 KB of libsodium and libjnidispatch that
+        // nothing could ever load. Play splits the bundle per ABI so users were
+        // spared the download, but the direct APK — F-Droid, GitHub — was not.
+        ndk {
+            abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
     }
 
     signingConfigs {

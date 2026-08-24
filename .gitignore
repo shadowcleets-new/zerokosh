@@ -22,3 +22,6 @@ keystore.properties
 fix*.py
 test2.py
 test.png
+
+# Generated Play assets — regenerate with design/gen_play_assets.py
+play/*.png

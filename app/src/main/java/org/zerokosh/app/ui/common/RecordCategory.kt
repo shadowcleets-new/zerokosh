@@ -8,6 +8,7 @@ package org.zerokosh.app.ui.common
 
 // #region Imports
 import org.zerokosh.app.data.AssetCatalog
+import org.zerokosh.core.model.FieldType
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.Sensitivity
 // #endregion
@@ -56,8 +57,15 @@ val Record.category: RecordCategory
 fun recordMeta(catalog: AssetCatalog, record: Record): String {
     val template = catalog.templates.byId(record.template_id)
     val entry = record.fields.entries.firstOrNull { (key, value) ->
+        val field = template?.fields?.firstOrNull { it.k == key }
         value.isNotBlank() &&
-            (template?.fields?.firstOrNull { it.k == key }?.sensitivity ?: Sensitivity.L) != Sensitivity.H
+            (field?.sensitivity ?: Sensitivity.L) != Sensitivity.H &&
+            // A LINK field holds the linked record's uuid, so rendering it put
+            // "30151a25-7f72-4e3b-..." under Google Pay instead of its UPI ID.
+            // Skipped rather than resolved: the next identifying field is the
+            // better line anyway, and resolving would need the whole vault body
+            // here just to print a title.
+            field?.type != FieldType.LINK
     } ?: return record.institution
     val field = template?.fields?.firstOrNull { it.k == entry.key }
     return maskedValue(entry.value, field, revealed = false)

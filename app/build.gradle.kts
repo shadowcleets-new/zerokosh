@@ -29,7 +29,13 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "org.zerokosh.app"
+        // The identity Play Console reserved. It is deliberately NOT the
+        // namespace above: namespace only names the generated R/BuildConfig and
+        // resolves the manifest's relative class names, so renaming it would
+        // move every source file for no gain. Resources still resolve, because
+        // the merged manifest's package — and therefore context.packageName —
+        // follows applicationId, which is exactly how applicationIdSuffix works.
+        applicationId = "com.zerokosh.app"
         minSdk = 26
         targetSdk = 36
         versionCode = 1 // fixed per release — reproducible builds (§6.8)

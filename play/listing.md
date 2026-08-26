@@ -103,22 +103,36 @@ the trade, and it is the whole point.
 - **Privacy policy** —
   <https://zerokosh-privacy-somebodyunknownms-8456s-projects.vercel.app>
 
-## Screenshots — the one asset still missing
+- **Package name** — `com.zerokosh.app`, the id reserved in Play Console. It is
+  not the Kotlin package (`org.zerokosh.app`); see the note in
+  `app/build.gradle.kts`.
 
-Play wants at least two phone screenshots, 16:9 or 9:16, min 320px on the short
-edge.
+## Assets to upload
 
-Capture them from a build with **Settings → Allow screenshots** turned on.
-`FLAG_SECURE` is on by default and hands you black rectangles otherwise — which
-is the app behaving correctly, not a bug.
+All produced already; nothing here still needs making.
 
-Worth showing, in this order:
+| Console field | File |
+| --- | --- |
+| App icon (512×512) | `play/icon-512.png` |
+| Feature graphic (1024×500) | `play/feature-graphic-1024x500.png` |
+| Phone screenshots | `play/screenshots/*-play.png`, in filename order |
 
-1. The vault list with a few records — what the app is for
-2. A record open, secrets masked — shows the field detail without exposing one
-3. The tap-a-card sheet — the feature nothing else in this category has
-4. The template gallery — 315 Indian services, the local advantage
-5. Settings, showing "0 servers contacted" — the claim, in the product
+The five screenshots, in the order they should be uploaded:
 
-Use invented records. A screenshot of a real vault is a screenshot of real
-credentials, and it is permanent once uploaded.
+1. `1-vault-play.png` — the vault list. What the app is for.
+2. `2-record-play.png` — a card open, secrets masked. Detail without exposure.
+3. `3-templates-play.png` — the template gallery. 315 Indian services.
+4. `4-codes-play.png` — the built-in authenticator.
+5. `5-settings-play.png` — the claims, in the product.
+
+Play rejects a raw Pixel 9 capture: the panel is 1080×2424, and Play's long
+edge may not exceed twice the short one. `design/make_play_screenshots.py`
+scales each capture to fit 1080×1920 and pads it in the app's own background —
+padded rather than cropped, because cropping 504px costs either the status bar
+or the navigation bar, and both are what make a screenshot read as a phone.
+Re-run it after replacing any capture; it overwrites the `-play.png` beside it.
+
+Captures must come from a build with **Settings → Allow screenshots** on.
+`FLAG_SECURE` is the default and hands you black rectangles otherwise — the app
+behaving correctly, not a bug. Use invented records: an uploaded screenshot of
+a real vault is permanent.

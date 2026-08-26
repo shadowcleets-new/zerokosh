@@ -65,7 +65,7 @@ adb install -r app/build/outputs/apk/releaseCheck/app-releaseCheck.apk
 ```
 
 `releaseCheck` is the shipping R8 configuration under the applicationId
-`org.zerokosh.app.releasecheck`, so it installs **beside** a real Zerokosh
+`com.zerokosh.app.releasecheck`, so it installs **beside** a real Zerokosh
 rather than replacing it. That matters: swapping an app for one signed with a
 different key requires uninstalling first, and uninstalling a vault app destroys
 the vault.

@@ -25,3 +25,17 @@ test.png
 
 # Generated Play assets — regenerate with design/gen_play_assets.py
 play/*.png
+
+# Logo scrapers — they carry a Logo.dev account token in plain text.
+# Untracked is not the same as safe: one `git add -A` publishes them.
+download_logos.py
+fetch_*.py
+
+# Agent config. Deliberately not shared: a permission allow-list is a statement
+# about THIS machine, and shipping it silently pre-approves commands for anyone
+# who clones the repo.
+.claude/
+.ai-context/
+
+# Stray CLI output, not a version directory
+0.26.0

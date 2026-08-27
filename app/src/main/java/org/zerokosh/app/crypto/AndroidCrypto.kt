@@ -47,7 +47,7 @@ class AndroidCrypto : CryptoProvider {
      * §6.4/§3.2: pick KDF memlimit at first run — 64 MiB unless the device
      * can't allocate it, stepping down to the 32 MiB floor.
      */
-    fun chooseKdfParams(): Pair<Long, Long> {
+    override fun chooseKdfParams(): Pair<Long, Long> {
         val salt = randomBytes(CryptoProvider.SALT_BYTES)
         for (mem in longArrayOf(CryptoProvider.DEFAULT_MEM_BYTES, 50_331_648L, CryptoProvider.MIN_MEM_BYTES)) {
             try {

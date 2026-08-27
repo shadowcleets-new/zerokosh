@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.zerokosh.app.crypto.AndroidCrypto
+import org.zerokosh.core.crypto.CryptoProvider
 import org.zerokosh.core.crypto.wipe
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.VaultBody
@@ -63,9 +63,9 @@ sealed interface ImportOutcome {
 typealias SaveResult = Result<Unit>
 
 class VaultRepository(
-    val crypto: AndroidCrypto,
+    val crypto: CryptoProvider,
     @Volatile var store: VaultStore,
-    private val prefs: Prefs,
+    private val prefs: VaultPrefs,
 ) {
 
     // #region Observable state
@@ -521,7 +521,7 @@ class VaultRepository(
 private fun VaultOperations.unlockWithMasterKeyless(
     envelope: VaultEnvelope,
     vaultKey: ByteArray,
-    crypto: AndroidCrypto,
+    crypto: CryptoProvider,
 ): VaultBody? {
     val plain = crypto.aeadDecrypt(envelope.bodyCiphertext, envelope.prefix, envelope.bodyNonce, vaultKey) ?: return null
     return runCatching { org.zerokosh.core.model.VaultJson.decodeFromString<VaultBody>(plain.decodeToString()) }

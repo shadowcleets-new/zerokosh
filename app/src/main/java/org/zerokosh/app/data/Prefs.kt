@@ -9,10 +9,36 @@ import java.util.UUID
 // #endregion
 
 /**
+ * The slice of [Prefs] the vault repository needs.
+ *
+ * Extracted so the repository can be exercised without Android: [Prefs] itself
+ * is backed by EncryptedSharedPreferences and needs a Context, which is what
+ * kept the app module's single most important class untestable.
+ */
+interface VaultPrefs {
+    val deviceId: String
+    var kdfOps: Long
+    var kdfMem: Long
+    var failedAttempts: Int
+    var cooldownUntilMs: Long
+    var cooldownSeconds: Int
+    var syncFolderUri: String
+}
+
+/**
  * §6.2/§6.4: EncryptedSharedPreferences for small non-vault state only
  * (device id, KDF params, UI settings). The vault itself NEVER lives here.
+ *
+ * The library is deprecated with no drop-in replacement, and the suppression is
+ * deliberate rather than neglect. Nothing stored here is a secret — the value is
+ * defence in depth over a device id and a theme choice — while migrating the
+ * store would strand every existing install's prefs, including onboardingDone,
+ * which would silently re-onboard people who already have a vault. The cost of
+ * moving is real and immediate; the cost of staying is a warning. Revisit when
+ * a replacement exists, and migrate the keys rather than dropping them.
  */
-class Prefs(context: Context) {
+@Suppress("DEPRECATION")
+class Prefs(context: Context) : VaultPrefs {
 
     private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
         context,
@@ -22,15 +48,15 @@ class Prefs(context: Context) {
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
     )
 
-    val deviceId: String
+    override val deviceId: String
         get() = prefs.getString(KEY_DEVICE_ID, null) ?: UUID.randomUUID().toString()
             .also { prefs.edit().putString(KEY_DEVICE_ID, it).apply() }
 
-    var kdfOps: Long
+    override var kdfOps: Long
         get() = prefs.getLong(KEY_KDF_OPS, 0)
         set(v) = prefs.edit().putLong(KEY_KDF_OPS, v).apply()
 
-    var kdfMem: Long
+    override var kdfMem: Long
         get() = prefs.getLong(KEY_KDF_MEM, 0)
         set(v) = prefs.edit().putLong(KEY_KDF_MEM, v).apply()
 
@@ -61,15 +87,15 @@ class Prefs(context: Context) {
         set(v) = prefs.edit().putBoolean(KEY_QUICK_UNLOCK, v).apply()
 
     // §5.1 S13: failed-attempt cooldown, doubling — survives process death.
-    var failedAttempts: Int
+    override var failedAttempts: Int
         get() = prefs.getInt(KEY_FAILS, 0)
         set(v) = prefs.edit().putInt(KEY_FAILS, v).apply()
 
-    var cooldownUntilMs: Long
+    override var cooldownUntilMs: Long
         get() = prefs.getLong(KEY_COOLDOWN, 0)
         set(v) = prefs.edit().putLong(KEY_COOLDOWN, v).apply()
 
-    var cooldownSeconds: Int
+    override var cooldownSeconds: Int
         get() = prefs.getInt(KEY_COOLDOWN_LEN, 30)
         set(v) = prefs.edit().putInt(KEY_COOLDOWN_LEN, v).apply()
 
@@ -79,7 +105,7 @@ class Prefs(context: Context) {
         get() = prefs.getBoolean(KEY_NOTIF_ASKED, false)
         set(v) = prefs.edit().putBoolean(KEY_NOTIF_ASKED, v).apply()
 
-    var syncFolderUri: String
+    override var syncFolderUri: String
         get() = prefs.getString(KEY_SYNC_URI, "") ?: ""
         set(v) = prefs.edit().putString(KEY_SYNC_URI, v).apply()
 

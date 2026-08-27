@@ -1,3 +1,21 @@
+## [2026-08-27 18:30:00] - Four internal gaps: silent saves, no app tests, no catalogue guard, a deprecation
+
+### 1. Intent, Roles, & Context
+- **The Problem:** four gaps found by reading the app rather than running it — a save that could fail invisibly, an app module with no tests, a catalogue consistency check that lived only in a shell history, and a deprecated storage library emitting 11 warnings.
+- **Specialist Personas Invoked:** Android Platform Engineer; Principal Security Auditor; Test Architect.
+- **The Strategy:** fix the data-loss path first, then remove the conditions that let it hide.
+
+### 2. Surgical Technical Modifications
+- **`SaveResult` (`VaultRepository`)** — `persist` returns `Result<Unit>`; all eight mutators propagate it. Written as a wrapper around the existing body, not a nesting, so merge-before-write is untouched and the diff is signatures rather than 40 re-indented lines. Absent state (locked vault, missing uuid) reports success: an error the user cannot act on is worse than none.
+- **`ui/common/SaveError.kt`** — one dialog, one message that names the likely cause (a lapsed SAF grant), what to do, and that nothing was lost from the vault as it stood. Wired into the three call sites that navigate away on the assumption of success.
+- **`verifyTemplates` build task** — asserts templates, labels, category map and picker lists agree. Tested in both directions: removing one label fails the build naming it. Wired into `check` and both release assemblies.
+- **App module test source set — the first tests it has ever had.** Required making three Android dependencies substitutable: `VaultPrefs` extracted from `Prefs`, `chooseKdfParams` moved onto `CryptoProvider` with a spec default, and the repository now takes `CryptoProvider` rather than `AndroidCrypto`. 10 tests over the save-failure path, history capture, trash round-trip, backup-once-per-session and file round-trip.
+- **`@Suppress("DEPRECATION")` on `Prefs`** with the reasoning recorded: nothing there is a secret, and migrating the store would strand `onboardingDone` and silently re-onboard existing users. Staying costs a warning; moving costs data.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:assembleRelease`, `:core:test`, `:app:testDebugUnitTest` (10 run, 0 failures), `:app:deadComposables` (117), `:app:verifyTemplates` (21 templates, 184 fields), `verifyDynamicResources` — all green.
+- **Resulting App State:** unchanged in the happy path; a failed write now produces a dialog instead of silence. Not verified on device.
+- **Next Sprint Phase:** the device batch, now nine items.
 ## [2026-08-27 16:10:00] - Templates that offered fields the service cannot have
 
 ### 1. Intent, Roles, & Context

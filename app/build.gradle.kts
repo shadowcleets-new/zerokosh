@@ -166,6 +166,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("androidx.work:work-runtime-ktx:2.9.0") // reminders + clipboard-clear fallback
 
+    // Test only — never in the shipped APK, so outside the §6.2 runtime list.
+    // The app module had no test source set at all, which is why every defect
+    // this month was found by looking at the app rather than by a build.
+    testImplementation(kotlin("test-junit"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+
     // TOTP QR scanning only (§6.2)
     implementation("androidx.camera:camera-camera2:1.6.1")
     implementation("androidx.camera:camera-lifecycle:1.6.1")
@@ -220,6 +226,87 @@ fun registerResourceGuard(variant: String) {
 
 registerResourceGuard("release")
 registerResourceGuard("releaseCheck")
+// #endregion
+
+// #region Template catalogue guard
+// The catalogue is spread over five files that must agree, and nothing checks
+// that they do. Written as a throwaway script during the field audit, this
+// found on its first run that all six Gov ID templates — PAN, Aadhaar,
+// Passport, Driving Licence, Voter ID, DigiLocker — had no label strings at
+// all: 71 fields had been rendering as humanised ids ("Dob", "Epic number")
+// since they were written. Nothing failed, nothing warned.
+//
+// Same reasoning as deadComposables and verifyDynamicResources below and above:
+// when the toolchain is silent, the check has to live in the build.
+val templatesJson = file("src/main/assets/templates.json")
+val pickersJson = file("src/main/assets/pickers.json")
+val templateStrings = file("src/main/res/values/strings_templates.xml")
+val galleryKt = file("src/main/java/org/zerokosh/app/ui/gallery/TemplateGalleryScreen.kt")
+val categoryKt = file("src/main/java/org/zerokosh/app/ui/common/RecordCategory.kt")
+
+val verifyTemplates by tasks.registering {
+    group = "verification"
+    description = "Fails if templates, labels, categories and pickers disagree."
+    val files = listOf(templatesJson, pickersJson, templateStrings, galleryKt, categoryKt)
+    inputs.files(files)
+    outputs.upToDateWhen { false }
+    // Captured at configuration time: referencing the script's own properties
+    // from inside doLast breaks the configuration cache.
+    val jsonFile = templatesJson
+    val pickerFile = pickersJson
+    val stringsFile = templateStrings
+    val galleryFile = galleryKt
+    val categoryFile = categoryKt
+    doLast {
+        @Suppress("UNCHECKED_CAST")
+        val catalogue = groovy.json.JsonSlurper().parse(jsonFile) as Map<String, Any>
+        val templates = catalogue["templates"] as List<Map<String, Any>>
+        @Suppress("UNCHECKED_CAST")
+        val pickers = (groovy.json.JsonSlurper().parse(pickerFile) as Map<String, Any>)["pickers"] as Map<String, Any>
+        val strings = stringsFile.readText()
+        val category = categoryFile.readText()
+        val referenced = Regex("""GalleryItem\(\s*"[^"]*",\s*"[^"]*",\s*"([^"]*)"""")
+            .findAll(galleryFile.readText()).map { it.groupValues[1] }.toSet()
+
+        val problems = mutableListOf<String>()
+        val ids = templates.map { it["id"] as String }.toSet()
+
+        (referenced - ids).forEach { problems += "gallery points at unknown template: $it" }
+        templates.forEach { t ->
+            val id = t["id"] as String
+            if (!strings.contains("name=\"tpl_$id\"")) problems += "no title string: tpl_$id"
+            @Suppress("UNCHECKED_CAST")
+            (t["fields"] as List<Map<String, Any>>).forEach { f ->
+                val k = f["k"] as String
+                if (!strings.contains("name=\"tpl_${id}_$k\"")) problems += "no label: tpl_${id}_$k"
+                val type = f["t"] as String
+                if (type.startsWith("PICKER:") && !pickers.containsKey(type.removePrefix("PICKER:"))) {
+                    problems += "$id.$k names a picker list that does not exist: $type"
+                }
+            }
+        }
+        referenced.forEach { id ->
+            if (!category.contains("\"$id\" to RecordCategory")) problems += "not in category map: $id"
+        }
+
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "Template catalogue is inconsistent (${problems.size} problem(s)):" +
+                    System.lineSeparator() +
+                    problems.take(15).joinToString(System.lineSeparator()) { "  $it" },
+            )
+        }
+        logger.lifecycle(
+            "verifyTemplates: ok (${templates.size} templates, " +
+                "${templates.sumOf { (it["fields"] as List<*>).size }} fields, " +
+                "${referenced.size} referenced by the gallery)",
+        )
+    }
+}
+
+tasks.named("check") { dependsOn(verifyTemplates) }
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }
+    .configureEach { dependsOn(verifyTemplates) }
 // #endregion
 
 // #region Dead-composable guard

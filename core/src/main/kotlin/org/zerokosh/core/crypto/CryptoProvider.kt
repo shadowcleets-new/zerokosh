@@ -19,6 +19,13 @@ interface CryptoProvider {
     /** libsodium `randombytes_buf` — the ONLY random source for keys/salts/nonces/generator. */
     fun randomBytes(count: Int): ByteArray
 
+    /**
+     * Argon2id cost this device can actually afford, benchmarked. The default
+     * is the spec's, so a provider that cannot measure — a test double — still
+     * returns something valid rather than forcing every caller to special-case.
+     */
+    fun chooseKdfParams(): Pair<Long, Long> = DEFAULT_OPS to DEFAULT_MEM_BYTES
+
     companion object {
         const val KEY_BYTES = 32
         const val NONCE_BYTES = 24

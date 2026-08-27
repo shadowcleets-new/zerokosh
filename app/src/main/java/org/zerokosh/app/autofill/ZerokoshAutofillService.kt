@@ -10,6 +10,7 @@ package org.zerokosh.app.autofill
 import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Intent
+import android.os.Build
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
@@ -64,6 +65,14 @@ class ZerokoshAutofillService : AutofillService() {
             val builder = Dataset.Builder(presentation)
             parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText("")) }
             parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText("")) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                InlineSuggestions.maxSuggestions(request) > 0
+            ) {
+                InlineSuggestions.build(
+                    this, request, 0,
+                    getString(R.string.scr_autofill_unlock_first), null,
+                )?.let { builder.setInlinePresentation(it) }
+            }
             builder.setAuthentication(pending.intentSender)
             val response = FillResponse.Builder()
                 .addDataset(builder.build())
@@ -90,7 +99,8 @@ class ZerokoshAutofillService : AutofillService() {
         }
 
         val response = FillResponse.Builder()
-        for (record in matches.take(5)) {
+        val inlineSlots = InlineSuggestions.maxSuggestions(request)
+        for ((index, record) in matches.take(5).withIndex()) {
             val username = record.fields["username"]
                 ?: record.fields["registered_email"]
                 ?: record.fields["registered_mobile"]
@@ -106,6 +116,15 @@ class ZerokoshAutofillService : AutofillService() {
             val ds = Dataset.Builder(presentation)
             parsed.usernameId?.let { ds.setValue(it, AutofillValue.forText(username)) }
             parsed.passwordId?.let { ds.setValue(it, AutofillValue.forText(password)) }
+            // Both presentations on one dataset: the platform draws the chip
+            // where the IME has a strip, and falls back to the dropdown where
+            // it does not. Only the first `inlineSlots` get a chip, because
+            // asking for more than the keyboard offered is a no-op at best.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && index < inlineSlots) {
+                InlineSuggestions.build(
+                    this, request, index, record.title, username.ifBlank { null },
+                )?.let { ds.setInlinePresentation(it) }
+            }
             response.addDataset(ds.build())
         }
         if (parsed.usernameId != null && parsed.passwordId != null) {

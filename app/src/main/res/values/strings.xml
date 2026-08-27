@@ -141,6 +141,10 @@
     <string name="scr_settings_about">About</string>
     <string name="scr_settings_security_info">How your data is protected</string>
     <string name="scr_settings_allow_screenshots">Allow screenshots</string>
+    <string name="scr_settings_autofill">Autofill service</string>
+    <string name="scr_settings_autofill_on">Zerokosh</string>
+    <string name="scr_settings_autofill_off">Not set up</string>
+    <string name="scr_settings_autofill_unsupported">Not available</string>
     <string name="scr_settings_allow_screenshots_warning">Screenshots of your vault could end up in cloud photo backups. Keep this off unless you really need it.</string>
     <string name="scr_settings_current_passphrase">Current passphrase</string>
     <string name="scr_settings_new_passphrase">New passphrase (at least 10 characters)</string>

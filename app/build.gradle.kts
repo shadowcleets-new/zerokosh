@@ -152,6 +152,14 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.navigation:navigation-compose:2.9.8")
 
+    // §6.2 addition: inline autofill suggestions — the row that appears in the
+    // keyboard strip, which is the whole visible difference between this and
+    // Google Password Manager. The platform takes an InlinePresentation backed
+    // by a Slice whose layout is defined by androidx.autofill.inline; building
+    // that Slice by hand means hard-coding an internal, versioned contract, so
+    // this is the one case where the library IS the supported API rather than a
+    // convenience over it. ~40 KB, no transitive weight.
+    implementation("androidx.autofill:autofill:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.security:security-crypto:1.1.0") // prefs only, never the vault (§6.2)
     implementation("androidx.documentfile:documentfile:1.0.1")

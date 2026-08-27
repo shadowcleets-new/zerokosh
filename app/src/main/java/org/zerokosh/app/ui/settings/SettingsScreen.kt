@@ -35,10 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import org.zerokosh.app.autofill.AutofillSetup
 import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -74,6 +78,16 @@ fun SettingsScreen(app: ZerokoshApp) {
     var showNewRecovery by remember { mutableStateOf(false) }
     var quickUnlockOn by remember { mutableStateOf(app.prefs.quickUnlockEnabled) }
     var allowShots by remember { mutableStateOf(app.prefs.allowScreenshots) }
+    val autofillSupported = remember { AutofillSetup.isSupported(context) }
+    var autofillOn by remember { mutableStateOf(AutofillSetup.isEnabled(context)) }
+    val lifecycleOwner = context as? LifecycleOwner
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) autofillOn = AutofillSetup.isEnabled(context)
+        }
+        lifecycleOwner?.lifecycle?.addObserver(observer)
+        onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
+    }
     var enableQuickUnlockAsk by remember { mutableStateOf(false) }
     
     // Sync folder state
@@ -222,6 +236,24 @@ fun SettingsScreen(app: ZerokoshApp) {
                         app.prefs.allowScreenshots = on
                         allowShots = on
                         (context as? MainActivity)?.applyScreenPrivacy()
+                    }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = stringResource(R.string.scr_settings_autofill),
+                    value = when {
+                        !autofillSupported -> stringResource(R.string.scr_settings_autofill_unsupported)
+                        autofillOn -> stringResource(R.string.scr_settings_autofill_on)
+                        else -> stringResource(R.string.scr_settings_autofill_off)
+                    },
+                    valueColor = if (autofillOn) VaultTheme.colors.accent else Color.Unspecified,
+                    onClick = {
+                        if (!autofillSupported) return@SettingsRow
+                        // The OS owns this choice and shows its own confirmation,
+                        // which is exactly why an app cannot make itself the
+                        // password provider quietly. runCatching because a few
+                        // OEM builds ship no activity for this intent at all.
+                        runCatching { context.startActivity(AutofillSetup.intent(context)) }
                     }
                 )
                 SettingsDivider()

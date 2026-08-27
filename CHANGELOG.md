@@ -1,3 +1,27 @@
+## [2026-08-27 01:20:00] - Edge-to-edge deprecations, Gradle 9.7.1, discoverable autofill
+
+### 1. Intent, Roles, & Context
+- **The Problem:** Play Console flagged "Edge-to-edge may not display for all users"; the toolchain was a minor behind; and the autofill provider, though registered and working, was invisible from inside the app.
+- **Specialist Personas Invoked:** Android Platform Engineer; Release Engineer; Apple-caliber CXO (discoverability).
+- **The Strategy:** treat each report as a claim to verify rather than a task to perform. The edge-to-edge warning turned out to be one dead theme attribute, not missing inset handling. The autofill complaint turned out to be a discovery problem, not a missing service.
+
+### 2. Surgical Technical Modifications
+- **Modified Files:**
+  - `app/src/main/res/values/themes.xml`: dropped `android:statusBarColor`. Deprecated at API 35 and inert at `targetSdk 36`, so it was a no-op that still tripped Play's check. `enableEdgeToEdge()` in `MainActivity` already owns the bars on every supported API. All 14 screens were audited for inset handling first; every one already pads.
+  - `gradle/wrapper/*`, `gradlew*`: Gradle 9.6.1 -> **9.7.1**.
+  - `app/build.gradle.kts`: `androidx.autofill:autofill:1.3.0` — a §6.2 addition, justified in place. The platform's `InlinePresentation` needs a Slice whose layout is a versioned androidx contract; hand-rolling it means hard-coding an internal format.
+  - `autofill/AutofillSetup.kt` (new): provider status + the system picker intent.
+  - `autofill/InlineSuggestions.kt` (new): keyboard-strip chips, API 30+, IME-version-checked.
+  - `autofill/ZerokoshAutofillService.kt`: both dataset paths now carry an inline presentation alongside the RemoteViews one; chip count clamped to what the IME offered.
+  - `ui/settings/SettingsScreen.kt`: "Autofill service" row with live status, refreshed on `ON_RESUME` so returning from the picker updates it.
+- **Irreversible Actions:** none.
+- **Payload/Schema Changes:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:assembleRelease`, `:core:test`, `:app:deadComposables` (109 composables, none dead) — all green on Gradle 9.7.1. Confirmed in the built artifact rather than assumed: `aapt2 dump resources` shows **zero** `statusBarColor` entries under `style/Theme.Zerokosh`; the "Autofill service" string ships; `InlineSuggestions` and androidx's `InlineSuggestionUi` are both in the dex.
+- **Resulting App State:** the **minified** `releaseCheck` build installs and runs on a Pixel 9 — the check that matters, since a new library plus R8 is exactly where a release breaks. `pm query-services` confirms the service survives minification and is still offered to the system.
+- **Next Sprint Phase:** AGP stays at **9.3.1**. There is no stable 9.4.0 — Google Maven has only `9.4.0-rc02` and alphas, and a release candidate is the wrong toolchain for a Play submission. Also outstanding: `EncryptedSharedPreferences`/`MasterKey` are deprecated (11 warnings in `Prefs.kt`), and the app module still has no test source set.
+
 ## [2026-08-26 21:55:00] - Play Console identity, and the listing assets finished
 
 ### 1. Intent, Roles, & Context

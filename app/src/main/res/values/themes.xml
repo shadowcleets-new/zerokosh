@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Compose owns all theming (§10.1); this is only the pre-Compose window. -->
+    <!-- Compose owns all theming (§10.1); this is only the pre-Compose window.
+
+         No android:statusBarColor here. It is deprecated as of API 35 and is
+         simply ignored for an app targeting 35+, so setting it was a no-op that
+         still tripped Play's edge-to-edge check. The bars are transparent
+         because enableEdgeToEdge() in MainActivity makes them so, which is the
+         supported path on every API level this app runs on. Setting the colour
+         a second time here could only ever disagree with it.
+
+         Do not add android:navigationBarColor, android:statusBarColor,
+         android:navigationBarDividerColor, or the *ContrastEnforced attributes
+         back: all are deprecated in 15 and inert at this targetSdk. -->
     <style name="Theme.Zerokosh" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

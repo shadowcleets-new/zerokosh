@@ -1,0 +1,26 @@
+# Functions still above a cyclomatic complexity of 10.
+#
+# A ratchet, not an amnesty: verifyComplexity fails if any of these grows, if
+# a new one appears, or if one of these drops below the limit and is still
+# listed. The target is an empty file.
+#
+# Every entry is a Composable. They came last because a compile proves less
+# about UI than a test does about logic, and each needs decomposing along a
+# real seam rather than by line count.
+
+LockScreen.kt:LockScreen = 46
+SettingsScreen.kt:SettingsScreen = 33
+AuthenticatorScreen.kt:QrScannerScreen = 24
+ZerokoshNav.kt:MainScaffold = 23
+RecordEditScreen.kt:RecordEditScreen = 22
+Onboarding.kt:CreatePassphraseScreen = 20
+CardNfcReader.kt:read = 17
+TemplateGalleryScreen.kt:TemplateGalleryScreen = 17
+TapCardSheet.kt:TapCardSheet = 17
+RecordDetailScreen.kt:RecordDetailScreen = 17
+HomeScreen.kt:HomeScreen = 17
+AuthenticatorScreen.kt:AuthenticatorScreen = 16
+Onboarding.kt:TrustFactRow = 12
+RecordDetailScreen.kt:FieldRow = 12
+ImportBackup.kt:ImportResultDialog = 11
+SettingsScreen.kt:ChangePassphraseDialog = 11

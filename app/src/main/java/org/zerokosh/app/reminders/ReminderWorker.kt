@@ -6,6 +6,9 @@
 package org.zerokosh.app.reminders
 
 // #region Imports
+import android.annotation.SuppressLint
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -38,7 +41,24 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         return !today.isBefore(due.minusDays(daysBefore.toLong())) && !today.isAfter(due)
     }
 
+    /**
+     * POST_NOTIFICATIONS became a runtime permission at API 33. Without it a
+     * notify() is dropped on the floor, so the check is not lint appeasement —
+     * it is the difference between a reminder and a silent no-op.
+     */
+    private fun canNotify(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+
+    // Lint cannot follow the check into canNotify(), so it is named here rather
+    // than inlined: the guard is real and on the first line, and duplicating it
+    // to satisfy flow analysis would leave two copies to keep in step.
+    @SuppressLint("MissingPermission")
     private fun notifyFor(record: Record, id: Int) {
+        if (!canNotify()) return
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
             .setContentTitle(applicationContext.getString(R.string.scr_reminder_title))

@@ -13,6 +13,7 @@
 package org.zerokosh.app.autofill
 
 // #region Imports
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -49,6 +50,12 @@ object InlineSuggestions {
      * the last one repeats for any slot beyond it — so clamping rather than
      * indexing directly is what keeps a sixth suggestion from throwing.
      */
+    // getSlice() is annotated @RestrictedTo(LIBRARY) yet it is the only way to
+    // hand a built Content to InlinePresentation — the platform takes a Slice
+    // and androidx offers no other route to one. Every implementation of inline
+    // suggestions calls it; the restriction is an oversight in the library, not
+    // a boundary being crossed.
+    @SuppressLint("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.R)
     fun build(
         context: Context,

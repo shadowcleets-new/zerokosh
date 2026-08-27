@@ -28,6 +28,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import org.zerokosh.app.MainActivity
+import org.zerokosh.app.ui.health.VaultHealthScreen
+import org.zerokosh.app.ui.trash.TrashScreen
 import androidx.core.content.ContextCompat
 import org.zerokosh.app.reminders.ReminderWorker
 import androidx.compose.animation.SharedTransitionLayout
@@ -412,7 +414,21 @@ private fun MainScaffold(app: ZerokoshApp) {
                             }
                         }
                         composable("authenticator") { AuthenticatorScreen(app) }
-                        composable("settings") { SettingsScreen(app) }
+                        composable("settings") {
+                            SettingsScreen(
+                                app = app,
+                                onOpenTrash = { nav.navigate("trash") },
+                                onOpenHealth = { nav.navigate("health") },
+                            )
+                        }
+                        composable("trash") { TrashScreen(app, onBack = { nav.popBackStack() }) }
+                        composable("health") {
+                            VaultHealthScreen(
+                                app = app,
+                                onBack = { nav.popBackStack() },
+                                onOpen = { uuid -> nav.navigate("detail/$uuid") },
+                            )
+                        }
                         composable("gallery") {
                             TemplateGalleryScreen(
                                 app = app,

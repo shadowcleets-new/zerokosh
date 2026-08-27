@@ -27,6 +27,8 @@ import org.zerokosh.core.crypto.wipe
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.VaultBody
 import org.zerokosh.core.vault.UnlockResult
+import org.zerokosh.core.vault.captureHistory
+import org.zerokosh.core.vault.withoutHistory
 import org.zerokosh.core.vault.VaultEnvelope
 import org.zerokosh.core.vault.VaultFileCodec
 import org.zerokosh.core.vault.VaultMerge
@@ -375,6 +377,14 @@ class VaultRepository(
     // #endregion
 
     // #region Record mutations
+    /**
+     * Which fields are worth remembering a previous value for, by template id.
+     * A hook rather than a constructor argument because the repository is built
+     * before the asset catalog is parsed; ZerokoshApp fills it in. Left as the
+     * empty set, history capture simply does not happen — never a crash.
+     */
+    var secretKeysFor: (String) -> Set<String> = { emptySet() }
+
     suspend fun upsertRecord(record: Record) {
         val current = _body.value ?: return
         val now = System.currentTimeMillis()
@@ -385,7 +395,16 @@ class VaultRepository(
                 created_at = now, modified_at = now, rev = 1, device_id = prefs.deviceId,
             )
         } else {
-            record.copy(modified_at = now, rev = existing.rev + 1, device_id = prefs.deviceId) // §2.1: rev+1 every save
+            captureHistory(
+                previous = existing,
+                next = record.copy(
+                    modified_at = now,
+                    rev = existing.rev + 1,
+                    device_id = prefs.deviceId, // §2.1: rev+1 every save
+                ),
+                secretKeys = secretKeysFor(record.template_id),
+                nowMs = now,
+            )
         }
         val records = if (existing == null) current.records + prepared
         else current.records.map { if (it.uuid == prepared.uuid) prepared else it }
@@ -397,9 +416,67 @@ class VaultRepository(
         )
     }
 
+    /**
+     * Bulk insert/update in one write. Importing 200 logins through
+     * upsertRecord would re-encrypt and re-write the whole vault 200 times.
+     */
+    suspend fun upsertRecords(incoming: List<Record>) {
+        if (incoming.isEmpty()) return
+        val current = _body.value ?: return
+        val now = System.currentTimeMillis()
+        val byUuid = current.records.associateBy { it.uuid }
+        val prepared = incoming.map { record ->
+            val existing = byUuid[record.uuid]
+            if (existing == null) {
+                record.copy(
+                    uuid = record.uuid.ifEmpty { UUID.randomUUID().toString() },
+                    created_at = now, modified_at = now, rev = 1, device_id = prefs.deviceId,
+                )
+            } else {
+                captureHistory(
+                    previous = existing,
+                    next = record.copy(modified_at = now, rev = existing.rev + 1, device_id = prefs.deviceId),
+                    secretKeys = secretKeysFor(record.template_id),
+                    nowMs = now,
+                )
+            }
+        }
+        val preparedByUuid = prepared.associateBy { it.uuid }
+        persist(
+            current.copy(
+                records = current.records.map { preparedByUuid[it.uuid] ?: it } +
+                    prepared.filter { it.uuid !in byUuid },
+                meta = current.meta.copy(device_names = current.meta.device_names + (prefs.deviceId to deviceName())),
+            ),
+        )
+    }
+
+    /** Moves the record to trash for 30 days; the tombstone is written too. */
     suspend fun deleteRecord(uuid: String) {
         val current = _body.value ?: return
         persist(VaultMerge.applyDeletion(current, uuid, System.currentTimeMillis()))
+    }
+
+    suspend fun restoreRecord(uuid: String) {
+        val current = _body.value ?: return
+        persist(VaultMerge.applyRestore(current, uuid, System.currentTimeMillis()))
+    }
+
+    /** Permanent. The tombstone stays behind so the deletion still syncs. */
+    suspend fun purgeRecord(uuid: String) {
+        val current = _body.value ?: return
+        persist(VaultMerge.applyPurge(current, uuid))
+    }
+
+    suspend fun emptyTrash() {
+        val current = _body.value ?: return
+        persist(current.copy(trash = emptyList()))
+    }
+
+    /** Drops every remembered previous secret for one record. */
+    suspend fun forgetHistory(uuid: String) {
+        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return
+        upsertRecord(record.withoutHistory())
     }
 
     suspend fun toggleFavorite(uuid: String) {

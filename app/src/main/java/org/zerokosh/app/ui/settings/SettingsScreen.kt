@@ -60,6 +60,7 @@ import org.zerokosh.app.ui.common.Kicker
 import org.zerokosh.app.ui.common.SectionLabel
 import org.zerokosh.app.ui.common.WhiteCard
 import org.zerokosh.app.ui.backup.rememberImportBackup
+import org.zerokosh.app.ui.backup.rememberImportCsv
 import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
@@ -70,7 +71,11 @@ import org.zerokosh.app.ui.record.DropdownSelector
 
 // #region Screen list
 @Composable
-fun SettingsScreen(app: ZerokoshApp) {
+fun SettingsScreen(
+    app: ZerokoshApp,
+    onOpenTrash: () -> Unit = {},
+    onOpenHealth: () -> Unit = {},
+) {
     val context = LocalContext.current
     val activity = context as FragmentActivity
     val scope = rememberCoroutineScope()
@@ -79,6 +84,7 @@ fun SettingsScreen(app: ZerokoshApp) {
     var quickUnlockOn by remember { mutableStateOf(app.prefs.quickUnlockEnabled) }
     var allowShots by remember { mutableStateOf(app.prefs.allowScreenshots) }
     val autofillSupported = remember { AutofillSetup.isSupported(context) }
+    val trashCount = app.repository.body.collectAsState().value?.trash?.size ?: 0
     var autofillOn by remember { mutableStateOf(AutofillSetup.isEnabled(context)) }
     val lifecycleOwner = context as? LifecycleOwner
     DisposableEffect(lifecycleOwner) {
@@ -151,6 +157,7 @@ fun SettingsScreen(app: ZerokoshApp) {
     }
 
     val importBackup = rememberImportBackup(app)
+    val importCsv = rememberImportCsv(app)
 
     // Dropdown states
     var showAutoLockDropdown by remember { mutableStateOf(false) }
@@ -255,6 +262,18 @@ fun SettingsScreen(app: ZerokoshApp) {
                         // OEM builds ship no activity for this intent at all.
                         runCatching { context.startActivity(AutofillSetup.intent(context)) }
                     }
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = "Vault review",
+                    value = "Reused, weak, expiring",
+                    onClick = onOpenHealth,
+                )
+                SettingsDivider()
+                SettingsRow(
+                    title = "Recently deleted",
+                    value = if (trashCount > 0) "$trashCount" else null,
+                    onClick = onOpenTrash,
                 )
                 SettingsDivider()
                 SettingsRow(
@@ -419,6 +438,34 @@ fun SettingsScreen(app: ZerokoshApp) {
                     fontWeight = FontWeight.Medium,
                     color = VaultTheme.colors.ink(0.8f),
                 )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // The route in from everywhere else. :core has parsed these formats
+            // since M5; until now nothing called it.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, VaultTheme.colors.line, RoundedCornerShape(16.dp))
+                    .clickable(onClick = importCsv)
+                    .padding(vertical = 14.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "Import from another password manager",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = VaultTheme.colors.ink(0.8f),
+                    )
+                    Text(
+                        "Chrome · Google · Bitwarden · LastPass · KeePass",
+                        fontSize = 11.sp,
+                        color = VaultTheme.colors.ink(0.45f),
+                    )
+                }
             }
 
             // Clears the bottom navigation bar.

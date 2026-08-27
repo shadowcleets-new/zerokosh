@@ -35,6 +35,14 @@ class ZerokoshApp : Application() {
         }
         
         repository = VaultRepository(AndroidCrypto(), initialStore, prefs)
+        // The repository is built before the catalog can tell it which fields are
+        // secret, so the lookup is handed over here rather than passed in.
+        repository.secretKeysFor = { templateId ->
+            catalog.templates.templates.firstOrNull { it.id == templateId }
+                ?.fields.orEmpty()
+                .filter { it.sensitivity == org.zerokosh.core.model.Sensitivity.H }
+                .mapTo(mutableSetOf()) { it.k }
+        }
 
         // BV-02: nothing used to enqueue this, so expiry and renewal
         // reminders never fired. KEEP policy makes it idempotent.

@@ -30,6 +30,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -77,6 +78,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,6 +118,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.MainActivity
 import org.zerokosh.app.pdf.RecoveryKitPdf
 import org.zerokosh.app.quickunlock.QuickUnlockManager
 import org.zerokosh.app.ui.common.BottomActionBar
@@ -1259,6 +1262,22 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Onboarding otherwise leaves screenshots on throughout, so the one screen
+    // that puts the Recovery Key on display is also the one screen a recorder
+    // would want. The card below tells the user "not a screenshot" in as many
+    // words; leaving the capture path open while saying that is the app not
+    // meaning it. Clamped for this step only, and handed straight back to the
+    // normal rule on the way out — the Save PDF and QR image routes are how the
+    // key is meant to leave, and neither goes through the framebuffer.
+    DisposableEffect(Unit) {
+        val activity = context as? MainActivity
+        activity?.window?.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE,
+        )
+        onDispose { activity?.applyScreenPrivacy() }
+    }
+
     // BV-09: a 320x320 QR is a ~102k-iteration pixel loop; building it inside
     // remember{} ran it during composition and dropped frames on entry.
     val qr by produceState<ImageBitmap?>(initialValue = null, key) {
@@ -1584,6 +1603,30 @@ private fun SaveOptionRow(
 // #endregion
 
 // #region S6 Quick unlock opt-in
+/**
+ * Turn on quick unlock if it was asked for, then open the vault.
+ *
+ * Returns false only when the user asked for a fingerprint and did not end up
+ * with one. Dismissing the system prompt used to fall straight through to a
+ * finished vault with quick unlock quietly off — asked for a fingerprint, given
+ * none, told nothing. The caller keeps them on the step instead, so the choice
+ * is still theirs: press again, or take the Skip that says what it does.
+ */
+private suspend fun sealOnboarding(
+    activity: FragmentActivity,
+    app: ZerokoshApp,
+    onboarding: OnboardingState,
+    enable: Boolean,
+): Boolean {
+    val pass = onboarding.passphrase
+    if (enable && (pass == null || !QuickUnlockManager.enable(activity, app, pass))) return false
+    // BV-25: the session is opened here, not in createVault, so S5 and S6 get to
+    // render first. Must run before wipe() zeroes the array.
+    if (pass != null) app.repository.completeOnboarding(pass)
+    onboarding.wipe()
+    return true
+}
+
 @Composable
 fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () -> Unit) {
     val c = VaultTheme.colors
@@ -1594,17 +1637,18 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
     var useBiometrics by remember { mutableStateOf(available && onboarding.sealToDevice) }
 
     var finishing by remember { mutableStateOf(false) }
+    var quickUnlockRefused by remember { mutableStateOf(false) }
     val finish: (Boolean) -> Unit = { enable ->
         if (!finishing) {
             finishing = true
+            quickUnlockRefused = false
             scope.launch {
-                val pass = onboarding.passphrase
-                if (enable && pass != null) QuickUnlockManager.enable(activity, app, pass)
-                // BV-25: the session is opened here, not in createVault, so S5 and
-                // S6 get to render first. Must run before wipe() zeroes the array.
-                if (pass != null) app.repository.completeOnboarding(pass)
-                onboarding.wipe()
-                onDone()
+                if (sealOnboarding(activity, app, onboarding, enable)) {
+                    onDone()
+                } else {
+                    quickUnlockRefused = true
+                    finishing = false
+                }
             }
         }
     }
@@ -1630,6 +1674,16 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
                 showArrow = !finishing,
                 loading = finishing,
             )
+            if (quickUnlockRefused) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    "Quick unlock was not set up. Try again, or carry on with just your passphrase.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                )
+            }
             Spacer(Modifier.height(10.dp))
             SubtleTextButton("Skip for now — I'll type my passphrase", onClick = { finish(false) })
         },

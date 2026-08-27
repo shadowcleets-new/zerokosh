@@ -13,6 +13,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
@@ -40,6 +41,8 @@ object QuickUnlockManager {
     private const val PREF_IV = "quick_unlock_iv"
 
     // #region Availability
+    private const val TAG = "QuickUnlock"
+
     fun hardwareBackedBiometricsAvailable(context: Context): Boolean =
         BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
     // #endregion
@@ -64,6 +67,10 @@ object QuickUnlockManager {
             app.prefs.quickUnlockEnabled = true
             return true
         } catch (e: Exception) {
+            // Was a bare swallow. Enabling quick unlock is one tap that either
+            // works or leaves the toggle off saying nothing, so when it fails
+            // this is the only place the reason exists at all.
+            Log.w(TAG, "quick unlock enable failed", e)
             disable(activity, app)
             return false
         } finally {

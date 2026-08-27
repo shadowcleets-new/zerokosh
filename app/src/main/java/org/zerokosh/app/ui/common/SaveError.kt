@@ -29,7 +29,13 @@ import androidx.compose.runtime.Composable
  * that hiding the detail would leave the user guessing between them.
  */
 fun saveErrorMessage(cause: Throwable?): String {
-    val detail = cause?.message?.takeIf { it.isNotBlank() }
+    val detail = cause?.message
+        ?.takeIf { it.isNotBlank() }
+        // An internal path is not an instruction. The detail earns its place on
+        // the sync-folder cases, where it separates "permission withdrawn" from
+        // "folder deleted"; "/data/user/0/org.zerokosh.app/files/vault.kosh.bak"
+        // only hands the user something they cannot act on and cannot read.
+        ?.takeUnless { it.contains("/data/user/") || it.contains("/data/data/") }
     return buildString {
         append("Your changes were not saved, so nothing has been lost from the vault as it was.")
         append("\n\n")

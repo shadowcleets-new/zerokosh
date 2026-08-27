@@ -1,3 +1,28 @@
+## [2026-08-28 00:45:00] - The device run: five real bugs, three of them in autofill
+
+### 1. Intent, Roles, & Context
+- **The Problem:** everything shipped so far had been verified by reading it. Running it on a Pixel 9 against a minified `releaseCheck` build found five defects, three of which meant the headline autofill feature had never worked once.
+- **Specialist Personas Invoked:** Android Platform Engineer; Principal Security Auditor; QA Automation Lead.
+- **The Strategy:** drive the real build over adb, fix what the device says rather than what the code implies, and re-run each scenario against the fix.
+
+### 2. Surgical Technical Modifications
+- **`autofill/AutofillFill.kt` (new)** — response building and the auth handshake, extracted from the service because the locked case needs the same code from an Activity. `FieldTargets` carries ids and origin only; typed values still travel in memory via `PendingSave`.
+- **`ZerokoshAutofillService.onFillRequest`** — three fixes. (a) A response carrying neither a dataset nor a SaveInfo threw `IllegalStateException` out of the binder callback and killed the app process; the guard admitted a one-field structure while `saveInfoFor` demanded two, which is the first page of every two-step login. Now returns `onSuccess(null)`. (b) Locked vaults now use response-level authentication so several matches can be offered after unlock. (c) Datasets are built from `res/layout/autofill_suggestion.xml`.
+- **`res/layout/autofill_suggestion.xml` (new)** — `android.R.layout.simple_list_item_2` is rooted in `TwoLineListItem`, which is not `@RemoteView`. RemoteViews refused to inflate it inside system_server *after* the service reported success, so no credential suggestion had ever rendered and nothing on our side logged a thing.
+- **`MainActivity.DeliverAutofillWhenUnlocked`** — returns the finished `FillResponse` through `EXTRA_AUTHENTICATION_RESULT` and finishes. Previously the auth dataset opened the app and stopped: the user unlocked and the form stayed empty.
+- **`autofill/AutofillSave.loginRecordFor`** — a credential captured in a native app was stored with no `website`, and the login matcher keys entirely off that field, so it could never be offered back to the app it came from. Stores the package name, which is what the matcher already derives its hint from.
+- **`ui/common/RecordCategory.recordMeta`** — iterated the fields map, whose order is a state map's hash order, so a row could show a masked username where the site belongs. Iterates template order.
+- **`core/import/CsvImport.mergeWithExisting`** — an update rebuilt the record from the CSV row, dropping institution, template, custom fields, reminders, older history, and any field the export has no column for, a TOTP secret included. Now updates the existing record. `CsvMergeTest` pins it and fails without the fix.
+- **`ui/onboarding/Onboarding.kt`** — `FLAG_SECURE` is clamped for the Recovery Kit step only, so the one screen showing the key is not also the one screen a recorder can have; and a refused quick-unlock keeps the user on step 6 with a reason instead of silently finishing with it off. `sealOnboarding` extracted to stay under complexity 10.
+- **`ui/common/SaveError.kt`** — the appended detail no longer surfaces internal `/data/user/...` paths.
+- **`quickunlock/QuickUnlockManager.kt`** — the bare `catch` on the enable path now logs; it is the only place the reason for a failed enrolment exists.
+- **`app/build.gradle.kts`** — `releaseCheck` is `isDebuggable = true`. Shrinking and obfuscation stay on; without `run-as` the vault file cannot be made unwritable and the save-failure path cannot be exercised on a device. Never published.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test`, `:app:testDebugUnitTest`, `verifyComplexity` (68 files, 440 functions, 16 baselined, 0 new over 10) — all green. `verifyComplexity` caught `QuickUnlockScreen` at 13 during this work and was the reason it was split.
+- **Resulting App State:** verified on a Pixel 9 against the minified build. Screenshot lifecycle measured three ways (11,585 colours during onboarding, 9 when clamped, 1,775 after the Settings toggle). All 315 logos render — the Play Store monogram bug is gone. Autofill: suggestion renders, one tap fills both fields, save prompt captures a new credential, and the captured credential is offered back in the same app. Locked-vault auth round trip lands back in the form filled. Save-failure dialog raised by `chmod 0555` on the vault directory; edits survive it and a retry succeeds. Biometric enrolment wraps the master key and unlock arms the prompt. Trash restore, CSV import (2 added, 1 updated), and vault review all correct.
+- **Next Sprint Phase:** publish the Android repo (GPL obligation), make Hindi real, upload the `versionCode 2` bundle, and the polish plan's Phases 0/1.
+
 ## [2026-08-27 18:30:00] - Four internal gaps: silent saves, no app tests, no catalogue guard, a deprecation
 
 ### 1. Intent, Roles, & Context

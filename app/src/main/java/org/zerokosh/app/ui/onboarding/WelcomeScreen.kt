@@ -18,6 +18,8 @@ package org.zerokosh.app.ui.onboarding
 // #region Imports
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -113,7 +115,9 @@ fun WelcomeScreen(
     onLogin: () -> Unit,
 ) {
     val c = VaultTheme.colors
-    Box(
+    // BoxWithConstraints, not Box: the layout below has to know whether the
+    // viewport is tall enough for the designed spacing before it commits to it.
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(c.paper)
@@ -128,11 +132,21 @@ fun WelcomeScreen(
                 .align(Alignment.TopStart),
         )
 
+        // The designed layout pushes everything below the shape hero with a
+        // weighted spacer, which is right until the viewport is shorter than the
+        // content. Then weight(1f) resolves to zero, the buttons land past the
+        // bottom edge, and there is no scroll to reach them — on a landscape
+        // phone that made "Create a new vault" unreachable and first run a dead
+        // end. Short viewports scroll instead; tall ones are untouched.
+        val roomForDesignedLayout = maxHeight >= 640.dp
         Column(
             modifier = Modifier
                 // BV-23: cap before filling (see Onboarding.kt).
                 .widthIn(max = 560.dp)
-                .fillMaxSize()
+                .then(
+                    if (roomForDesignedLayout) Modifier.fillMaxSize()
+                    else Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                )
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
                 .padding(horizontal = 24.dp)
@@ -141,7 +155,10 @@ fun WelcomeScreen(
         ) {
             TopBar()
 
-            Spacer(Modifier.weight(1f))
+            // weight() needs a bounded height, which a scrolling column does not
+            // have, so the short path gets a fixed gap rather than a silent zero.
+            if (roomForDesignedLayout) Spacer(Modifier.weight(1f))
+            else Spacer(Modifier.height(28.dp))
 
             DifferenceHeadline()
 

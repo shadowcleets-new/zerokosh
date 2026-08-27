@@ -35,6 +35,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -176,12 +177,15 @@ private fun OnboardingScaffold(
     body: @Composable ColumnScope.() -> Unit,
 ) {
     val c = VaultTheme.colors
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(c.paper)
-            .statusBarsPadding(),
-    ) {
+    // The header is fixed and the action bar pinned, so the body lives on
+    // whatever is left. In portrait that is most of the screen; on a landscape
+    // phone it is roughly 40dp, which is not a cramped field — it is an
+    // unusable one. Below the threshold the header scrolls with the body
+    // instead, and only the action bar stays pinned.
+    BoxWithConstraints(modifier = modifier.fillMaxSize().background(c.paper)) {
+        val compact = maxHeight < 600.dp
+        val bodyScroll = rememberScrollState()
+        val header: @Composable ColumnScope.() -> Unit = {
         Column(Modifier.widthIn(max = 560.dp).align(Alignment.CenterHorizontally).fillMaxWidth()) {
             OnboardingTopBar(
                 stepLabel = "Step $step of 6",
@@ -208,23 +212,41 @@ private fun OnboardingScaffold(
             }
             afterHeader?.invoke(this)
         }
+        }
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                // BV-23: cap before filling, or fillMaxWidth pins the minimum to the
-                // parent width and the 560dp cap never applies.
-                .widthIn(max = 560.dp)
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .then(if (scrollBody) Modifier.verticalScroll(rememberScrollState()) else Modifier),
-            content = body,
-        )
+        // BV-23: cap before filling, or fillMaxWidth pins the minimum to the
+        // parent width and the 560dp cap never applies.
+        val bodyWidth = Modifier.widthIn(max = 560.dp).fillMaxWidth()
 
-        BottomActionBar(
-            Modifier.widthIn(max = 560.dp).align(Alignment.CenterHorizontally),
-            content = bottomBar,
-        )
+        Column(Modifier.fillMaxSize().statusBarsPadding()) {
+            if (compact) {
+                // One scroll region for header and body together: squeezing the
+                // body to nothing to keep the header fixed is the wrong trade
+                // when the header alone is taller than the viewport.
+                Column(Modifier.weight(1f).verticalScroll(bodyScroll)) {
+                    header()
+                    Column(
+                        modifier = bodyWidth.align(Alignment.CenterHorizontally),
+                        content = body,
+                    )
+                }
+            } else {
+                header()
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(bodyWidth)
+                        .align(Alignment.CenterHorizontally)
+                        .then(if (scrollBody) Modifier.verticalScroll(bodyScroll) else Modifier),
+                    content = body,
+                )
+            }
+
+            BottomActionBar(
+                Modifier.widthIn(max = 560.dp).align(Alignment.CenterHorizontally),
+                content = bottomBar,
+            )
+        }
     }
 }
 

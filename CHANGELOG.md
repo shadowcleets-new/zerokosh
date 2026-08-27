@@ -1,3 +1,21 @@
+## [2026-08-27 10:45:00] - Landscape onboarding was a dead end
+
+### 1. Intent, Roles, & Context
+- **The Problem:** on a landscape phone the first-run flow could not be completed. `WelcomeScreen`'s primary button sat below the viewport with no way to scroll to it, and `OnboardingScaffold` squeezed its body to roughly 40dp between a fixed header and a pinned action bar.
+- **Specialist Personas Invoked:** Apple-caliber CXO; Android Platform Engineer.
+- **The Strategy:** keep the designed portrait layout byte-for-byte and branch only when the viewport is genuinely too short, rather than rewriting the layout for the common case to satisfy the rare one.
+
+### 2. Surgical Technical Modifications
+- **Modified Files:**
+  - `ui/onboarding/WelcomeScreen.kt`: `Box` → `BoxWithConstraints`; below 640dp of height the column scrolls and the weighted spacer becomes a fixed 28dp gap. `weight(1f)` needs a bounded height, which a scrolling column does not have, so leaving it in place would have silently resolved to zero.
+  - `ui/onboarding/Onboarding.kt` (`OnboardingScaffold`): below 600dp the header scrolls together with the body in one region; only the action bar stays pinned. Portrait is untouched.
+- **Irreversible Actions:** none.
+- **Payload/Schema Changes:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:core:test`, `:app:deadComposables` (109 checked) — green.
+- **Resulting App State:** the WelcomeScreen fix is **confirmed on a Pixel 9 in landscape** — both buttons reachable by scrolling where before they were unreachable at any scroll position. The **scaffold fix compiles but is unverified**: the device was disconnected before it could be installed.
+- **Next Sprint Phase:** on device — (a) step 4 usable in landscape, (b) FLAG_SECURE flips at the moment setup completes. Both are the last two unverified items.
 ## [2026-08-27 02:10:00] - Screenshots during first run; reveal on the Confirm field
 
 ### 1. Intent, Roles, & Context

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Resource-shrinker keep rules (§6.8).
+
+  isShrinkResources removes any resource it cannot see referenced. It reads
+  R.<type>.<name> references in code and @type/name in XML — and nothing else.
+  Both of the resource families below are reached only by name at runtime:
+
+      CompanyLogo.kt   getIdentifier("logo_$key", "drawable", packageName)
+      FieldLabels.kt   getIdentifier("tpl_${templateId}_$fieldKey", "string", ...)
+
+  A composed string is invisible to that analysis, so the shrinker concluded the
+  whole set was dead and deleted it. The release build kept 0 of 593 logo
+  drawables and 12 of 119 template label strings, which is why every institution
+  fell back to a monogram and most field labels fell back to a humanised field
+  id — in the Play build only. Debug never shrinks, so it all looked correct
+  right up until the artifact that reaches users.
+
+  This is the same failure mode as the Room R8 crash: the tooling is silent, the
+  build is green, and only the shipped artifact is wrong. Prefer R.string /
+  R.drawable references where possible; when a lookup must be dynamic, its
+  resources have to be named here or they will not ship.
+-->
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/logo_*,@string/tpl_*" />

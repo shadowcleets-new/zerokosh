@@ -1,3 +1,23 @@
+## [2026-08-27 12:40:00] - The release build shipped with no logos at all
+
+### 1. Intent, Roles, & Context
+- **The Problem:** every institution fell back to a monogram in the Play build while looking correct in debug. Reported as a logo bug; it was not only logos.
+- **Specialist Personas Invoked:** Android Release Engineer; Principal Security Auditor (silent-failure class).
+- **The Strategy:** measure the artifact rather than the source. `aapt2 dump resources` on both APKs settled it in one command.
+
+### 2. Surgical Technical Modifications
+- **Root cause:** `isShrinkResources = true`. The shrinker resolves `R.<type>.<name>` in code and `@type/name` in XML and nothing else. Both dynamic families are composed strings — `getIdentifier("logo_$key", …)` in `CompanyLogo.kt` and `getIdentifier("tpl_${templateId}_$fieldKey", …)` in `FieldLabels.kt` — so it judged the whole set dead.
+- **Measured before the fix:** logos **0 of 299**; template label strings **12 of 119**. Debug had all of both, because debug never shrinks. The reported symptom was the logos; 107 missing field labels were falling back to humanised field ids unnoticed.
+- **Modified Files:**
+  - `app/src/main/res/raw/keep.xml` (new): `tools:keep="@drawable/logo_*,@string/tpl_*"`.
+  - `app/build.gradle.kts`: `verifyReleaseDynamicResources` / `verifyReleaseCheckDynamicResources`, each reading its own shrinker report and failing the build on any `logo_`/`tpl_` marked "is not reachable." Wired via `finalizedBy` on the matching assemble/bundle tasks.
+- **Irreversible Actions:** none.
+- **Payload/Schema Changes:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** release APK now carries **299 logo drawables and 119 tpl_ strings — identical to debug**. The guard was tested in both directions: with `keep.xml` removed the build fails naming 406 dropped resources; restored, it passes.
+- **Resulting App State:** APK 10.49 MB (up ~0.15 MB). Not yet installed on hardware.
+- **Next Sprint Phase:** versionCode 2 must reach Play — the published alpha has no logos and degraded field labels.
 ## [2026-08-27 11:30:00] - Live strength for PINs, and suggestions that are actually generated
 
 ### 1. Intent, Roles, & Context

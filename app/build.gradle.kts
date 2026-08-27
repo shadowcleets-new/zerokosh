@@ -173,6 +173,55 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 }
 
+// #region Dynamic-resource guard
+// A resource reached only through Resources.getIdentifier is invisible to the
+// resource shrinker: it reads R.<type>.<name> in code and @type/name in XML, and
+// a composed string is neither. It therefore deleted every logo drawable and 107
+// of 119 template label strings from the release build — 0 of 593 logos survived
+// — while debug, which never shrinks, looked perfect. That shipped.
+//
+// keep.xml fixes the instance. This fixes the class: the shrinker already writes
+// down what it removed, so read its own report back and fail the build rather
+// than let a green build produce a wrong artifact again. Same reasoning as
+// deadComposables below — when the toolchain is silent, the check has to live
+// at project level.
+val dynamicResourcePrefixes = listOf("drawable:logo_", "string:tpl_")
+
+// One guard per shrinking variant, each reading only its own report: a single
+// task walking every report would fail on a stale one left by a variant this
+// invocation never built.
+fun registerResourceGuard(variant: String) {
+    val report = layout.buildDirectory.file("outputs/mapping/$variant/resources.txt")
+    val prefixes = dynamicResourcePrefixes
+    val guard = tasks.register("verify${variant.replaceFirstChar(Char::titlecase)}DynamicResources") {
+        group = "verification"
+        description = "Fails if the shrinker removed a $variant resource only reached by name."
+        outputs.upToDateWhen { false }
+        doLast {
+            val file = report.get().asFile
+            if (!file.exists()) return@doLast
+            val dropped = file.readLines().filter { line ->
+                line.endsWith("is not reachable.") && prefixes.any(line::startsWith)
+            }
+            if (dropped.isNotEmpty()) {
+                throw GradleException(
+                    "Resource shrinker removed ${dropped.size} $variant resource(s) reached only " +
+                        "by name at runtime. They go missing with no error at all — see " +
+                        "app/src/main/res/raw/keep.xml." + System.lineSeparator() +
+                        dropped.take(8).joinToString(System.lineSeparator()) { "  $it" },
+                )
+            }
+            logger.lifecycle("verifyDynamicResources($variant): ok")
+        }
+    }
+    tasks.matching { it.name in setOf("assemble${variant.replaceFirstChar(Char::titlecase)}", "bundle${variant.replaceFirstChar(Char::titlecase)}") }
+        .configureEach { finalizedBy(guard) }
+}
+
+registerResourceGuard("release")
+registerResourceGuard("releaseCheck")
+// #endregion
+
 // #region Dead-composable guard
 // Nothing in the standard toolchain catches an unreferenced @Composable, which
 // is how eight of them accumulated here unnoticed:

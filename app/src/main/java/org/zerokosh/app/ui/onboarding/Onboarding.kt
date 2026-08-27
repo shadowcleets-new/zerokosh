@@ -136,6 +136,9 @@ import org.zerokosh.app.ui.theme.CornerHero
 import org.zerokosh.app.ui.theme.JetBrainsMono
 import org.zerokosh.app.ui.theme.SecretTextStyle
 import org.zerokosh.app.ui.theme.VaultTheme
+import org.zerokosh.core.passphrase.PassphraseSuggestions
+import org.zerokosh.core.passphrase.isWeakPinPattern
+import org.zerokosh.core.passphrase.pinScore
 import kotlin.math.ln
 import kotlin.math.pow
 // #endregion
@@ -921,8 +924,11 @@ fun CreatePassphraseScreen(
                 isError = confirm.isNotEmpty() && confirm != pass,
             )
 
-            if (!pinMode) {
-                val score = passphraseScore(pass)
+            // Live in both modes. It used to be passphrase-only, which meant the
+            // PIN branch — the weaker of the two by construction — was the one
+            // place you typed a secret with no feedback at all.
+            run {
+                val score = if (pinMode) pinScore(pass) else passphraseScore(pass)
                 val bits = passphraseEntropyBits(pass)
                 val meterColor = when {
                     pass.isEmpty() -> c.ink(0.12f)
@@ -936,7 +942,14 @@ fun CreatePassphraseScreen(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    val lit = if (pass.isEmpty()) 0 else (score + 2).coerceAtMost(5)
+                    // A PIN caps at three of five lit: six digits is ~19.9 bits,
+                    // and a full bar beside a 60-bit passphrase would misrepresent
+                    // the choice being offered on this very screen.
+                    val lit = when {
+                        pass.isEmpty() -> 0
+                        pinMode -> score + 1
+                        else -> (score + 2).coerceAtMost(5)
+                    }
                     repeat(5) { i ->
                         Box(
                             Modifier
@@ -956,7 +969,11 @@ fun CreatePassphraseScreen(
                 ) {
                     Text(
                         text = when {
+                            pass.isEmpty() && pinMode -> "Six digits nobody could guess from your life"
                             pass.isEmpty() -> "Pick something only you would say"
+                            pinMode && score == 0 -> "Too short · needs 6 digits"
+                            pinMode && score == 1 -> "Weak · among the first PINs anyone tries"
+                            pinMode -> "Fair · $bits bits — a PIN can only be so strong"
                             score == 0 -> "Too short · needs 10 characters"
                             score == 1 -> "Weak · $bits bits of entropy"
                             score == 2 -> "Good · $bits bits of entropy"
@@ -977,44 +994,61 @@ fun CreatePassphraseScreen(
                 }
 
                 Spacer(Modifier.height(12.dp))
-                PassphraseCheck("10 characters or more", pass.length >= 10)
-                Spacer(Modifier.height(6.dp))
-                PassphraseCheck(
-                    "Not a single dictionary word",
-                    pass.length >= 10 && (pass.contains(' ') || pass.any { !it.isLetter() }),
-                )
-                Spacer(Modifier.height(6.dp))
-                PassphraseCheck("Not reused from another app", null)
-
-                // Illustrative patterns only — deliberately not tappable, since a
-                // published example passphrase is a published passphrase.
-                Spacer(Modifier.height(16.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        "TRY",
-                        fontSize = 11.sp,
-                        letterSpacing = 0.88.sp,
-                        color = c.ink(0.4f),
+                if (pinMode) {
+                    PassphraseCheck("All six digits entered", pass.length == 6)
+                    Spacer(Modifier.height(6.dp))
+                    PassphraseCheck(
+                        "Not a run or a repeated pattern",
+                        pass.length == 6 && !isWeakPinPattern(pass),
                     )
-                    listOf("chai ledger tiger", "peepal 9 rickshaw").forEach { s ->
-                        Box(
-                            Modifier
-                                .height(32.dp)
-                                .clip(CircleShape)
-                                .background(c.surface)
-                                .border(1.dp, c.line, CircleShape)
-                                .padding(horizontal = 12.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                s,
-                                fontFamily = JetBrainsMono,
-                                fontSize = 11.5.sp,
-                                color = c.ink(0.7f),
-                            )
+                    Spacer(Modifier.height(6.dp))
+                    // Unverifiable from here, like "not reused" below — a prompt,
+                    // not a tick the app pretends to have checked.
+                    PassphraseCheck("Not a birthday or anniversary", null)
+                } else {
+                    PassphraseCheck("10 characters or more", pass.length >= 10)
+                    Spacer(Modifier.height(6.dp))
+                    PassphraseCheck(
+                        "Not a single dictionary word",
+                        pass.length >= 10 && (pass.contains(' ') || pass.any { !it.isLetter() }),
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    PassphraseCheck("Not reused from another app", null)
+
+                    // Regenerated per visit rather than hard-coded. Two string
+                    // literals in a public repository are the worst suggestions this
+                    // screen could make: identical on every install, and therefore the
+                    // first entries in any wordlist built against this app. Still not
+                    // tappable — the user should type their own.
+                    val suggestions = remember { PassphraseSuggestions.suggest() }
+                    Spacer(Modifier.height(16.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            "TRY",
+                            fontSize = 11.sp,
+                            letterSpacing = 0.88.sp,
+                            color = c.ink(0.4f),
+                        )
+                        suggestions.forEach { s ->
+                            Box(
+                                Modifier
+                                    .height(32.dp)
+                                    .clip(CircleShape)
+                                    .background(c.surface)
+                                    .border(1.dp, c.line, CircleShape)
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    s,
+                                    fontFamily = JetBrainsMono,
+                                    fontSize = 11.5.sp,
+                                    color = c.ink(0.7f),
+                                )
+                            }
                         }
                     }
                 }

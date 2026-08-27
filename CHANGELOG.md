@@ -1,3 +1,23 @@
+## [2026-08-27 11:30:00] - Live strength for PINs, and suggestions that are actually generated
+
+### 1. Intent, Roles, & Context
+- **The Problem:** two reports on S4 — the strength meter appeared not to respond to typing, and the "TRY" examples never changed.
+- **Specialist Personas Invoked:** Principal Security Auditor (entropy claims); Apple-caliber CXO.
+- **The Strategy:** the first report named the wrong widget. The Argon2id card shows KDF cost measured on the device and must not move with typing — it would tell the user their passphrase changed the key-derivation cost, which it does not. The live meter already existed a few dp above it; what did not exist was that meter in **PIN** mode, which is the branch that needs it most.
+
+### 2. Surgical Technical Modifications
+- **Modified Files:**
+  - `core/passphrase/PinStrength.kt` (new): `pinScore` / `isWeakPinPattern`. One loop over block sizes catches `000000`, `121212` and `123123` alike; runs are caught by first differences. Ceiling of 2 on purpose — six digits is ~19.9 bits and must never read "strong" beside a 60-bit passphrase.
+  - `core/passphrase/PassphraseSuggestions.kt` (new): SecureRandom over a 69-word list, ~300k three-word combinations. Distinct words per phrase, distinct phrases per pair, one carrying a digit so the examples satisfy the screen's own "not a single dictionary word" rule.
+  - `ui/onboarding/Onboarding.kt`: meter now renders in both modes with PIN-specific copy and a 3-of-5 cap; PIN gets its own three checks; TRY chips read from the generator.
+  - **Tests:** `PinStrengthTest` (incl. all 100k six-digit PINs against the ceiling), `PassphraseSuggestionsTest` (500 draws for distinctness, 200 for variation).
+- **Irreversible Actions:** none.
+- **Payload/Schema Changes:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:core:test`, `:app:deadComposables` (109 checked) — green.
+- **Resulting App State:** **not verified on hardware** — device unplugged. Joins the two checks already queued.
+- **Next Sprint Phase:** on device — PIN meter behaviour, fresh TRY chips per visit, step 4 usable in landscape, and FLAG_SECURE flipping at completion.
 ## [2026-08-27 10:45:00] - Landscape onboarding was a dead end
 
 ### 1. Intent, Roles, & Context

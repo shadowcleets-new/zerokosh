@@ -19,6 +19,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import org.zerokosh.core.model.Record
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.R
 import org.zerokosh.app.data.VaultState
@@ -29,57 +30,61 @@ import java.util.concurrent.TimeUnit
 
 class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
+    /** Inside the window that starts `daysBefore` ahead and ends on the day. */
+    private fun isDue(dateStr: String?, daysBefore: Int, today: LocalDate): Boolean {
+        val raw = dateStr ?: return false
+        val due = runCatching { LocalDate.parse(raw.take(10), DateTimeFormatter.ISO_LOCAL_DATE) }
+            .getOrNull() ?: return false
+        return !today.isBefore(due.minusDays(daysBefore.toLong())) && !today.isAfter(due)
+    }
+
+    private fun notifyFor(record: Record, id: Int) {
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
+            .setContentTitle(applicationContext.getString(R.string.scr_reminder_title))
+            .setContentText(applicationContext.getString(R.string.scr_reminder_body, record.title))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(applicationContext).notify(id, notification)
+    }
+
+    /**
+     * The dates worth a reminder: the user's own, plus a 30-day default on the
+     * common ones they did not set (§5.7). Returns field ids only so the
+     * notifying stays in one place.
+     */
+    private fun dueFields(record: Record, today: LocalDate): List<String> {
+        val explicit = record.reminders
+            .filter { isDue(record.fields[it.field_id], it.days_before, today) }
+            .map { it.field_id }
+        val suggested = AUTO_SUGGEST_FIELDS
+            .filter { field -> record.reminders.none { it.field_id == field } }
+            .filter { isDue(record.fields[it], AUTO_SUGGEST_DAYS, today) }
+        return explicit + suggested
+    }
+
     override suspend fun doWork(): Result {
         val app = applicationContext as? ZerokoshApp ?: return Result.success()
         if (app.repository.state.value != VaultState.Unlocked) return Result.success()
         val body = app.repository.body.value ?: return Result.success()
         ensureChannel(applicationContext)
+
         val today = LocalDate.now()
-        val fmt = DateTimeFormatter.ISO_LOCAL_DATE
         var notifId = 7000
         for (record in body.records) {
-            for (reminder in record.reminders) {
-                val dateStr = record.fields[reminder.field_id] ?: continue
-                val due = runCatching { LocalDate.parse(dateStr.take(10), fmt) }.getOrNull() ?: continue
-                val trigger = due.minusDays(reminder.days_before.toLong())
-                if (!today.isBefore(trigger) && !today.isAfter(due)) {
-                    val text = applicationContext.getString(
-                        R.string.scr_reminder_body,
-                        record.title,
-                    )
-                    val n = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
-                        .setContentTitle(applicationContext.getString(R.string.scr_reminder_title))
-                        .setContentText(text)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setAutoCancel(true)
-                        .build()
-                    NotificationManagerCompat.from(applicationContext).notify(notifId++, n)
-                }
-            }
-            // Auto-suggest 30-day reminders for common date fields (§5.7)
-            for (fieldId in listOf("expiry", "premium_due_date", "membership_renewal", "renewal_date")) {
-                if (record.reminders.any { it.field_id == fieldId }) continue
-                val dateStr = record.fields[fieldId] ?: continue
-                val due = runCatching { LocalDate.parse(dateStr.take(10), fmt) }.getOrNull() ?: continue
-                val trigger = due.minusDays(30)
-                if (!today.isBefore(trigger) && !today.isAfter(due)) {
-                    val text = applicationContext.getString(R.string.scr_reminder_body, record.title)
-                    val n = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
-                        .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
-                        .setContentTitle(applicationContext.getString(R.string.scr_reminder_title))
-                        .setContentText(text)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        .setAutoCancel(true)
-                        .build()
-                    NotificationManagerCompat.from(applicationContext).notify(notifId++, n)
-                }
-            }
+            repeat(dueFields(record, today).size) { notifyFor(record, notifId++) }
         }
         return Result.success()
     }
 
     companion object {
+        /** Date fields that get a default reminder when the user set none (§5.7). */
+        val AUTO_SUGGEST_FIELDS = listOf(
+            "expiry", "premium_due_date", "membership_renewal", "renewal_date", "maturity_date",
+        )
+        const val AUTO_SUGGEST_DAYS = 30
+
         const val CHANNEL_ID = "zerokosh_reminders"
         const val WORK_NAME = "zerokosh_daily_reminders"
         const val RUN_NOW_NAME = "zerokosh_reminders_on_unlock"

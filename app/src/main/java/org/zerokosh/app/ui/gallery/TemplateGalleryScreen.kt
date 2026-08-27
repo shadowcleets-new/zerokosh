@@ -52,6 +52,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import org.zerokosh.app.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -814,29 +816,39 @@ private fun BrandGridTile(item: GalleryItem, fields: Int, onClick: () -> Unit) {
 // #endregion
 
 // #region Template name lookup
-@Composable
-fun templateName(templateId: String): String = androidx.compose.ui.res.stringResource(
-    when (templateId) {
-        "bank_account" -> org.zerokosh.app.R.string.tpl_bank_account
-        "card" -> org.zerokosh.app.R.string.tpl_card
-        "upi" -> org.zerokosh.app.R.string.tpl_upi
-        "demat" -> org.zerokosh.app.R.string.tpl_demat
-        "insurance" -> org.zerokosh.app.R.string.tpl_insurance
-        "gov_id" -> org.zerokosh.app.R.string.tpl_gov_id
-        "pan_card" -> org.zerokosh.app.R.string.tpl_gov_id
-        "aadhaar_card" -> org.zerokosh.app.R.string.tpl_gov_id
-        "passport" -> org.zerokosh.app.R.string.tpl_gov_id
-        "driving_license" -> org.zerokosh.app.R.string.tpl_gov_id
-        "voter_id" -> org.zerokosh.app.R.string.tpl_gov_id
-        "digilocker" -> org.zerokosh.app.R.string.tpl_gov_id
-        "epf_pension" -> org.zerokosh.app.R.string.tpl_epf_pension
-        "shopping" -> org.zerokosh.app.R.string.tpl_app_profile
-        "transit" -> org.zerokosh.app.R.string.tpl_app_profile
-        "utility" -> org.zerokosh.app.R.string.tpl_utility
-        "telecom" -> org.zerokosh.app.R.string.tpl_telecom
-        "app_profile" -> org.zerokosh.app.R.string.tpl_app_profile
-        "login" -> org.zerokosh.app.R.string.tpl_login
-        else -> org.zerokosh.app.R.string.tpl_secure_note
-    },
+/**
+ * Display name per template. A map rather than a 21-arm `when`: the branches
+ * carried no logic, only data, and as data the gaps were visible — shopping and
+ * transit were showing the app-profile title even after gaining their own, and
+ * travel_booking was falling through to "Secure note".
+ *
+ * The six government IDs deliberately share one title: on a list, "Government
+ * ID" groups better than six near-identical names.
+ */
+private val TEMPLATE_TITLES: Map<String, Int> = mapOf(
+    "bank_account" to R.string.tpl_bank_account,
+    "card" to R.string.tpl_card,
+    "upi" to R.string.tpl_upi,
+    "demat" to R.string.tpl_demat,
+    "insurance" to R.string.tpl_insurance,
+    "gov_id" to R.string.tpl_gov_id,
+    "pan_card" to R.string.tpl_gov_id,
+    "aadhaar_card" to R.string.tpl_gov_id,
+    "passport" to R.string.tpl_gov_id,
+    "driving_license" to R.string.tpl_gov_id,
+    "voter_id" to R.string.tpl_gov_id,
+    "digilocker" to R.string.tpl_gov_id,
+    "epf_pension" to R.string.tpl_epf_pension,
+    "shopping" to R.string.tpl_shopping,
+    "transit" to R.string.tpl_transit,
+    "travel_booking" to R.string.tpl_travel_booking,
+    "utility" to R.string.tpl_utility,
+    "telecom" to R.string.tpl_telecom,
+    "app_profile" to R.string.tpl_app_profile,
+    "login" to R.string.tpl_login,
 )
+
+@Composable
+fun templateName(templateId: String): String =
+    stringResource(TEMPLATE_TITLES[templateId] ?: R.string.tpl_secure_note)
 // #endregion

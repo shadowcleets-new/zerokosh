@@ -48,108 +48,96 @@ class ZerokoshAutofillService : AutofillService() {
         super.onDestroy()
     }
 
+    /** Offered on every response so a new credential can still be captured. */
+    private fun saveInfoFor(parsed: Parsed): SaveInfo? {
+        val username = parsed.usernameId ?: return null
+        val password = parsed.passwordId ?: return null
+        return SaveInfo.Builder(
+            SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD,
+            arrayOf(username, password),
+        ).build()
+    }
+
+    private fun addInline(
+        builder: Dataset.Builder,
+        request: FillRequest,
+        index: Int,
+        title: String,
+        subtitle: String?,
+    ) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
+        if (index >= InlineSuggestions.maxSuggestions(request)) return
+        InlineSuggestions.build(this, request, index, title, subtitle)
+            ?.let { builder.setInlinePresentation(it) }
+    }
+
+    /**
+     * A shut vault has nothing to offer but a way in, so the single dataset is
+     * an authentication trigger rather than a value.
+     */
+    private fun lockedDataset(request: FillRequest, parsed: Parsed): Dataset {
+        val pending = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val label = getString(R.string.scr_autofill_unlock_first)
+        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
+            setTextViewText(android.R.id.text1, label)
+        }
+        val builder = Dataset.Builder(presentation)
+        parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText("")) }
+        parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText("")) }
+        addInline(builder, request, 0, label, null)
+        builder.setAuthentication(pending.intentSender)
+        return builder.build()
+    }
+
+    /** The first non-empty of the field names this template family might use. */
+    private fun firstOf(record: Record, vararg keys: String): String =
+        keys.firstNotNullOfOrNull { record.fields[it]?.takeIf(String::isNotBlank) }.orEmpty()
+
+    private fun datasetFor(request: FillRequest, parsed: Parsed, record: Record, index: Int): Dataset {
+        val username = firstOf(record, "username", "registered_email", "registered_mobile")
+        val password = firstOf(record, "password", "password_if_any", "login_password")
+        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_2).apply {
+            setTextViewText(android.R.id.text1, record.title)
+            setTextViewText(android.R.id.text2, username)
+        }
+        val builder = Dataset.Builder(presentation)
+        parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText(username)) }
+        parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText(password)) }
+        // Both presentations on one dataset: the platform draws the chip where
+        // the IME has a strip and falls back to the dropdown where it does not.
+        addInline(builder, request, index, record.title, username.ifBlank { null })
+        return builder.build()
+    }
+
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
         callback: FillCallback,
     ) {
         val structure = request.fillContexts.lastOrNull()?.structure
-        if (structure == null) {
-            callback.onSuccess(null)
-            return
-        }
-        val parsed = parseStructure(structure)
-        if (parsed.usernameId == null && parsed.passwordId == null) {
+        val parsed = structure?.let(::parseStructure)
+        if (parsed == null || (parsed.usernameId == null && parsed.passwordId == null)) {
             callback.onSuccess(null)
             return
         }
 
         val app = application as ZerokoshApp
-        if (app.repository.state.value != VaultState.Unlocked) {
-            // Require unlock — authentication activity
-            val authIntent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            val pending = PendingIntent.getActivity(
-                this, 0, authIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-            val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-                setTextViewText(android.R.id.text1, getString(R.string.scr_autofill_unlock_first))
-            }
-            val builder = Dataset.Builder(presentation)
-            parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText("")) }
-            parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText("")) }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-                InlineSuggestions.maxSuggestions(request) > 0
-            ) {
-                InlineSuggestions.build(
-                    this, request, 0,
-                    getString(R.string.scr_autofill_unlock_first), null,
-                )?.let { builder.setInlinePresentation(it) }
-            }
-            builder.setAuthentication(pending.intentSender)
-            val response = FillResponse.Builder()
-                .addDataset(builder.build())
-                .build()
-            callback.onSuccess(response)
-            return
-        }
-
-        val body = app.repository.body.value
-        val matches = matchRecords(body?.records.orEmpty(), parsed.packageName, parsed.webDomain)
-        if (matches.isEmpty()) {
-            // Still offer save for new credentials
-            val response = FillResponse.Builder()
-            if (parsed.usernameId != null && parsed.passwordId != null) {
-                response.setSaveInfo(
-                    SaveInfo.Builder(
-                        SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD,
-                        arrayOf(parsed.usernameId, parsed.passwordId),
-                    ).build(),
-                )
-            }
-            callback.onSuccess(response.build())
-            return
-        }
-
         val response = FillResponse.Builder()
-        val inlineSlots = InlineSuggestions.maxSuggestions(request)
-        for ((index, record) in matches.take(5).withIndex()) {
-            val username = record.fields["username"]
-                ?: record.fields["registered_email"]
-                ?: record.fields["registered_mobile"]
-                ?: ""
-            val password = record.fields["password"]
-                ?: record.fields["password_if_any"]
-                ?: record.fields["login_password"]
-                ?: ""
-            val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_2).apply {
-                setTextViewText(android.R.id.text1, record.title)
-                setTextViewText(android.R.id.text2, username)
-            }
-            val ds = Dataset.Builder(presentation)
-            parsed.usernameId?.let { ds.setValue(it, AutofillValue.forText(username)) }
-            parsed.passwordId?.let { ds.setValue(it, AutofillValue.forText(password)) }
-            // Both presentations on one dataset: the platform draws the chip
-            // where the IME has a strip, and falls back to the dropdown where
-            // it does not. Only the first `inlineSlots` get a chip, because
-            // asking for more than the keyboard offered is a no-op at best.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && index < inlineSlots) {
-                InlineSuggestions.build(
-                    this, request, index, record.title, username.ifBlank { null },
-                )?.let { ds.setInlinePresentation(it) }
-            }
-            response.addDataset(ds.build())
+        if (app.repository.state.value != VaultState.Unlocked) {
+            callback.onSuccess(response.addDataset(lockedDataset(request, parsed)).build())
+            return
         }
-        if (parsed.usernameId != null && parsed.passwordId != null) {
-            response.setSaveInfo(
-                SaveInfo.Builder(
-                    SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD,
-                    arrayOf(parsed.usernameId, parsed.passwordId),
-                ).build(),
-            )
+
+        val matches = matchRecords(app.repository.body.value?.records.orEmpty(), parsed.packageName, parsed.webDomain)
+        matches.take(5).forEachIndexed { index, record ->
+            response.addDataset(datasetFor(request, parsed, record, index))
         }
+        // Offered even with no matches, so a brand new credential can be saved.
+        saveInfoFor(parsed)?.let(response::setSaveInfo)
         callback.onSuccess(response.build())
     }
 
@@ -217,52 +205,74 @@ class ZerokoshAutofillService : AutofillService() {
         val passwordValue: String = "",
     )
 
-    private fun parseStructure(structure: AssistStructure): Parsed {
-        var packageName = structure.activityComponent?.packageName.orEmpty()
+    /** An HTML `type=` attribute, when the node came from a web view. */
+    private fun htmlType(node: AssistStructure.ViewNode): String? =
+        node.htmlInfo?.attributes
+            ?.firstOrNull { it.first.equals("type", true) }
+            ?.second
+            ?.lowercase()
+
+    private fun isPasswordNode(node: AssistStructure.ViewNode, hints: List<String>): Boolean {
+        if (hints.any { it.contains("password") }) return true
+        if (htmlType(node) == "password") return true
+        val type = node.inputType
+        return (type and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
+            (type and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0
+    }
+
+    private fun isUsernameNode(node: AssistStructure.ViewNode, hints: List<String>): Boolean {
+        if (hints.any { it.contains("username") || it.contains("email") }) return true
+        return htmlType(node) in setOf("email", "text")
+    }
+
+    /**
+     * Mutable while the tree is walked, then frozen into [Parsed]. A class
+     * rather than six captured locals so the walk can be a real function
+     * instead of a closure nested inside its caller.
+     */
+    private class Scan(var packageName: String) {
         var webDomain: String? = null
         var usernameId: AutofillId? = null
         var passwordId: AutofillId? = null
         var usernameValue = ""
         var passwordValue = ""
 
-        fun walk(node: AssistStructure.ViewNode) {
-            val hints = node.autofillHints?.map { it.lowercase() }.orEmpty()
-            val id = node.autofillId
-            val html = node.htmlInfo
-            val inputType = node.inputType
-            if (node.webDomain != null) webDomain = node.webDomain
-            if (packageName.isEmpty() && node.idPackage != null) packageName = node.idPackage!!
+        fun toParsed() = Parsed(packageName, webDomain, usernameId, passwordId, usernameValue, passwordValue)
+    }
 
-            val isPassword = hints.any { it.contains("password") } ||
-                html?.attributes?.any { it.first.equals("type", true) && it.second.equals("password", true) } == true ||
-                (inputType and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
-                (inputType and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0
-
-            val isUsername = hints.any {
-                it.contains("username") || it.contains("email") || it == "emailAddress".lowercase()
-            } || html?.attributes?.any {
-                it.first.equals("type", true) && (it.second.equals("email", true) || it.second.equals("text", true))
-            } == true
-
-            // autofillValue is only filled in on a save request. Reading it
-            // here is what makes saving possible at all: the ids alone name
-            // fields whose contents were never looked at.
-            val typed = node.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty()
-            if (id != null) {
-                if (isPassword && passwordId == null) {
-                    passwordId = id
-                    if (typed.isNotEmpty()) passwordValue = typed
-                } else if (isUsername && usernameId == null && !isPassword) {
-                    usernameId = id
-                    if (typed.isNotEmpty()) usernameValue = typed
-                }
-            }
-            for (i in 0 until node.childCount) walk(node.getChildAt(i))
+    /**
+     * autofillValue is only populated on a save request. Reading it is what
+     * makes saving possible at all: the ids alone name fields whose contents
+     * were never looked at.
+     */
+    private fun Scan.record(node: AssistStructure.ViewNode, hints: List<String>) {
+        val id = node.autofillId ?: return
+        val typed = node.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty()
+        if (isPasswordNode(node, hints)) {
+            if (passwordId != null) return
+            passwordId = id
+            if (typed.isNotEmpty()) passwordValue = typed
+            return
         }
+        if (usernameId != null || !isUsernameNode(node, hints)) return
+        usernameId = id
+        if (typed.isNotEmpty()) usernameValue = typed
+    }
+
+    private fun walk(node: AssistStructure.ViewNode, scan: Scan) {
+        val hints = node.autofillHints?.map { it.lowercase() }.orEmpty()
+        node.webDomain?.let { scan.webDomain = it }
+        if (scan.packageName.isEmpty()) node.idPackage?.let { scan.packageName = it }
+        scan.record(node, hints)
+        for (i in 0 until node.childCount) walk(node.getChildAt(i), scan)
+    }
+
+    private fun parseStructure(structure: AssistStructure): Parsed {
+        val scan = Scan(structure.activityComponent?.packageName.orEmpty())
         for (i in 0 until structure.windowNodeCount) {
-            walk(structure.getWindowNodeAt(i).rootViewNode)
+            walk(structure.getWindowNodeAt(i).rootViewNode, scan)
         }
-        return Parsed(packageName, webDomain, usernameId, passwordId, usernameValue, passwordValue)
+        return scan.toParsed()
     }
 
     private fun matchRecords(records: List<Record>, packageName: String, webDomain: String?): List<Record> {

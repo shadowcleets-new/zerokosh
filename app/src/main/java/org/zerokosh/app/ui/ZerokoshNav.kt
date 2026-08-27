@@ -231,9 +231,14 @@ private val TabRoutes = mapOf(
     VaultTab.Settings to "settings",
 )
 
-/** Date fields ReminderWorker auto-suggests a 30-day reminder for (§5.7). */
-private val ReminderDateFields =
-    listOf("expiry", "premium_due_date", "membership_renewal", "renewal_date", "maturity_date")
+/**
+ * Date fields ReminderWorker auto-suggests a 30-day reminder for (§5.7).
+ *
+ * Read from the worker rather than repeated here. It was repeated here, and the
+ * two lists had already drifted: maturity_date was added to this copy and not
+ * to the worker's, so the app offered a reminder it would never raise.
+ */
+private val ReminderDateFields = ReminderWorker.AUTO_SUGGEST_FIELDS
 
 @Composable
 private fun MainScaffold(app: ZerokoshApp) {

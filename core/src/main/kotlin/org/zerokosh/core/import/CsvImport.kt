@@ -182,12 +182,18 @@ object CsvImport {
                     (url.isNotBlank() || user.isNotBlank())
             }
             if (match != null) {
-                update += rec.copy(
-                    uuid = match.uuid,
-                    created_at = match.created_at,
-                    rev = match.rev,
-                    favorite = match.favorite,
-                    tags = match.tags,
+                // Update the existing record; do not rebuild it from the CSV row.
+                // Copying the other way round dropped everything an export format
+                // has no column for: the institution (and with it the brand tile
+                // and the institution grouping), the template, custom fields,
+                // reminders, older password history, and any field the file did
+                // not carry — a TOTP secret among them. An import that silently
+                // removes a working 2FA code is worse than a duplicate row.
+                update += match.copy(
+                    title = rec.title.ifBlank { match.title },
+                    fields = match.fields + rec.fields.filterValues { it.isNotBlank() },
+                    modified_at = rec.modified_at,
+                    device_id = rec.device_id,
                 )
             } else {
                 insert += rec

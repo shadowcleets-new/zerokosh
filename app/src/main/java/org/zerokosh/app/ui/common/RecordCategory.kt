@@ -57,9 +57,16 @@ val Record.category: RecordCategory
  */
 fun recordMeta(catalog: AssetCatalog, record: Record): String {
     val template = catalog.templates.byId(record.template_id)
-    val entry = record.fields.entries.firstOrNull { (key, value) ->
-        val field = template?.fields?.firstOrNull { it.k == key }
-        value.isNotBlank() &&
+    // Template order, not map order. `fields` is a plain Map, so its iteration
+    // order is whatever order the editor happened to write the keys in — clear
+    // a website, fill in a username, then retype the website and the URL lands
+    // last. The row under the title then reads "••••••••••••" (a masked
+    // username) instead of the site the record is for. Template order is the
+    // order the user sees in the editor, which is the one they expect here.
+    val ordered = (template?.fields?.map { it.k }.orEmpty() + record.fields.keys).distinct()
+    val key = ordered.firstOrNull { k ->
+        val field = template?.fields?.firstOrNull { it.k == k }
+        record.fields[k].orEmpty().isNotBlank() &&
             (field?.sensitivity ?: Sensitivity.L) != Sensitivity.H &&
             // A LINK field holds the linked record's uuid, so rendering it put
             // "30151a25-7f72-4e3b-..." under Google Pay instead of its UPI ID.
@@ -68,8 +75,8 @@ fun recordMeta(catalog: AssetCatalog, record: Record): String {
             // here just to print a title.
             field?.type != FieldType.LINK
     } ?: return record.institution
-    val field = template?.fields?.firstOrNull { it.k == entry.key }
-    return maskedValue(entry.value, field, revealed = false)
+    val field = template?.fields?.firstOrNull { it.k == key }
+    return maskedValue(record.fields.getValue(key), field, revealed = false)
 }
 
 /** The small uppercase badge beside a title: UPI, TOTP or ID. */

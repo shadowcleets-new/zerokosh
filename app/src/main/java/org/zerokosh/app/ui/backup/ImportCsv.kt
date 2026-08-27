@@ -40,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.core.import.CsvImport
 import org.zerokosh.core.model.Record
 // #endregion
@@ -108,9 +109,10 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
                 busy = true
                 scope.launch {
                     app.repository.upsertRecords(p.insert + p.update)
+                        .onSuccess { result = p.insert.size to p.update.size }
+                        .onFailure { error = saveErrorMessage(it) }
                     busy = false
                     pending = null
-                    result = p.insert.size to p.update.size
                 }
             },
         )

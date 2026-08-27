@@ -54,6 +54,8 @@ import org.zerokosh.app.ui.common.PassphraseAuthDialog
 import org.zerokosh.app.ui.common.RevealAuth
 import org.zerokosh.app.ui.common.fieldLabel
 import org.zerokosh.app.ui.common.groupCardNumber
+import org.zerokosh.app.ui.common.SaveErrorDialog
+import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.app.ui.common.maskedValue
 import org.zerokosh.core.model.Record
 import org.zerokosh.app.ui.theme.JetBrainsMono
@@ -81,6 +83,7 @@ fun RecordDetailScreen(
     val record = body?.records?.firstOrNull { it.uuid == uuid } ?: run { onClose(); return }
     val template = app.catalog.templates.byId(record.template_id)
     val scope = rememberCoroutineScope()
+    var saveError by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     val sharedScope = LocalSharedTransitionScope.current
@@ -288,7 +291,8 @@ fun RecordDetailScreen(
                     confirmDelete = false
                     scope.launch {
                         app.repository.deleteRecord(uuid)
-                        onClose()
+                            .onSuccess { onClose() }
+                            .onFailure { saveError = saveErrorMessage(it) }
                     }
                 }) { Text(stringResource(R.string.scr_detail_delete_confirm_yes), color = MaterialTheme.colorScheme.error) }
             },
@@ -297,6 +301,8 @@ fun RecordDetailScreen(
             },
         )
     }
+
+    SaveErrorDialog(saveError) { saveError = null }
 }
 
 /**

@@ -79,6 +79,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import org.zerokosh.app.ui.common.SaveErrorDialog
+import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.BrandTile
 import org.zerokosh.app.ui.common.Kicker
@@ -170,6 +172,7 @@ fun RecordEditScreen(
     var customFields by remember { mutableStateOf(existing?.custom_fields ?: emptyList()) }
     var showAddField by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var saveError by remember { mutableStateOf<String?>(null) }
 
     fun invalidFields(): List<String> = template.fields.filter { f ->
         val v = values[f.k].orEmpty()
@@ -235,7 +238,8 @@ fun RecordEditScreen(
                     )
                     scope.launch {
                         app.repository.upsertRecord(record)
-                        onDone()
+                            .onSuccess { onDone() }
+                            .onFailure { saveError = saveErrorMessage(it) }
                     }
                 }
 
@@ -412,6 +416,8 @@ fun RecordEditScreen(
             },
         )
     }
+
+    SaveErrorDialog(saveError) { saveError = null }
 }
 
 /** One user-named field: the label is fixed, the value edits like any secret or text. */

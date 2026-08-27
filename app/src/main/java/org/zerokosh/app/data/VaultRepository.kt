@@ -59,6 +59,9 @@ sealed interface ImportOutcome {
 }
 // #endregion
 
+/** Whether a mutation reached disk. Callers must not assume it did. */
+typealias SaveResult = Result<Unit>
+
 class VaultRepository(
     val crypto: AndroidCrypto,
     @Volatile var store: VaultStore,
@@ -239,7 +242,18 @@ class VaultRepository(
     // #endregion
 
     // #region Persistence (§4.4 atomic write + §4.5 merge-before-write)
-    private suspend fun persist(newBody: VaultBody) = ioMutex.withLock {
+    /**
+     * The write can genuinely fail. A sync folder's permission grant lapses when
+     * the user moves the folder or clears their cloud app's data, and the SAF
+     * store throws in five places when it does. Every caller used to launch a
+     * save, navigate away, and never learn — the record was gone and the screen
+     * said nothing. A vault that loses a write in silence has broken the one
+     * promise it makes, so the outcome is a value the caller must look at.
+     */
+    private suspend fun persist(newBody: VaultBody): SaveResult =
+        runCatching { persistOrThrow(newBody) }
+
+    private suspend fun persistOrThrow(newBody: VaultBody) = ioMutex.withLock {
         withContext(Dispatchers.Default) {
             val key = vaultKey ?: error("locked")
             var env = envelope ?: error("locked")
@@ -385,8 +399,8 @@ class VaultRepository(
      */
     var secretKeysFor: (String) -> Set<String> = { emptySet() }
 
-    suspend fun upsertRecord(record: Record) {
-        val current = _body.value ?: return
+    suspend fun upsertRecord(record: Record): SaveResult {
+        val current = _body.value ?: return SaveResult.success(Unit)
         val now = System.currentTimeMillis()
         val existing = current.records.firstOrNull { it.uuid == record.uuid }
         val prepared = if (existing == null) {
@@ -408,7 +422,7 @@ class VaultRepository(
         }
         val records = if (existing == null) current.records + prepared
         else current.records.map { if (it.uuid == prepared.uuid) prepared else it }
-        persist(
+        return persist(
             current.copy(
                 records = records,
                 meta = current.meta.copy(device_names = current.meta.device_names + (prefs.deviceId to deviceName())),
@@ -420,9 +434,9 @@ class VaultRepository(
      * Bulk insert/update in one write. Importing 200 logins through
      * upsertRecord would re-encrypt and re-write the whole vault 200 times.
      */
-    suspend fun upsertRecords(incoming: List<Record>) {
-        if (incoming.isEmpty()) return
-        val current = _body.value ?: return
+    suspend fun upsertRecords(incoming: List<Record>): SaveResult {
+        if (incoming.isEmpty()) return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.success(Unit)
         val now = System.currentTimeMillis()
         val byUuid = current.records.associateBy { it.uuid }
         val prepared = incoming.map { record ->
@@ -442,7 +456,7 @@ class VaultRepository(
             }
         }
         val preparedByUuid = prepared.associateBy { it.uuid }
-        persist(
+        return persist(
             current.copy(
                 records = current.records.map { preparedByUuid[it.uuid] ?: it } +
                     prepared.filter { it.uuid !in byUuid },
@@ -452,36 +466,36 @@ class VaultRepository(
     }
 
     /** Moves the record to trash for 30 days; the tombstone is written too. */
-    suspend fun deleteRecord(uuid: String) {
-        val current = _body.value ?: return
-        persist(VaultMerge.applyDeletion(current, uuid, System.currentTimeMillis()))
+    suspend fun deleteRecord(uuid: String): SaveResult {
+        val current = _body.value ?: return SaveResult.success(Unit)
+        return persist(VaultMerge.applyDeletion(current, uuid, System.currentTimeMillis()))
     }
 
-    suspend fun restoreRecord(uuid: String) {
-        val current = _body.value ?: return
-        persist(VaultMerge.applyRestore(current, uuid, System.currentTimeMillis()))
+    suspend fun restoreRecord(uuid: String): SaveResult {
+        val current = _body.value ?: return SaveResult.success(Unit)
+        return persist(VaultMerge.applyRestore(current, uuid, System.currentTimeMillis()))
     }
 
     /** Permanent. The tombstone stays behind so the deletion still syncs. */
-    suspend fun purgeRecord(uuid: String) {
-        val current = _body.value ?: return
-        persist(VaultMerge.applyPurge(current, uuid))
+    suspend fun purgeRecord(uuid: String): SaveResult {
+        val current = _body.value ?: return SaveResult.success(Unit)
+        return persist(VaultMerge.applyPurge(current, uuid))
     }
 
-    suspend fun emptyTrash() {
-        val current = _body.value ?: return
-        persist(current.copy(trash = emptyList()))
+    suspend fun emptyTrash(): SaveResult {
+        val current = _body.value ?: return SaveResult.success(Unit)
+        return persist(current.copy(trash = emptyList()))
     }
 
     /** Drops every remembered previous secret for one record. */
-    suspend fun forgetHistory(uuid: String) {
-        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return
-        upsertRecord(record.withoutHistory())
+    suspend fun forgetHistory(uuid: String): SaveResult {
+        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return SaveResult.success(Unit)
+        return upsertRecord(record.withoutHistory())
     }
 
-    suspend fun toggleFavorite(uuid: String) {
-        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return
-        upsertRecord(record.copy(favorite = !record.favorite))
+    suspend fun toggleFavorite(uuid: String): SaveResult {
+        val record = _body.value?.records?.firstOrNull { it.uuid == uuid } ?: return SaveResult.success(Unit)
+        return upsertRecord(record.copy(favorite = !record.favorite))
     }
 
     private fun deviceName(): String = "${Build.MANUFACTURER} ${Build.MODEL}".trim()

@@ -7,22 +7,18 @@
 package org.zerokosh.app.autofill
 
 // #region Imports
-import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Intent
 import android.os.Build
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
-import android.service.autofill.Dataset
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
+import android.service.autofill.InlinePresentation
 import android.service.autofill.SaveCallback
-import android.service.autofill.SaveInfo
 import android.service.autofill.SaveRequest
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillValue
-import android.widget.RemoteViews
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,7 +30,6 @@ import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
 import org.zerokosh.app.data.VaultState
 import org.zerokosh.core.model.Record
-import java.net.URI
 // #endregion
 
 class ZerokoshAutofillService : AutofillService() {
@@ -48,97 +43,56 @@ class ZerokoshAutofillService : AutofillService() {
         super.onDestroy()
     }
 
-    /** Offered on every response so a new credential can still be captured. */
-    private fun saveInfoFor(parsed: Parsed): SaveInfo? {
-        val username = parsed.usernameId ?: return null
-        val password = parsed.passwordId ?: return null
-        return SaveInfo.Builder(
-            SaveInfo.SAVE_DATA_TYPE_USERNAME or SaveInfo.SAVE_DATA_TYPE_PASSWORD,
-            arrayOf(username, password),
-        ).build()
-    }
-
-    private fun addInline(
-        builder: Dataset.Builder,
-        request: FillRequest,
-        index: Int,
-        title: String,
-        subtitle: String?,
-    ) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
-        if (index >= InlineSuggestions.maxSuggestions(request)) return
-        InlineSuggestions.build(this, request, index, title, subtitle)
-            ?.let { builder.setInlinePresentation(it) }
-    }
-
-    /**
-     * A shut vault has nothing to offer but a way in, so the single dataset is
-     * an authentication trigger rather than a value.
-     */
-    private fun lockedDataset(request: FillRequest, parsed: Parsed): Dataset {
-        val pending = PendingIntent.getActivity(
-            this, 0,
-            Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        val label = getString(R.string.scr_autofill_unlock_first)
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-            setTextViewText(android.R.id.text1, label)
-        }
-        val builder = Dataset.Builder(presentation)
-        parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText("")) }
-        parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText("")) }
-        addInline(builder, request, 0, label, null)
-        builder.setAuthentication(pending.intentSender)
-        return builder.build()
-    }
-
-    /** The first non-empty of the field names this template family might use. */
-    private fun firstOf(record: Record, vararg keys: String): String =
-        keys.firstNotNullOfOrNull { record.fields[it]?.takeIf(String::isNotBlank) }.orEmpty()
-
-    private fun datasetFor(request: FillRequest, parsed: Parsed, record: Record, index: Int): Dataset {
-        val username = firstOf(record, "username", "registered_email", "registered_mobile")
-        val password = firstOf(record, "password", "password_if_any", "login_password")
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_2).apply {
-            setTextViewText(android.R.id.text1, record.title)
-            setTextViewText(android.R.id.text2, username)
-        }
-        val builder = Dataset.Builder(presentation)
-        parsed.usernameId?.let { builder.setValue(it, AutofillValue.forText(username)) }
-        parsed.passwordId?.let { builder.setValue(it, AutofillValue.forText(password)) }
-        // Both presentations on one dataset: the platform draws the chip where
-        // the IME has a strip and falls back to the dropdown where it does not.
-        addInline(builder, request, index, record.title, username.ifBlank { null })
-        return builder.build()
-    }
-
     override fun onFillRequest(
         request: FillRequest,
         cancellationSignal: CancellationSignal,
         callback: FillCallback,
     ) {
         val structure = request.fillContexts.lastOrNull()?.structure
-        val parsed = structure?.let(::parseStructure)
-        if (parsed == null || (parsed.usernameId == null && parsed.passwordId == null)) {
+        val targets = structure?.let(::parseStructure)?.targets
+        if (targets == null || targets.isEmpty) {
             callback.onSuccess(null)
             return
         }
 
         val app = application as ZerokoshApp
-        val response = FillResponse.Builder()
         if (app.repository.state.value != VaultState.Unlocked) {
-            callback.onSuccess(response.addDataset(lockedDataset(request, parsed)).build())
+            // Response-level auth: MainActivity carries the unlock and hands the
+            // finished response back through EXTRA_AUTHENTICATION_RESULT, so the
+            // form the user was standing in is filled the moment they are in.
+            callback.onSuccess(AutofillFill.lockedResponse(this, targets))
             return
         }
+        callback.onSuccess(unlockedResponse(request, app, targets))
+    }
 
-        val matches = matchRecords(app.repository.body.value?.records.orEmpty(), parsed.packageName, parsed.webDomain)
+    /**
+     * The same content as [AutofillFill.responseFor], plus the inline chips that
+     * only exist here — building one needs the FillRequest, which the auth
+     * activity never sees.
+     */
+    private fun unlockedResponse(
+        request: FillRequest,
+        app: ZerokoshApp,
+        targets: FieldTargets,
+    ): FillResponse? {
+        val matches = AutofillFill.matchRecords(app, targets)
+        val saveInfo = AutofillFill.saveInfoFor(targets)
+        if (matches.isEmpty() && saveInfo == null) return null
+        val response = FillResponse.Builder()
         matches.take(5).forEachIndexed { index, record ->
-            response.addDataset(datasetFor(request, parsed, record, index))
+            val inline = inlineFor(request, index, record)
+            response.addDataset(AutofillFill.datasetFor(this, targets, record, inline))
         }
-        // Offered even with no matches, so a brand new credential can be saved.
-        saveInfoFor(parsed)?.let(response::setSaveInfo)
-        callback.onSuccess(response.build())
+        saveInfo?.let(response::setSaveInfo)
+        return response.build()
+    }
+
+    private fun inlineFor(request: FillRequest, index: Int, record: Record): InlinePresentation? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        if (index >= InlineSuggestions.maxSuggestions(request)) return null
+        val username = AutofillFill.usernameOf(record).ifBlank { null }
+        return InlineSuggestions.build(this, request, index, record.title, username)
     }
 
     /**
@@ -194,6 +148,9 @@ class ZerokoshAutofillService : AutofillService() {
             }
         }
     }
+
+    private val Parsed.targets: FieldTargets
+        get() = FieldTargets(packageName, webDomain, usernameId, passwordId)
 
     private data class Parsed(
         val packageName: String,
@@ -273,39 +230,6 @@ class ZerokoshAutofillService : AutofillService() {
             walk(structure.getWindowNodeAt(i).rootViewNode, scan)
         }
         return scan.toParsed()
-    }
-
-    private fun matchRecords(records: List<Record>, packageName: String, webDomain: String?): List<Record> {
-        val domain = webDomain?.lowercase()?.removePrefix("www.")
-            ?: packageName.let { extractDomainHint(it) }
-        val appMap = (application as ZerokoshApp).catalog.appMap
-        return records.filter { rec ->
-            when (rec.template_id) {
-                "login" -> {
-                    val site = rec.fields["website"].orEmpty().lowercase()
-                    domain != null && (site.contains(domain) || domainHost(site) == domain)
-                }
-                "app_profile" -> {
-                    val name = rec.fields["app_name"].orEmpty().lowercase()
-                    val mapped = appMap[packageName]?.lowercase()
-                    mapped != null && (name.contains(mapped) || mapped.contains(name))
-                }
-                else -> false
-            }
-        }.sortedByDescending { it.favorite }
-    }
-
-    private fun domainHost(url: String): String? = try {
-        val withScheme = if (url.contains("://")) url else "https://$url"
-        URI(withScheme).host?.lowercase()?.removePrefix("www.")
-    } catch (_: Exception) {
-        null
-    }
-
-    private fun extractDomainHint(pkg: String): String? {
-        // crude: com.zomato.android → zomato
-        val parts = pkg.split('.')
-        return parts.getOrNull(1)
     }
 
 }

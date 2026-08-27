@@ -85,6 +85,13 @@ android {
             applicationIdSuffix = ".releasecheck"
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += "release"
+            // Shrinking, obfuscation and resource shrinking all stay on — this
+            // variant exists to test the shape that ships, and the monogram
+            // fallback bug only ever appeared with R8 running. Debuggable is
+            // the one difference: without it there is no run-as, so the vault
+            // file cannot be made unwritable and the save-failure path cannot
+            // be exercised on a real device at all. Never published.
+            isDebuggable = true
         }
     }
 

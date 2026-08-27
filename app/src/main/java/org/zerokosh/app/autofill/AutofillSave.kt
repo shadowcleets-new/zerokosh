@@ -62,7 +62,15 @@ fun loginRecordFor(app: ZerokoshApp, credential: PendingSave.Credential): Record
         template_id = "login",
         title = titleFor(app, credential),
         fields = buildMap {
-            credential.webDomain?.takeIf { it.isNotBlank() }?.let { put("website", it) }
+            // A credential captured in a native app has no web domain, and the
+            // login matcher keys entirely off the website field — so storing
+            // nothing here meant the record could never be offered back to the
+            // app it was captured from. matchRecords already derives its hint
+            // from the package name, so the package is exactly the value that
+            // closes the round trip.
+            val site = credential.webDomain?.takeIf { it.isNotBlank() }
+                ?: credential.packageName
+            if (site.isNotBlank()) put("website", site)
             if (credential.username.isNotBlank()) put("username", credential.username)
             put("password", credential.password)
         },

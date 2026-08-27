@@ -1,3 +1,26 @@
+## [2026-08-27 14:20:00] - Autofill "save" was reporting success and saving nothing
+
+### 1. Intent, Roles, & Context
+- **The Problem:** Android's "Save to Zerokosh?" prompt worked, the user tapped yes, and the credential was discarded. Both branches of `onSaveRequest` called `callback.onSuccess()` without writing anything.
+- **Specialist Personas Invoked:** Android Platform Engineer; Principal Security Auditor (silent-failure class).
+- **The Strategy:** the consent already exists by the time the framework calls us — the system asked and was told yes. What was missing was the writing down.
+
+### 2. Surgical Technical Modifications
+- **Two separate bugs in one method:**
+  - Vault locked → returned immediately, dropping the credential.
+  - Vault unlocked → started `MainActivity` with `EXTRA_AUTOFILL_SAVE`, which **nothing read**, and never touched the typed values at all. `parseStructure` only ever returned `AutofillId`s.
+- **Modified Files:**
+  - `autofill/ZerokoshAutofillService.kt`: `Parsed` now carries `usernameValue`/`passwordValue`, read from `node.autofillValue` — populated only on a save request, and the thing that makes saving possible. `onSaveRequest` rewritten: fails honestly when there is nothing to store, saves directly when open, stashes when shut. Work moved off the binder thread onto a service scope cancelled in `onDestroy`.
+  - `autofill/PendingSave.kt` (new): in-memory handoff, same reasoning as `PendingCard` — a password must never travel as an Intent extra. Deliberately survives a lock, since it exists *because* the vault is locked; a 5-minute TTL bounds that instead.
+  - `autofill/AutofillSave.kt` (new): one record builder for both routes. Updates an existing site+user match rather than inserting a duplicate, which also puts the replaced password into that record's history.
+  - `ui/ZerokoshNav.kt`: finishes a stashed save on unlock.
+  - Removed `EXTRA_AUTOFILL_SAVE`/`EXTRA_PACKAGE`/`EXTRA_DOMAIN`, dead once the intent round-trip went.
+- **Irreversible Actions:** none.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:assembleRelease` (dynamic-resource guard ok), `:core:test`, `:app:deadComposables` (116 checked) — green.
+- **Resulting App State:** **not verified on device**; joins the batch.
+- **Next Sprint Phase:** one device pass covering seven items, then publish the repo and make Hindi real.
 ## [2026-08-27 12:40:00] - The release build shipped with no logos at all
 
 ### 1. Intent, Roles, & Context

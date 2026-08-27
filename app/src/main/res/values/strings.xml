@@ -142,6 +142,7 @@
     <string name="scr_settings_security_info">How your data is protected</string>
     <string name="scr_settings_allow_screenshots">Allow screenshots</string>
     <string name="scr_settings_autofill">Autofill service</string>
+    <string name="scr_autofill_save_failed">Zerokosh could not save that login.</string>
     <string name="scr_detail_history_title">Previous passwords</string>
     <string name="scr_detail_history_empty">Nothing replaced yet.</string>
     <string name="scr_settings_autofill_on">Zerokosh</string>

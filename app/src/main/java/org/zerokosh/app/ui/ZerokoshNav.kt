@@ -27,6 +27,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import org.zerokosh.app.autofill.PendingSave
+import org.zerokosh.app.autofill.loginRecordFor
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.ui.health.VaultHealthScreen
 import org.zerokosh.app.ui.trash.TrashScreen
@@ -138,7 +140,17 @@ fun ZerokoshNav(app: ZerokoshApp) {
             RevealAuth.reset()
             LockScreen(app)
         }
-        VaultState.Unlocked -> MainScaffold(app)
+        VaultState.Unlocked -> {
+            // A credential Android asked us to save while the vault was shut.
+            // Finishing it here is what makes "save to Zerokosh" mean anything
+            // when the app was locked at the time — which is most of the time.
+            LaunchedEffect(Unit) {
+                PendingSave.take()?.let { credential ->
+                    app.repository.upsertRecord(loginRecordFor(app, credential))
+                }
+            }
+            MainScaffold(app)
+        }
         VaultState.Damaged -> DamagedScreen()
     }
 }

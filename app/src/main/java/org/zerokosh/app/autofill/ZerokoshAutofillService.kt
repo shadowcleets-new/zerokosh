@@ -23,6 +23,12 @@ import android.service.autofill.SaveRequest
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
@@ -32,6 +38,15 @@ import java.net.URI
 // #endregion
 
 class ZerokoshAutofillService : AutofillService() {
+
+    // Saving writes the vault, which is disk and crypto — not work for the
+    // binder thread the framework calls us on.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
+    }
 
     override fun onFillRequest(
         request: FillRequest,
@@ -138,28 +153,58 @@ class ZerokoshAutofillService : AutofillService() {
         callback.onSuccess(response.build())
     }
 
+    /**
+     * Android has already asked the user "save to Zerokosh?" and been told yes,
+     * so the consent exists; this is only the writing down.
+     *
+     * Both previous paths reported success and saved nothing. Locked, it
+     * returned immediately and dropped the credential. Unlocked, it started
+     * MainActivity with an extra nothing read, and never looked at the typed
+     * values at all — so the user was told their password was saved when it had
+     * been discarded. Reporting failure honestly is the minimum here; actually
+     * saving is the point.
+     */
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        // Save prompt: store as login record when vault is unlocked
         val structure = request.fillContexts.lastOrNull()?.structure
         if (structure == null) {
-            callback.onSuccess()
+            callback.onFailure(getString(R.string.scr_autofill_save_failed))
             return
         }
         val parsed = parseStructure(structure)
+        if (parsed.passwordValue.isEmpty()) {
+            // Nothing worth storing, and a login record without one would be a
+            // record the user has to go and finish by hand.
+            callback.onFailure(getString(R.string.scr_autofill_save_failed))
+            return
+        }
+
         val app = application as ZerokoshApp
+        val credential = PendingSave.Credential(
+            username = parsed.usernameValue,
+            password = parsed.passwordValue,
+            webDomain = parsed.webDomain,
+            packageName = parsed.packageName,
+        )
+
         if (app.repository.state.value != VaultState.Unlocked) {
+            // The vault cannot be written shut. Hold the credential in memory —
+            // never in an Intent extra — and open the app so the user can unlock;
+            // ZerokoshNav finishes the save once they do.
+            PendingSave.offer(credential)
+            startActivity(
+                Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
+            )
             callback.onSuccess()
             return
         }
-        // Values are in the structure client state; for v1 we open MainActivity with save intent
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra(EXTRA_AUTOFILL_SAVE, true)
-            putExtra(EXTRA_PACKAGE, parsed.packageName)
-            putExtra(EXTRA_DOMAIN, parsed.webDomain)
+
+        scope.launch {
+            val ok = runCatching { app.repository.upsertRecord(loginRecordFor(app, credential)) }.isSuccess
+            withContext(Dispatchers.Main) {
+                if (ok) callback.onSuccess()
+                else callback.onFailure(getString(R.string.scr_autofill_save_failed))
+            }
         }
-        startActivity(intent)
-        callback.onSuccess()
     }
 
     private data class Parsed(
@@ -167,6 +212,9 @@ class ZerokoshAutofillService : AutofillService() {
         val webDomain: String?,
         val usernameId: AutofillId?,
         val passwordId: AutofillId?,
+        /** Populated on a save request; empty on a fill request. */
+        val usernameValue: String = "",
+        val passwordValue: String = "",
     )
 
     private fun parseStructure(structure: AssistStructure): Parsed {
@@ -174,6 +222,8 @@ class ZerokoshAutofillService : AutofillService() {
         var webDomain: String? = null
         var usernameId: AutofillId? = null
         var passwordId: AutofillId? = null
+        var usernameValue = ""
+        var passwordValue = ""
 
         fun walk(node: AssistStructure.ViewNode) {
             val hints = node.autofillHints?.map { it.lowercase() }.orEmpty()
@@ -194,16 +244,25 @@ class ZerokoshAutofillService : AutofillService() {
                 it.first.equals("type", true) && (it.second.equals("email", true) || it.second.equals("text", true))
             } == true
 
+            // autofillValue is only filled in on a save request. Reading it
+            // here is what makes saving possible at all: the ids alone name
+            // fields whose contents were never looked at.
+            val typed = node.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty()
             if (id != null) {
-                if (isPassword && passwordId == null) passwordId = id
-                else if (isUsername && usernameId == null && !isPassword) usernameId = id
+                if (isPassword && passwordId == null) {
+                    passwordId = id
+                    if (typed.isNotEmpty()) passwordValue = typed
+                } else if (isUsername && usernameId == null && !isPassword) {
+                    usernameId = id
+                    if (typed.isNotEmpty()) usernameValue = typed
+                }
             }
             for (i in 0 until node.childCount) walk(node.getChildAt(i))
         }
         for (i in 0 until structure.windowNodeCount) {
             walk(structure.getWindowNodeAt(i).rootViewNode)
         }
-        return Parsed(packageName, webDomain, usernameId, passwordId)
+        return Parsed(packageName, webDomain, usernameId, passwordId, usernameValue, passwordValue)
     }
 
     private fun matchRecords(records: List<Record>, packageName: String, webDomain: String?): List<Record> {
@@ -239,9 +298,4 @@ class ZerokoshAutofillService : AutofillService() {
         return parts.getOrNull(1)
     }
 
-    companion object {
-        const val EXTRA_AUTOFILL_SAVE = "autofill_save"
-        const val EXTRA_PACKAGE = "autofill_package"
-        const val EXTRA_DOMAIN = "autofill_domain"
-    }
 }

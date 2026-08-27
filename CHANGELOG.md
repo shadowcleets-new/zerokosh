@@ -1,3 +1,21 @@
+## [2026-08-27 16:10:00] - Templates that offered fields the service cannot have
+
+### 1. Intent, Roles, & Context
+- **The Problem:** WhatsApp's edit screen offered Membership, Membership renewal and Gift cards. Not isolated — three templates handed irrelevant fields to a third of the 315-service catalogue.
+- **Specialist Personas Invoked:** Information Architect; SEO/Growth Strategist (Indian financial vocabulary); Android Platform Engineer.
+- **The Strategy:** measure the catalogue before changing it. The detail screen already hides empty fields, so this was only ever an edit-screen problem, and only ever fixable in the templates and the mapping.
+
+### 2. Surgical Technical Modifications
+- **Re-mapped 10 services** (gallery only, no stored record touched): WhatsApp, SmartThings, Justdial, Vyapar, KNOT → `login`; Keepa, Alibaba → `login`; FamApp, Cheq → `card`; INDmoney → `demat`. `app_profile` drops 12 → 4, and the four left (PVR, BookMyShow, District, Samsung Wallet) genuinely have memberships and gift cards.
+- **Split `transit`** with a new `travel_booking` template: 16 booking and ride-hailing services keep a wallet and lose `smart_card_number`; 6 information and courier apps become plain logins. `transit` is now exactly the 29 operators with a real NCMC stored-value card.
+- **7 fields added** from research: `demat.depository` (CDSL 16-digit vs NSDL `IN`-prefixed — the numbers were unvalidatable without it), `insurance.{premium_mode, commencement_date, maturity_date, policy_term}`, `telecom.{circle, sim_number}`. Two new picker lists.
+- **`maturity_date` wired into reminders and the vault review** — the reason to store a payout date is to be told about it.
+- **79 label strings added.** A consistency check written for this work found that all six Gov ID templates — PAN, Aadhaar, Passport, DL, Voter ID, DigiLocker — had **no labels at all**, plus `shopping` and `transit`. 71 fields were rendering as humanised ids: "Dob", "Epic number", "Pan number". Pre-existing, unrelated to the reported bug, and invisible until something checked.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** a new consistency pass asserts every gallery template exists, every template has a title, every field has a label, every template is in the category map and every PICKER names a real list — 21 templates, 184 fields, all consistent. `:app:assembleDebug`, `:app:assembleRelease` (dynamic-resource guard ok), `:core:test`, `:app:deadComposables` (116) green.
+- **Resulting App State:** release APK carries **214 `tpl_` strings, up from 119**. Not verified on device.
+- **Next Sprint Phase:** the device batch, now eight items.
 ## [2026-08-27 14:20:00] - Autofill "save" was reporting success and saving nothing
 
 ### 1. Intent, Roles, & Context

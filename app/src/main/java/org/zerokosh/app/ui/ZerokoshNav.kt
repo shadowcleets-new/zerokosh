@@ -233,7 +233,7 @@ private val TabRoutes = mapOf(
 
 /** Date fields ReminderWorker auto-suggests a 30-day reminder for (§5.7). */
 private val ReminderDateFields =
-    listOf("expiry", "premium_due_date", "membership_renewal", "renewal_date")
+    listOf("expiry", "premium_due_date", "membership_renewal", "renewal_date", "maturity_date")
 
 @Composable
 private fun MainScaffold(app: ZerokoshApp) {

@@ -167,11 +167,11 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("Slice", "Slice Card (SBM)", "card", "Slice", "Banks"),
             GalleryItem("OneCard", "OneCard Credit Card", "card", "OneCard", "Banks"),
             GalleryItem("Uni Cards", "Uni Pay 1/3 Card", "card", "Uni Card", "Banks"),
-            GalleryItem("FamApp", "FamApp (FamPay)", "app_profile", "FamPay", "Banks"),
+            GalleryItem("FamApp", "FamApp (FamPay)", "card", "FamPay", "Banks"),
             GalleryItem("RazorpayX", "RazorpayX Business Bank", "bank_account", "RazorpayX", "Banks"),
             GalleryItem("Open Money", "Open Business Bank", "bank_account", "Open Money", "Banks"),
-            GalleryItem("INDmoney", "INDmoney Stocks & Bank", "app_profile", "INDmoney", "Banks"),
-            GalleryItem("Cheq", "Cheq Credit Card Bills", "app_profile", "Cheq", "Banks"),
+            GalleryItem("INDmoney", "INDmoney Stocks & Bank", "demat", "INDmoney", "Banks"),
+            GalleryItem("Cheq", "Cheq Credit Card Bills", "card", "Cheq", "Banks"),
 
             // NBFCs & Housing Finance
             GalleryItem("Bajaj Finance", "Bajaj Finserv / Loan", "bank_account", "Bajaj Finance", "Banks", isPopular = true),
@@ -251,7 +251,7 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("Amazon", "Amazon India Shopping", "shopping", "Amazon", "Shopping", isPopular = true),
             GalleryItem("Amazon Business", "Amazon Business B2B", "shopping", "Amazon Business", "Shopping"),
             GalleryItem("Meesho", "Meesho Marketplace", "shopping", "Meesho", "Shopping", isPopular = true),
-            GalleryItem("Alibaba", "Alibaba.com Wholesale", "shopping", "Alibaba", "Shopping"),
+            GalleryItem("Alibaba", "Alibaba.com Wholesale", "login", "Alibaba", "Shopping"),
             GalleryItem("IndiaMART", "IndiaMART B2B Marketplace", "shopping", "IndiaMART", "Shopping"),
             GalleryItem("Nykaa", "Nykaa Cosmetics & Beauty", "shopping", "Nykaa", "Shopping", isPopular = true),
             GalleryItem("Nykaa Fashion", "Nykaa Fashion Apparel", "shopping", "Nykaa Fashion", "Shopping"),
@@ -288,16 +288,16 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("Starbucks", "Starbucks India", "shopping", "Starbucks", "Shopping"),
             GalleryItem("abcoffee", "abcoffee Specialty Coffee", "shopping", "abcoffee", "Shopping"),
             GalleryItem("EazyDiner", "EazyDiner Restaurant Deals", "shopping", "EazyDiner", "Shopping"),
-            GalleryItem("Keepa", "Keepa Amazon Price Tracker", "shopping", "Keepa", "Shopping"),
+            GalleryItem("Keepa", "Keepa Amazon Price Tracker", "login", "Keepa", "Shopping"),
 
             // --- TRAVEL & TRANSPORTATION ---
             // Railways & Helplines
-            GalleryItem("IRCTC", "IRCTC Rail Connect", "transit", "IRCTC", "Travel", isPopular = true),
-            GalleryItem("RailOne", "RailOne (Super App)", "transit", "RailOne", "Travel", isPopular = true),
-            GalleryItem("UTS", "UTS Unreserved Train Ticket", "transit", "UTS", "Travel", isPopular = true),
-            GalleryItem("NTES", "NTES Live Train Status", "transit", "NTES", "Travel"),
-            GalleryItem("RailMadad", "RailMadad Rail Helpline", "transit", "RailMadad", "Travel"),
-            GalleryItem("Where is my train", "Where is my Train", "transit", "Where is my train", "Travel"),
+            GalleryItem("IRCTC", "IRCTC Rail Connect", "travel_booking", "IRCTC", "Travel", isPopular = true),
+            GalleryItem("RailOne", "RailOne (Super App)", "travel_booking", "RailOne", "Travel", isPopular = true),
+            GalleryItem("UTS", "UTS Unreserved Train Ticket", "travel_booking", "UTS", "Travel", isPopular = true),
+            GalleryItem("NTES", "NTES Live Train Status", "login", "NTES", "Travel"),
+            GalleryItem("RailMadad", "RailMadad Rail Helpline", "login", "RailMadad", "Travel"),
+            GalleryItem("Where is my train", "Where is my Train", "login", "Where is my train", "Travel"),
 
             // Specific Metro Operators & Networks across India
             GalleryItem("Mumbai Metro One", "Mumbai Metro Line 1 (MMOPL)", "transit", "Mumbai Metro Line 1", "Travel", isPopular = true),
@@ -334,24 +334,24 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("BMTC Bus", "BMTC Bus (Bengaluru Namma BMTC)", "transit", "BMTC Bus", "Travel"),
 
             // Freight & Logistics / Courier Services
-            GalleryItem("Porter", "Porter Intra-City Truck & Courier", "transit", "Porter", "Travel"),
-            GalleryItem("Delhivery", "Delhivery Courier & Parcel", "transit", "Delhivery", "Travel"),
-            GalleryItem("Borzo", "Borzo Same-Day Delivery", "transit", "Borzo", "Travel"),
+            GalleryItem("Porter", "Porter Intra-City Truck & Courier", "login", "Porter", "Travel"),
+            GalleryItem("Delhivery", "Delhivery Courier & Parcel", "login", "Delhivery", "Travel"),
+            GalleryItem("Borzo", "Borzo Same-Day Delivery", "login", "Borzo", "Travel"),
 
             // Travel & Cab / Flight / Bus Aggregators
-            GalleryItem("RedBus", "RedBus (Bus & Train)", "transit", "RedBus", "Travel", isPopular = true),
-            GalleryItem("AbhiBus", "AbhiBus Ticket Booking", "transit", "AbhiBus", "Travel"),
-            GalleryItem("MakeMyTrip", "MakeMyTrip (Flight/Hotel/Train)", "transit", "MakeMyTrip", "Travel", isPopular = true),
-            GalleryItem("Ixigo", "Ixigo (Train & Flight Booking)", "transit", "Ixigo", "Travel", isPopular = true),
-            GalleryItem("Goibibo", "Goibibo Travel", "transit", "Goibibo", "Travel"),
-            GalleryItem("EaseMyTrip", "EaseMyTrip Flight Booking", "transit", "EaseMyTrip", "Travel"),
-            GalleryItem("Yatra", "Yatra Travel", "transit", "Yatra", "Travel"),
-            GalleryItem("Ola", "Ola Cabs & Auto", "transit", "Ola Cabs", "Travel", isPopular = true),
-            GalleryItem("Uber", "Uber Cabs & Moto", "transit", "Uber", "Travel", isPopular = true),
-            GalleryItem("Rapido", "Rapido Bike & Auto", "transit", "Rapido", "Travel", isPopular = true),
-            GalleryItem("Namma Yatri", "Namma Yatri Auto", "transit", "Namma Yatri", "Travel"),
-            GalleryItem("InDrive", "InDrive Fair Cabs", "transit", "InDrive", "Travel"),
-            GalleryItem("BluSmart", "BluSmart EV Cab", "transit", "BluSmart", "Travel"),
+            GalleryItem("RedBus", "RedBus (Bus & Train)", "travel_booking", "RedBus", "Travel", isPopular = true),
+            GalleryItem("AbhiBus", "AbhiBus Ticket Booking", "travel_booking", "AbhiBus", "Travel"),
+            GalleryItem("MakeMyTrip", "MakeMyTrip (Flight/Hotel/Train)", "travel_booking", "MakeMyTrip", "Travel", isPopular = true),
+            GalleryItem("Ixigo", "Ixigo (Train & Flight Booking)", "travel_booking", "Ixigo", "Travel", isPopular = true),
+            GalleryItem("Goibibo", "Goibibo Travel", "travel_booking", "Goibibo", "Travel"),
+            GalleryItem("EaseMyTrip", "EaseMyTrip Flight Booking", "travel_booking", "EaseMyTrip", "Travel"),
+            GalleryItem("Yatra", "Yatra Travel", "travel_booking", "Yatra", "Travel"),
+            GalleryItem("Ola", "Ola Cabs & Auto", "travel_booking", "Ola Cabs", "Travel", isPopular = true),
+            GalleryItem("Uber", "Uber Cabs & Moto", "travel_booking", "Uber", "Travel", isPopular = true),
+            GalleryItem("Rapido", "Rapido Bike & Auto", "travel_booking", "Rapido", "Travel", isPopular = true),
+            GalleryItem("Namma Yatri", "Namma Yatri Auto", "travel_booking", "Namma Yatri", "Travel"),
+            GalleryItem("InDrive", "InDrive Fair Cabs", "travel_booking", "InDrive", "Travel"),
+            GalleryItem("BluSmart", "BluSmart EV Cab", "travel_booking", "BluSmart", "Travel"),
             GalleryItem("FASTag", "FASTag NHAI Toll Pass", "utility", "FASTag", "Travel"),
 
             // --- UTILITIES ---
@@ -398,7 +398,7 @@ private fun galleryCatalog(): List<GalleryItem> =
 
             // Samsung Suite Apps
             GalleryItem("Samsung Wallet", "Samsung Wallet / Pay", "app_profile", "Samsung Wallet", "Apps"),
-            GalleryItem("SmartThings", "Samsung SmartThings", "app_profile", "SmartThings", "Apps"),
+            GalleryItem("SmartThings", "Samsung SmartThings", "login", "SmartThings", "Apps"),
 
             // Hardware Brand Accounts
             GalleryItem("HP", "HP Account / Smart", "login", "HP Account", "Apps"),
@@ -440,7 +440,7 @@ private fun galleryCatalog(): List<GalleryItem> =
             // Social & Communication
             GalleryItem("Threads", "Threads (Meta)", "login", "Threads", "Apps"),
             GalleryItem("Truecaller", "Truecaller Account", "login", "Truecaller", "Apps", isPopular = true),
-            GalleryItem("WhatsApp", "WhatsApp Messenger", "app_profile", "WhatsApp", "Apps", isPopular = true),
+            GalleryItem("WhatsApp", "WhatsApp Messenger", "login", "WhatsApp", "Apps", isPopular = true),
             GalleryItem("Telegram", "Telegram Messenger", "login", "Telegram", "Apps", isPopular = true),
             GalleryItem("Discord", "Discord Community & Chat", "login", "Discord", "Apps"),
             GalleryItem("Arattai", "Arattai (Zoho Made-in-India Chat)", "login", "Arattai", "Apps"),
@@ -465,9 +465,9 @@ private fun galleryCatalog(): List<GalleryItem> =
             GalleryItem("Bigbasket", "Bigbasket Grocery (Tata)", "shopping", "Bigbasket", "Apps", isPopular = true),
             GalleryItem("JioMart", "JioMart Grocery", "shopping", "JioMart", "Apps"),
             GalleryItem("MagicPin", "MagicPin Savings", "shopping", "MagicPin", "Apps"),
-            GalleryItem("Justdial", "Justdial Local Search", "app_profile", "Justdial", "Apps"),
-            GalleryItem("Vyapar", "Vyapar Billing", "app_profile", "Vyapar", "Apps"),
-            GalleryItem("KNOT", "KNOT App", "app_profile", "KNOT", "Apps"),
+            GalleryItem("Justdial", "Justdial Local Search", "login", "Justdial", "Apps"),
+            GalleryItem("Vyapar", "Vyapar Billing", "login", "Vyapar", "Apps"),
+            GalleryItem("KNOT", "KNOT App", "login", "KNOT", "Apps"),
             GalleryItem("PVR", "PVR INOX Cinemas", "app_profile", "PVR", "Apps"),
             GalleryItem("BookMyShow", "BookMyShow Movie & Event Tickets", "app_profile", "BookMyShow", "Apps", isPopular = true),
             GalleryItem("Netflix", "Netflix Streaming", "login", "Netflix", "Apps", isPopular = true),

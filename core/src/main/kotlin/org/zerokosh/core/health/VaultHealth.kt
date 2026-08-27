@@ -52,7 +52,8 @@ data class HealthFinding(
 }
 
 /** Dates the app already warns about via reminders, reused here. */
-private val EXPIRY_KEYS = setOf("expiry", "premium_due_date", "membership_renewal", "renewal_date")
+private val EXPIRY_KEYS =
+    setOf("expiry", "premium_due_date", "membership_renewal", "renewal_date", "maturity_date")
 
 /** `YYYY-MM` or `YYYY-MM-DD`, which is how this app stores every date. */
 private val DATE_RE = Regex("^(\\d{4})-(\\d{2})(?:-(\\d{2}))?$")

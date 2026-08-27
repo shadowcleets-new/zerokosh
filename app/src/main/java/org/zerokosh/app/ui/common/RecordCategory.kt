@@ -39,6 +39,7 @@ private val CategoryByTemplate = mapOf(
     "utility" to RecordCategory.Utilities,
     "telecom" to RecordCategory.Utilities,
     "transit" to RecordCategory.Utilities,
+    "travel_booking" to RecordCategory.Utilities,
     "shopping" to RecordCategory.Utilities,
     "app_profile" to RecordCategory.Apps,
     "login" to RecordCategory.Apps,

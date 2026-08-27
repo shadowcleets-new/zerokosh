@@ -208,6 +208,11 @@
           "s": "L"
         },
         {
+          "k": "depository",
+          "t": "PICKER:depositories",
+          "s": "L"
+        },
+        {
           "k": "client_id",
           "t": "TEXT",
           "s": "M"
@@ -296,6 +301,26 @@
         {
           "k": "premium_due_date",
           "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "premium_mode",
+          "t": "PICKER:premium_modes",
+          "s": "L"
+        },
+        {
+          "k": "commencement_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "maturity_date",
+          "t": "DATE",
+          "s": "L"
+        },
+        {
+          "k": "policy_term",
+          "t": "TEXT",
           "s": "L"
         },
         {
@@ -759,6 +784,11 @@
           "s": "L"
         },
         {
+          "k": "circle",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
           "k": "plan_type",
           "t": "PICKER:plan_types",
           "s": "L"
@@ -772,6 +802,11 @@
           "k": "puk",
           "t": "PIN",
           "s": "H"
+        },
+        {
+          "k": "sim_number",
+          "t": "TEXT",
+          "s": "M"
         },
         {
           "k": "portal_password",
@@ -869,6 +904,52 @@
           "k": "smart_card_number",
           "t": "TEXT",
           "s": "M"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
+    },
+    {
+      "id": "travel_booking",
+      "icon": "cart",
+      "fields": [
+        {
+          "k": "provider",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "account_username",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "registered_mobile",
+          "t": "PHONE",
+          "s": "L"
+        },
+        {
+          "k": "registered_email",
+          "t": "EMAIL",
+          "s": "L"
+        },
+        {
+          "k": "login_password",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "wallet_pin",
+          "t": "PIN",
+          "s": "H"
+        },
+        {
+          "k": "totp",
+          "t": "TOTP",
+          "s": "H"
         },
         {
           "k": "notes",

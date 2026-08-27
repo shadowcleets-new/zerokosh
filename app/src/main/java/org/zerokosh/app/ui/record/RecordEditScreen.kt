@@ -330,7 +330,20 @@ fun RecordEditScreen(
                                 templateId = templateId,
                                 field = field,
                                 value = values[field.k].orEmpty(),
-                                onValueChange = { values[field.k] = it },
+                                onValueChange = {
+                                    values[field.k] = it
+                                    // A typed card number knows as much as a
+                                    // tapped one: the network, bank, type and
+                                    // variant all come from the IIN table, not
+                                    // the chip. Only the NFC path used it, so
+                                    // anyone entering a card by hand got none of
+                                    // it for no reason.
+                                    if (templateId == "card" && field.k == "card_number") {
+                                        applyCardNumberInference(it, app, values) { bank ->
+                                            if (institution.isBlank()) institution = bank
+                                        }
+                                    }
+                                },
                                 showInvalid = showInvalid,
                                 // Only the card template has a card to tap.
                                 onTapCard = if (templateId == "card") {
@@ -839,6 +852,32 @@ private fun applyTappedCard(
     iin?.variant?.let {
         if (values["card_variant"].isNullOrBlank()) values["card_variant"] = it
     }
+}
+
+/**
+ * Fills what a card number implies, without overwriting anything the user typed.
+ *
+ * Deliberately quieter than [applyTappedCard]: a tap is an explicit request to
+ * populate the record, whereas typing is not, so this only ever fills blanks and
+ * waits for enough digits to identify an issuer rather than guessing from three.
+ */
+private fun applyCardNumberInference(
+    typed: String,
+    app: ZerokoshApp,
+    values: MutableMap<String, String>,
+    setInstitution: (String) -> Unit,
+) {
+    val digits = typed.filter(Char::isDigit)
+    // Six is the length of an IIN; below that any match would be a coincidence.
+    if (digits.length < 6) return
+
+    CardUtils.detectNetwork(digits)?.let { network ->
+        if (values["card_network"].isNullOrBlank()) values["card_network"] = network.label
+    }
+    val iin = app.catalog.cardIins.lookup(digits) ?: return
+    iin.kind?.let { if (values["card_type"].isNullOrBlank()) values["card_type"] = it }
+    iin.variant?.let { if (values["card_variant"].isNullOrBlank()) values["card_variant"] = it }
+    iin.bank?.let(setInstitution)
 }
 
 /**

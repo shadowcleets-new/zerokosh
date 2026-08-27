@@ -88,7 +88,7 @@
     <string name="scr_detail_delete">Delete</string>
     <string name="scr_detail_favorite">Favourite</string>
     <string name="scr_detail_delete_confirm_title">Delete this record?</string>
-    <string name="scr_detail_delete_confirm_body">It will also disappear from your other devices after they sync.</string>
+    <string name="scr_detail_delete_confirm_body">It moves to Recently deleted for 30 days, and disappears from your other devices after they sync.</string>
     <string name="scr_detail_delete_confirm_yes">Delete</string>
     <string name="scr_detail_hidden">Hidden</string>
     <string name="scr_detail_shown">Shown</string>
@@ -142,6 +142,8 @@
     <string name="scr_settings_security_info">How your data is protected</string>
     <string name="scr_settings_allow_screenshots">Allow screenshots</string>
     <string name="scr_settings_autofill">Autofill service</string>
+    <string name="scr_detail_history_title">Previous passwords</string>
+    <string name="scr_detail_history_empty">Nothing replaced yet.</string>
     <string name="scr_settings_autofill_on">Zerokosh</string>
     <string name="scr_settings_autofill_off">Not set up</string>
     <string name="scr_settings_autofill_unsupported">Not available</string>

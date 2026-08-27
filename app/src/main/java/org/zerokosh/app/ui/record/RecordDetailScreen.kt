@@ -55,6 +55,8 @@ import org.zerokosh.app.ui.common.RevealAuth
 import org.zerokosh.app.ui.common.fieldLabel
 import org.zerokosh.app.ui.common.groupCardNumber
 import org.zerokosh.app.ui.common.maskedValue
+import org.zerokosh.core.model.Record
+import org.zerokosh.app.ui.theme.JetBrainsMono
 import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
 import org.zerokosh.app.ui.motion.LocalSharedTransitionScope
 import org.zerokosh.app.ui.theme.SecretTextStyle
@@ -195,6 +197,15 @@ fun RecordDetailScreen(
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+                // What the record used to hold. Only shown when there is
+                // something, so an untouched vault never sees the section.
+                if (record.history.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        HistorySection(app = app, record = record)
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
                 items(record.custom_fields.size) { i ->
                     val custom = record.custom_fields[i]
                     FieldRow(
@@ -283,6 +294,125 @@ fun RecordDetailScreen(
             },
             dismissButton = {
                 TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.msg_cancel)) }
+            },
+        )
+    }
+}
+
+/**
+ * Values this record used to hold (§5.13).
+ *
+ * Gated by the same [RevealAuth] as any other high-sensitivity reveal, because
+ * an old password is still a password — and often still in use somewhere else,
+ * which is exactly why it is worth keeping and exactly why it is worth
+ * protecting.
+ */
+@Composable
+private fun HistorySection(app: ZerokoshApp, record: Record) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var shown by remember(record.uuid) { mutableStateOf(false) }
+    var authing by remember { mutableStateOf(false) }
+    var confirmForget by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(VaultTheme.colors.ink(0.04f))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.scr_detail_history_title),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = VaultTheme.colors.ink,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = if (shown) "Hide" else "Show ${record.history.size}",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = VaultTheme.colors.primary,
+                modifier = Modifier.clickable {
+                    if (shown) {
+                        shown = false
+                    } else if (RevealAuth.withinGrace()) {
+                        shown = true
+                    } else {
+                        authing = true
+                    }
+                },
+            )
+        }
+
+        if (shown) {
+            record.history.forEach { past ->
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = fieldLabel(context, record.template_id, past.k),
+                    fontSize = 10.5.sp,
+                    color = VaultTheme.colors.ink(0.45f),
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = past.value,
+                        fontFamily = JetBrainsMono,
+                        fontSize = 13.sp,
+                        color = VaultTheme.colors.ink,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = "Copy",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = VaultTheme.colors.primary,
+                        modifier = Modifier.clickable {
+                            ClipboardHelper.copySensitive(context, past.value)
+                        },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Forget these",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.clickable { confirmForget = true },
+            )
+        }
+    }
+
+    if (authing) {
+        PassphraseAuthDialog(
+            repository = app.repository,
+            onSuccess = {
+                RevealAuth.markAuthenticated()
+                authing = false
+                shown = true
+            },
+            onDismiss = { authing = false },
+        )
+    }
+
+    if (confirmForget) {
+        AlertDialog(
+            onDismissRequest = { confirmForget = false },
+            title = { Text("Forget previous passwords?") },
+            text = { Text("The ${record.history.size} remembered value(s) for this record are removed. This cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmForget = false
+                    shown = false
+                    scope.launch { app.repository.forgetHistory(record.uuid) }
+                }) { Text("Forget", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmForget = false }) { Text(stringResource(R.string.msg_cancel)) }
             },
         )
     }

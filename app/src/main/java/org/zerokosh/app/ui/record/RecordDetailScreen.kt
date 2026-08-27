@@ -424,6 +424,36 @@ private fun HistorySection(app: ZerokoshApp, record: Record) {
     }
 }
 
+/** Quick unlock is only an option when the user enabled it and enrolled. */
+private fun biometricReady(app: ZerokoshApp, context: android.content.Context): Boolean =
+    app.prefs.quickUnlockEnabled && QuickUnlockManager.isEnrolled(context)
+
+/**
+ * Prompts, and reports whether the user proved themselves. The key material is
+ * wiped immediately — this call is asking "is it you", not opening the vault,
+ * which is already open.
+ */
+private suspend fun authenticateByBiometric(activity: FragmentActivity, app: ZerokoshApp): Boolean {
+    val result = QuickUnlockManager.unlock(activity, app)
+    if (result !is org.zerokosh.core.vault.UnlockResult.Success) return false
+    result.vaultKey.fill(0)
+    RevealAuth.markAuthenticated()
+    return true
+}
+
+/**
+ * A low-sensitivity value goes to the clipboard as-is; anything else is copied
+ * through the path that clears it again after 30 seconds.
+ */
+private fun copyFieldValue(context: android.content.Context, field: TemplateField, value: String) {
+    if (field.sensitivity == Sensitivity.L) {
+        ClipboardHelper.copyPlain(context, value)
+        return
+    }
+    ClipboardHelper.copySensitive(context, value)
+    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+}
+
 @Composable
 fun FieldRow(
     app: ZerokoshApp,
@@ -454,32 +484,19 @@ fun FieldRow(
             action()
             return
         }
-        if (app.prefs.quickUnlockEnabled && QuickUnlockManager.isEnrolled(context)) {
-            scope.launch {
-                val result = QuickUnlockManager.unlock(activity, app)
-                if (result is org.zerokosh.core.vault.UnlockResult.Success) {
-                    result.vaultKey.fill(0)
-                    RevealAuth.markAuthenticated()
-                    action()
-                }
-            }
-        } else {
+        if (!biometricReady(app, context)) {
             authAction = action
+            return
         }
+        scope.launch { if (authenticateByBiometric(activity, app)) action() }
     }
 
-    fun copyValue() {
-        if (field.sensitivity == Sensitivity.L) {
-            ClipboardHelper.copyPlain(context, value)
-        } else {
-            ClipboardHelper.copySensitive(context, value)
-            Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
-        }
-    }
+    fun copyValue() = copyFieldValue(context, field, value)
 
-    val displayValue = when {
-        field.type == FieldType.CARDNUM && revealed -> groupCardNumber(value)
-        else -> maskedValue(value, field, revealed || !maskable)
+    val displayValue = if (field.type == FieldType.CARDNUM && revealed) {
+        groupCardNumber(value)
+    } else {
+        maskedValue(value, field, revealed || !maskable)
     }
 
     val label = labelOverride ?: fieldLabel(templateId, field.k)

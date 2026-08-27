@@ -116,6 +116,106 @@ import androidx.compose.ui.semantics.Role
 // #endregion
 
 // #region Screen state & save
+/**
+ * One card per template field, in template order.
+ *
+ * The card-number branch is the only thing here that is not a plain editor: a
+ * typed number knows as much as a tapped one, since network, type, variant and
+ * issuing bank all come from the bundled IIN table rather than the chip.
+ */
+@Composable
+private fun TemplateFieldsSection(
+    app: ZerokoshApp,
+    template: org.zerokosh.core.model.Template,
+    templateId: String,
+    values: androidx.compose.runtime.snapshots.SnapshotStateMap<String, String>,
+    showInvalid: Boolean,
+    onTapCard: () -> Unit,
+    onInstitutionInferred: (String) -> Unit,
+) {
+    if (template.fields.isEmpty()) return
+    val isCard = templateId == "card"
+    template.fields.forEach { field ->
+        FieldEditor(
+            app = app,
+            templateId = templateId,
+            field = field,
+            value = values[field.k].orEmpty(),
+            onValueChange = {
+                values[field.k] = it
+                if (isCard && field.k == "card_number") {
+                    applyCardNumberInference(it, app, values, onInstitutionInferred)
+                }
+            },
+            showInvalid = showInvalid,
+            // Only the card template has a card to tap.
+            onTapCard = if (isCard) onTapCard else null,
+        )
+    }
+}
+
+/**
+ * The user's own fields, if they added any. Editing one means rewriting the
+ * whole list, so the list rather than an index is what comes back out — the
+ * caller should not have to know how a change is applied.
+ */
+@Composable
+private fun CustomFieldsCard(
+    app: ZerokoshApp,
+    fields: List<CustomField>,
+    onChange: (List<CustomField>) -> Unit,
+) {
+    if (fields.isEmpty()) return
+    WhiteCard(corner = 20.dp) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            fields.forEachIndexed { index, custom ->
+                CustomFieldEditor(
+                    app = app,
+                    field = custom,
+                    onValueChange = { updated ->
+                        onChange(fields.toMutableList().also { it[index] = updated })
+                    },
+                    onRemove = {
+                        onChange(fields.toMutableList().also { it.removeAt(index) })
+                    },
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The record a save would write. Pulled out of the save handler so the handler
+ * is the two guards and the write, and the field-by-field construction — which
+ * carries the rules about what an edit preserves — sits on its own.
+ */
+private fun buildRecord(
+    existing: Record?,
+    templateId: String,
+    title: String,
+    institution: String,
+    values: Map<String, String>,
+    customFields: List<CustomField>,
+): Record = Record(
+    uuid = existing?.uuid ?: "",
+    template_id = templateId,
+    title = title.trim(),
+    institution = institution.ifBlank { deriveInstitution(templateId, values) }.trim(),
+    fields = values.filterValues { it.isNotBlank() }, // §2.1: empty fields omitted
+    custom_fields = customFields.filter { it.label.isNotBlank() },
+    // An edit preserves what the form never showed.
+    tags = existing?.tags ?: emptyList(),
+    favorite = existing?.favorite ?: false,
+    created_at = existing?.created_at ?: 0,
+    modified_at = 0,
+    rev = existing?.rev ?: 1,
+    device_id = "",
+    reminders = existing?.reminders ?: emptyList(),
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordEditScreen(
@@ -221,21 +321,7 @@ fun RecordEditScreen(
                         showInvalid = true
                         return@save
                     }
-                    val record = Record(
-                        uuid = existing?.uuid ?: "",
-                        template_id = templateId,
-                        title = title.trim(),
-                        institution = institution.ifBlank { deriveInstitution(templateId, values) }.trim(),
-                        fields = values.filterValues { it.isNotBlank() }, // §2.1: empty fields omitted
-                        custom_fields = customFields.filter { it.label.isNotBlank() },
-                        tags = existing?.tags ?: emptyList(),
-                        favorite = existing?.favorite ?: false,
-                        created_at = existing?.created_at ?: 0,
-                        modified_at = 0,
-                        rev = existing?.rev ?: 1,
-                        device_id = "",
-                        reminders = existing?.reminders ?: emptyList(),
-                    )
+                    val record = buildRecord(existing, templateId, title, institution, values, customFields)
                     scope.launch {
                         app.repository.upsertRecord(record)
                             .onSuccess { onDone() }
@@ -325,64 +411,20 @@ fun RecordEditScreen(
                 VaultFieldCard(label = stringResource(R.string.scr_edit_institution_hint)) {
                     FieldInput(value = institution, onValueChange = { institution = it })
                 }
-            if (template.fields.isNotEmpty()) {
-                run {
-                    run {
-                        template.fields.forEach { field ->
-                            FieldEditor(
-                                app = app,
-                                templateId = templateId,
-                                field = field,
-                                value = values[field.k].orEmpty(),
-                                onValueChange = {
-                                    values[field.k] = it
-                                    // A typed card number knows as much as a
-                                    // tapped one: the network, bank, type and
-                                    // variant all come from the IIN table, not
-                                    // the chip. Only the NFC path used it, so
-                                    // anyone entering a card by hand got none of
-                                    // it for no reason.
-                                    if (templateId == "card" && field.k == "card_number") {
-                                        applyCardNumberInference(it, app, values) { bank ->
-                                            if (institution.isBlank()) institution = bank
-                                        }
-                                    }
-                                },
-                                showInvalid = showInvalid,
-                                // Only the card template has a card to tap.
-                                onTapCard = if (templateId == "card") {
-                                    { showTapCard = true }
-                                } else {
-                                    null
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-            if (customFields.isNotEmpty()) {
-                WhiteCard(corner = 20.dp) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        customFields.forEachIndexed { index, custom ->
-                            CustomFieldEditor(
-                                app = app,
-                                field = custom,
-                                onValueChange = { updated ->
-                                    customFields = customFields.toMutableList()
-                                        .also { it[index] = updated }
-                                },
-                                onRemove = {
-                                    customFields = customFields.toMutableList()
-                                        .also { it.removeAt(index) }
-                                },
-                            )
-                        }
-                    }
-                }
-            }
+            TemplateFieldsSection(
+                app = app,
+                template = template,
+                templateId = templateId,
+                values = values,
+                showInvalid = showInvalid,
+                onTapCard = { showTapCard = true },
+                onInstitutionInferred = { bank -> if (institution.isBlank()) institution = bank },
+            )
+            CustomFieldsCard(
+                app = app,
+                fields = customFields,
+                onChange = { customFields = it },
+            )
 
             Box(
                 modifier = Modifier
@@ -532,84 +574,122 @@ fun FieldEditor(
     onTapCard: (() -> Unit)? = null,
 ) {
     val label = fieldLabel(templateId, field.k)
-    val invalid = showInvalid && !FieldValidation.isValid(field, value)
     val modifier = Modifier.fillMaxWidth()
-    val invalidText = if (invalid) stringResource(R.string.scr_edit_invalid) else null
-    val errorColour = MaterialTheme.colorScheme.error
+    val invalidText = if (showInvalid && !FieldValidation.isValid(field, value)) {
+        stringResource(R.string.scr_edit_invalid)
+    } else {
+        null
+    }
 
     // Every branch renders into the mockup's field card. Only the input inside
     // it differs: monospace for anything transcribed, masked for secrets, a
-    // dropdown for pickers.
+    // dropdown for pickers. Split across two dispatches so neither is a
+    // ten-armed when — the four here need collaborators the rest do not.
     when (field.type) {
         FieldType.SECRET -> SecretField(app, value, onValueChange, label, modifier)
         FieldType.CARDNUM -> CardNumberField(value, onValueChange, label, modifier, onTapCard)
         FieldType.PICKER -> PickerField(app, field, value, onValueChange, label, modifier)
         FieldType.LINK -> LinkField(app, field, value, onValueChange, label, modifier)
+        else -> SelfContainedFieldEditor(field, value, onValueChange, label, modifier, invalidText)
+    }
+}
+
+/** The field types that need nothing but their own value. */
+@Composable
+private fun SelfContainedFieldEditor(
+    field: TemplateField,
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier,
+    invalidText: String?,
+) {
+    when (field.type) {
         FieldType.DATE -> DateField(value, onValueChange, label, modifier)
         FieldType.MONTHYEAR -> MonthYearField(value, onValueChange, label, modifier)
-        FieldType.FILE -> { /* attachments arrive with M4 templates */ }
-
-        FieldType.PIN -> {
-            var pinVisible by remember { mutableStateOf(false) }
-            VaultFieldCard(
-                label = label,
-                modifier = modifier,
-                supporting = invalidText,
-                supportingColor = errorColour,
-                trailing = { RevealToggle(visible = pinVisible, onToggle = { pinVisible = !pinVisible }) },
-            ) {
-                FieldInput(
-                    value = value,
-                    onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) },
-                    mono = true,
-                    dimmed = !pinVisible,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                    visualTransformation = if (pinVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
-                )
-            }
-        }
-
+        FieldType.FILE -> Unit // attachments arrive with M4 templates
+        FieldType.PIN -> PinField(value, onValueChange, label, modifier, invalidText)
         FieldType.NOTE -> VaultFieldCard(label = label, modifier = modifier) {
             FieldInput(value = value, onValueChange = onValueChange, singleLine = false)
         }
+        else -> PlainTextField(field, value, onValueChange, label, modifier, invalidText)
+    }
+}
 
-        else -> {
-            // The plain text family. They differ only by keyboard, filter and
-            // whether the value is something a human transcribes.
-            val mono = field.type in setOf(FieldType.NUMBER, FieldType.IFSC, FieldType.TOTP)
-            val keyboard = when (field.type) {
-                FieldType.NUMBER -> KeyboardType.Number
-                FieldType.PHONE -> KeyboardType.Phone
-                FieldType.EMAIL -> KeyboardType.Email
-                FieldType.URL -> KeyboardType.Uri
-                else -> KeyboardType.Text
-            }
-            val filter: (String) -> String = when (field.type) {
-                FieldType.NUMBER -> { v -> v.filter(Char::isDigit) }
-                FieldType.IFSC -> { v -> v.uppercase().take(11) } // uppercase (§2.2)
-                else -> { v -> v }
-            }
-            val supporting = when {
-                invalidText != null -> invalidText
-                field.type == FieldType.EMAIL && value.isNotEmpty() && !value.contains('@') ->
-                    stringResource(R.string.scr_edit_invalid)
-                else -> null
-            }
-            VaultFieldCard(
-                label = label,
-                modifier = modifier,
-                supporting = supporting,
-                supportingColor = errorColour,
-            ) {
-                FieldInput(
-                    value = value,
-                    onValueChange = { onValueChange(filter(it)) },
-                    mono = mono,
-                    keyboardOptions = KeyboardOptions(keyboardType = keyboard),
-                )
-            }
-        }
+@Composable
+private fun PinField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier,
+    invalidText: String?,
+) {
+    var pinVisible by remember { mutableStateOf(false) }
+    VaultFieldCard(
+        label = label,
+        modifier = modifier,
+        supporting = invalidText,
+        supportingColor = MaterialTheme.colorScheme.error,
+        trailing = { RevealToggle(visible = pinVisible, onToggle = { pinVisible = !pinVisible }) },
+    ) {
+        FieldInput(
+            value = value,
+            onValueChange = { v -> onValueChange(v.filter(Char::isDigit).take(8)) },
+            mono = true,
+            dimmed = !pinVisible,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            visualTransformation = if (pinVisible) VisualTransformation.None
+            else PasswordVisualTransformation(),
+        )
+    }
+}
+
+/** Monospace for anything a human transcribes from a document. */
+private fun isTranscribed(type: FieldType): Boolean =
+    type in setOf(FieldType.NUMBER, FieldType.IFSC, FieldType.TOTP)
+
+private fun keyboardFor(type: FieldType): KeyboardType = when (type) {
+    FieldType.NUMBER -> KeyboardType.Number
+    FieldType.PHONE -> KeyboardType.Phone
+    FieldType.EMAIL -> KeyboardType.Email
+    FieldType.URL -> KeyboardType.Uri
+    else -> KeyboardType.Text
+}
+
+private fun filterFor(type: FieldType): (String) -> String = when (type) {
+    FieldType.NUMBER -> { v -> v.filter(Char::isDigit) }
+    FieldType.IFSC -> { v -> v.uppercase().take(11) } // uppercase (§2.2)
+    else -> { v -> v }
+}
+
+/**
+ * The plain text family. They differ only by keyboard, filter and whether the
+ * value is something a human transcribes.
+ */
+@Composable
+private fun PlainTextField(
+    field: TemplateField,
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier,
+    invalidText: String?,
+) {
+    val missingAt = field.type == FieldType.EMAIL && value.isNotEmpty() && !value.contains('@')
+    val supporting = invalidText ?: if (missingAt) stringResource(R.string.scr_edit_invalid) else null
+    val filter = filterFor(field.type)
+    VaultFieldCard(
+        label = label,
+        modifier = modifier,
+        supporting = supporting,
+        supportingColor = MaterialTheme.colorScheme.error,
+    ) {
+        FieldInput(
+            value = value,
+            onValueChange = { onValueChange(filter(it)) },
+            mono = isTranscribed(field.type),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardFor(field.type)),
+        )
     }
 }
 
@@ -1066,6 +1146,20 @@ fun DropdownSelector(
 // #endregion
 
 // #region Card number (§2.2/§5.10: groups of 4, Luhn check, network badge)
+/**
+ * The short mark shown inside the field. Deliberately not Network.label — that
+ * is the value stored on the record, and a badge has room for "MC" where a
+ * stored field wants "Mastercard".
+ */
+private fun networkBadge(network: CardUtils.Network): String = when (network) {
+    CardUtils.Network.RUPAY -> "RuPay"
+    CardUtils.Network.VISA -> "Visa"
+    CardUtils.Network.MASTERCARD -> "MC"
+    CardUtils.Network.AMEX -> "Amex"
+    CardUtils.Network.DINERS -> "Diners"
+    CardUtils.Network.MAESTRO -> "Maestro"
+}
+
 @Composable
 private fun CardNumberField(
     value: String,
@@ -1095,14 +1189,7 @@ private fun CardNumberField(
                 }
                 if (network != null) {
                     Text(
-                        when (network) {
-                            CardUtils.Network.RUPAY -> "RuPay"
-                            CardUtils.Network.VISA -> "Visa"
-                            CardUtils.Network.MASTERCARD -> "MC"
-                            CardUtils.Network.AMEX -> "Amex"
-                            CardUtils.Network.DINERS -> "Diners"
-                            CardUtils.Network.MAESTRO -> "Maestro"
-                        },
+                        networkBadge(network),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )

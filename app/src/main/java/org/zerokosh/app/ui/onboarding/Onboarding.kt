@@ -895,6 +895,7 @@ fun CreatePassphraseScreen(
                 counter = if (confirm.isNotEmpty() && confirm != pass) "no match" else null,
                 keyboardType = if (pinMode) KeyboardType.NumberPassword else KeyboardType.Password,
                 visible = visible,
+                onToggleVisible = { visible = !visible },
                 isError = confirm.isNotEmpty() && confirm != pass,
             )
 

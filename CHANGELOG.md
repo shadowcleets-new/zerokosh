@@ -1,3 +1,23 @@
+## [2026-08-27 02:10:00] - Screenshots during first run; reveal on the Confirm field
+
+### 1. Intent, Roles, & Context
+- **The Problem:** FLAG_SECURE applied from the very first frame, so the Recovery Key — shown exactly once during setup — could not be captured. And the Confirm field on step 4 had no reveal toggle, unlike the field directly above it.
+- **Specialist Personas Invoked:** Apple-caliber CXO; Principal Security Auditor (screen-capture policy).
+- **The Strategy:** treat first run as the one window where capture is a recovery feature rather than a leak, and shut it the instant setup reports done.
+
+### 2. Surgical Technical Modifications
+- **Modified Files:**
+  - `MainActivity.kt` (`applyScreenPrivacy`): condition widened to `allowScreenshots || !onboardingDone`.
+  - `ui/ZerokoshNav.kt` (quickunlock destination): re-applies the flag when `onboardingDone` flips. The window flag is set per-activity, so the pref alone would not clamp until the next cold start.
+  - `ui/onboarding/Onboarding.kt` (Confirm field): passes `onToggleVisible`. `FilledSecretField` only draws the eye when that lambda is non-null, which is why the field above it had one and this did not. Both fields share the existing `visible` state deliberately — a confirm field exists to catch a typo, and two fields that disagree about masking make that harder, not easier.
+- **Irreversible Actions:** none.
+- **Payload/Schema Changes:** none — `onboardingDone` already existed.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:core:test`, `:app:deadComposables` (109 checked) — all green.
+- **Resulting App State:** **not verified on hardware** — the Pixel 9 disconnected mid-run, so the capture behaviour is reasoned from the code, not observed. Worth one pass on device before shipping.
+- **Next Sprint Phase:** confirm on device that first run captures and that the first frame after setup is black; AGP still pinned at 9.3.1 pending a stable 9.4.0.
+
 ## [2026-08-27 01:20:00] - Edge-to-edge deprecations, Gradle 9.7.1, discoverable autofill
 
 ### 1. Intent, Roles, & Context

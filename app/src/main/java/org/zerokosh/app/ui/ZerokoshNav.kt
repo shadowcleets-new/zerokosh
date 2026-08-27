@@ -27,6 +27,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import org.zerokosh.app.MainActivity
 import androidx.core.content.ContextCompat
 import org.zerokosh.app.reminders.ReminderWorker
 import androidx.compose.animation.SharedTransitionLayout
@@ -176,8 +177,13 @@ private fun OnboardingFlow(app: ZerokoshApp) {
             RecoveryKitScreen(app, onboarding) { nav.navigate("quickunlock") }
         }
         composable("quickunlock") {
+            val context = LocalContext.current
             QuickUnlockScreen(app, onboarding) {
                 app.prefs.onboardingDone = true
+                // The window flag is set once per activity, so flipping the pref
+                // is not enough — re-apply here or the vault stays screenshotable
+                // until the next cold start.
+                (context as? MainActivity)?.applyScreenPrivacy()
                 // repository is already Unlocked → root switch lands on Home (S7)
             }
         }

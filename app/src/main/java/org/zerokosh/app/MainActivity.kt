@@ -64,9 +64,18 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    /** §5.5: FLAG_SECURE by default; "Allow screenshots" (default OFF) disables it. */
+    /**
+     * §5.5: FLAG_SECURE by default; "Allow screenshots" (default OFF) disables it.
+     *
+     * First run is the exception. Setup hands the user a Recovery Key exactly
+     * once, and a black rectangle where that key should be is not a security
+     * win — it is how someone ends up locked out of their own vault forever.
+     * So screenshots stay available until onboarding reports done, and clamp
+     * shut the instant it does. After that the Settings toggle is the only way
+     * back, which is the behaviour that was always documented.
+     */
     fun applyScreenPrivacy() {
-        if (app.prefs.allowScreenshots) {
+        if (app.prefs.allowScreenshots || !app.prefs.onboardingDone) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         } else {
             window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)

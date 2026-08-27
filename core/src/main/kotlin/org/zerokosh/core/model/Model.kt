@@ -45,10 +45,37 @@ data class Record(
     val rev: Int = 1,
     val device_id: String,
     val reminders: List<Reminder> = emptyList(),
+    /**
+     * Previous values of high-sensitivity fields, newest first (§5.13). Exists
+     * for one scenario that happens often: you rotate a password, the site did
+     * not actually accept it, and the old one is gone. Defaulted so older
+     * writers stay readable and other cores can ignore it.
+     */
+    val history: List<PastSecret> = emptyList(),
+)
+
+@Serializable
+data class PastSecret(
+    val k: String,
+    val value: String,
+    val replaced_at: Long,
 )
 // #endregion
 
 // #region Vault body (§4.3)
+/**
+ * A deleted record kept for [TRASH_TTL_DAYS] so a mis-tap is recoverable. The
+ * tombstone is still written alongside it: the tombstone is what stops another
+ * device resurrecting the record, and trash is only the local undo buffer.
+ */
+@Serializable
+data class TrashedRecord(
+    val record: Record,
+    val deleted_at: Long,
+)
+
+const val TRASH_TTL_DAYS: Int = 30
+
 @Serializable
 data class Tombstone(
     val uuid: String,
@@ -72,6 +99,7 @@ data class VaultBody(
     val format: Int = 1,
     val records: List<Record> = emptyList(),
     val tombstones: List<Tombstone> = emptyList(),
+    val trash: List<TrashedRecord> = emptyList(),
     val attachments: Map<String, Attachment> = emptyMap(),
     val meta: VaultMeta = VaultMeta(),
 )

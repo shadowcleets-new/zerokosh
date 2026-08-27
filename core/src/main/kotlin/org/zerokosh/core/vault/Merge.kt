@@ -3,6 +3,8 @@ package org.zerokosh.core.vault
 // #region Imports
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.Tombstone
+import org.zerokosh.core.model.TrashedRecord
+import org.zerokosh.core.model.TRASH_TTL_DAYS
 import org.zerokosh.core.model.VaultBody
 import org.zerokosh.core.model.VaultMeta
 import org.zerokosh.core.model.contentDiffersFrom
@@ -72,14 +74,75 @@ object VaultMerge {
             format = 1,
             records = merged + conflictCopies,
             tombstones = tombstones.values.filter { nowMs - it.deleted_at < TOMBSTONE_TTL_MS }.sortedBy { it.uuid },
+            // Named explicitly because this constructor is exhaustive: a field
+            // left out here is silently dropped on every sync, which for trash
+            // would mean the undo buffer quietly emptying itself.
+            trash = mergeTrash(local.trash, remote.trash, merged + conflictCopies, nowMs),
             attachments = remote.attachments + local.attachments, // union by uuid
             meta = VaultMeta(device_names = remote.meta.device_names + local.meta.device_names),
         )
     }
 
+    private const val TRASH_TTL_MS = TRASH_TTL_DAYS * 86_400_000L
+
+    /**
+     * Union by uuid keeping the later deletion, minus anything expired and
+     * anything that is a live record again — a restore on one device must not
+     * leave the entry sitting in the other device's trash.
+     */
+    private fun mergeTrash(
+        local: List<TrashedRecord>,
+        remote: List<TrashedRecord>,
+        live: List<Record>,
+        nowMs: Long,
+    ): List<TrashedRecord> {
+        val liveUuids = live.mapTo(HashSet()) { it.uuid }
+        val byUuid = LinkedHashMap<String, TrashedRecord>()
+        for (entry in local + remote) {
+            val existing = byUuid[entry.record.uuid]
+            if (existing == null || entry.deleted_at > existing.deleted_at) {
+                byUuid[entry.record.uuid] = entry
+            }
+        }
+        return byUuid.values
+            .filter { it.record.uuid !in liveUuids && nowMs - it.deleted_at < TRASH_TTL_MS }
+            .sortedByDescending { it.deleted_at }
+    }
+
     /** Delete = tombstone + remove record (§4.5); never hard-delete without one. */
-    fun applyDeletion(body: VaultBody, uuid: String, nowMs: Long): VaultBody = body.copy(
-        records = body.records.filterNot { it.uuid == uuid },
-        tombstones = body.tombstones.filterNot { it.uuid == uuid } + Tombstone(uuid, nowMs),
-    )
+    fun applyDeletion(body: VaultBody, uuid: String, nowMs: Long): VaultBody {
+        val removed = body.records.firstOrNull { it.uuid == uuid }
+        return body.copy(
+            records = body.records.filterNot { it.uuid == uuid },
+            tombstones = body.tombstones.filterNot { it.uuid == uuid } + Tombstone(uuid, nowMs),
+            trash = purgeTrash(
+                body.trash.filterNot { it.record.uuid == uuid } +
+                    listOfNotNull(removed?.let { TrashedRecord(it, nowMs) }),
+                nowMs,
+            ),
+        )
+    }
+
+    /**
+     * Restore beats the tombstone by modification time rather than by deleting
+     * it: merge already prefers a record edited after its deletion, so bumping
+     * modified_at is what makes the restore survive a sync from a device that
+     * still remembers the deletion.
+     */
+    fun applyRestore(body: VaultBody, uuid: String, nowMs: Long): VaultBody {
+        val entry = body.trash.firstOrNull { it.record.uuid == uuid } ?: return body
+        val restored = entry.record.copy(modified_at = nowMs, rev = entry.record.rev + 1)
+        return body.copy(
+            records = body.records.filterNot { it.uuid == uuid } + restored,
+            tombstones = body.tombstones.filterNot { it.uuid == uuid },
+            trash = body.trash.filterNot { it.record.uuid == uuid },
+        )
+    }
+
+    /** Permanent. The tombstone stays, so the deletion still syncs. */
+    fun applyPurge(body: VaultBody, uuid: String): VaultBody =
+        body.copy(trash = body.trash.filterNot { it.record.uuid == uuid })
+
+    fun purgeTrash(trash: List<TrashedRecord>, nowMs: Long): List<TrashedRecord> =
+        trash.filter { nowMs - it.deleted_at < TRASH_TTL_MS }.sortedByDescending { it.deleted_at }
 }

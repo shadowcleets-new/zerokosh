@@ -75,18 +75,15 @@ object Totp {
     // #endregion
 
     // #region otpauth:// URI parsing (§5.8, S11 QR scanner)
-    fun parseOtpauthUri(uri: String): Params? {
-        val prefix = "otpauth://totp/"
-        if (!uri.startsWith(prefix, ignoreCase = true)) return null
-        val rest = uri.substring(prefix.length)
-        val qIdx = rest.indexOf('?')
-        val label = URLDecoder.decode(if (qIdx >= 0) rest.substring(0, qIdx) else rest, "UTF-8")
-        val query = if (qIdx >= 0) rest.substring(qIdx + 1) else return null
-        val params = query.split('&').mapNotNull {
+    /** `a=1&b=2` into a map, lower-cased keys, percent-decoded values. */
+    private fun queryParams(query: String): Map<String, String> =
+        query.split('&').mapNotNull {
             val eq = it.indexOf('=')
             if (eq <= 0) null
             else it.substring(0, eq).lowercase() to URLDecoder.decode(it.substring(eq + 1), "UTF-8")
         }.toMap()
+
+    private fun paramsFrom(label: String, params: Map<String, String>): Params? {
         val secret = params["secret"] ?: return null
         return try {
             base32Decode(secret) // validate early
@@ -101,6 +98,16 @@ object Totp {
         } catch (e: IllegalArgumentException) {
             null
         }
+    }
+
+    fun parseOtpauthUri(uri: String): Params? {
+        val prefix = "otpauth://totp/"
+        if (!uri.startsWith(prefix, ignoreCase = true)) return null
+        val rest = uri.substring(prefix.length)
+        val qIdx = rest.indexOf('?')
+        if (qIdx < 0) return null
+        val label = URLDecoder.decode(rest.substring(0, qIdx), "UTF-8")
+        return paramsFrom(label, queryParams(rest.substring(qIdx + 1)))
     }
     // #endregion
 }

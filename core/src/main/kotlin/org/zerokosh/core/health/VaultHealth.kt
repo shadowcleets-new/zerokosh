@@ -84,48 +84,44 @@ fun reviewVault(
         for (field in template.fields) {
             val value = record.fields[field.k]?.trim().orEmpty()
             if (value.isEmpty()) continue
-
             if (field.sensitivity == Sensitivity.H) {
                 secretOwners.getOrPut(value) { mutableListOf() }.add(record)
-
-                if (CommonPasswords.isCommon(value)) {
-                    findings += HealthFinding(
-                        HealthKind.COMMON, record.uuid, record.title, field.k,
-                        "guessed in the first few thousand tries",
-                    )
-                } else if (field.k in PIN_KEYS) {
-                    if (isWeakPinPattern(value)) {
-                        findings += HealthFinding(
-                            HealthKind.WEAK, record.uuid, record.title, field.k,
-                            "a run or a repeated pattern",
-                        )
-                    }
-                } else if (value.length < 10) {
-                    findings += HealthFinding(
-                        HealthKind.WEAK, record.uuid, record.title, field.k,
-                        "${value.length} characters",
-                    )
-                }
+                secretFinding(record, field.k, value)?.let(findings::add)
             }
-
             if (field.k in EXPIRY_KEYS) {
                 expiryFinding(record, field.k, value, nowMs, withinDays)?.let(findings::add)
             }
         }
     }
+    findings += reuseFindings(secretOwners)
+    return findings.sortedWith(compareBy({ it.severity }, { it.recordTitle }))
+}
 
-    for ((_, owners) in secretOwners) {
-        if (owners.size < 2) continue
-        for (record in owners) {
-            findings += HealthFinding(
+/**
+ * At most one finding per secret. Commonness outranks pattern so "123456" is
+ * reported once as the thing an attacker tries first, not twice.
+ */
+private fun secretFinding(record: Record, key: String, value: String): HealthFinding? = when {
+    CommonPasswords.isCommon(value) ->
+        HealthFinding(HealthKind.COMMON, record.uuid, record.title, key, "guessed in the first few thousand tries")
+    key in PIN_KEYS && isWeakPinPattern(value) ->
+        HealthFinding(HealthKind.WEAK, record.uuid, record.title, key, "a run or a repeated pattern")
+    key in PIN_KEYS -> null
+    value.length < 10 ->
+        HealthFinding(HealthKind.WEAK, record.uuid, record.title, key, "${value.length} characters")
+    else -> null
+}
+
+private fun reuseFindings(owners: Map<String, List<Record>>): List<HealthFinding> =
+    owners.values.filter { it.size >= 2 }.flatMap { shared ->
+        val others = shared.size - 1
+        shared.map { record ->
+            HealthFinding(
                 HealthKind.REUSED, record.uuid, record.title, "",
-                "shared with ${owners.size - 1} other record${if (owners.size > 2) "s" else ""}",
+                "shared with $others other record${if (others > 1) "s" else ""}",
             )
         }
     }
-
-    return findings.sortedWith(compareBy({ it.severity }, { it.recordTitle }))
-}
 
 private const val DAY_MS = 86_400_000L
 

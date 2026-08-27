@@ -124,6 +124,40 @@ object EmvReader {
      * for each field. Track 2 is preferred for the PAN because it is the tag most
      * consistently present across schemes; tag 5A is the fallback.
      */
+    /** Track 2 carries both the PAN and the expiry; either may be absent. */
+    private fun track2(nodes: List<TlvNode>): Pair<String?, String?> {
+        for (tag in listOf(TAG_TRACK2_EQUIVALENT, TAG_TRACK2_CONTACTLESS)) {
+            for (node in Tlv.findAll(nodes, tag)) {
+                val (p, e) = decodeTrack2(node.value)
+                if (p != null || e != null) return p to e
+            }
+        }
+        return null to null
+    }
+
+    /**
+     * Application Label first, Preferred Name as the fallback: the former is
+     * mandatory in the FCI, the latter optional.
+     */
+    private fun label(nodes: List<TlvNode>): String? {
+        for (tag in listOf(TAG_APPLICATION_LABEL, TAG_PREFERRED_NAME)) {
+            val text = Tlv.find(nodes, tag)?.value?.toString(Charsets.US_ASCII)?.trim()
+            if (!text.isNullOrBlank()) return text
+        }
+        return null
+    }
+
+    /**
+     * Issuers that omit the cardholder name still send the field, filled with
+     * spaces or a literal placeholder.
+     */
+    private fun cardholderName(nodes: List<TlvNode>): String? {
+        val raw = Tlv.find(nodes, TAG_CARDHOLDER_NAME)?.value
+            ?.toString(Charsets.US_ASCII)?.trim() ?: return null
+        if (raw.isBlank() || raw.equals("UNKNOWN", true) || raw == "/") return null
+        return raw.replace(Regex("""\s+"""), " ")
+    }
+
     fun extract(responses: List<ByteArray>): EmvCard {
         var pan: String? = null
         var expiry: String? = null
@@ -132,42 +166,11 @@ object EmvReader {
 
         for (response in responses) {
             val nodes = Tlv.parse(response)
-
-            for (tag in listOf(TAG_TRACK2_EQUIVALENT, TAG_TRACK2_CONTACTLESS)) {
-                for (node in Tlv.findAll(nodes, tag)) {
-                    val (p, e) = decodeTrack2(node.value)
-                    if (pan == null) pan = p
-                    if (expiry == null) expiry = e
-                }
-            }
-            if (pan == null) {
-                Tlv.find(nodes, TAG_PAN)?.let { pan = decodePanTag(it.value) }
-            }
-            if (expiry == null) {
-                Tlv.find(nodes, TAG_EXPIRY)?.let { expiry = decodeExpiryTag(it.value) }
-            }
-            // Application Label first, Preferred Name as the fallback: the
-            // former is mandatory in the FCI, the latter is optional.
-            if (label == null) {
-                for (tag in listOf(TAG_APPLICATION_LABEL, TAG_PREFERRED_NAME)) {
-                    val text = Tlv.find(nodes, tag)?.value
-                        ?.toString(Charsets.US_ASCII)?.trim()
-                    if (!text.isNullOrBlank()) {
-                        label = text
-                        break
-                    }
-                }
-            }
-            if (name == null) {
-                Tlv.find(nodes, TAG_CARDHOLDER_NAME)?.let { node ->
-                    val raw = node.value.toString(Charsets.US_ASCII).trim()
-                    // Issuers that omit the name still send the field, filled with
-                    // spaces or a literal placeholder.
-                    name = raw.takeIf {
-                        it.isNotBlank() && !it.equals("UNKNOWN", true) && it != "/"
-                    }?.replace(Regex("\\s+"), " ")
-                }
-            }
+            val (trackPan, trackExpiry) = track2(nodes)
+            pan = pan ?: trackPan ?: Tlv.find(nodes, TAG_PAN)?.let { decodePanTag(it.value) }
+            expiry = expiry ?: trackExpiry ?: Tlv.find(nodes, TAG_EXPIRY)?.let { decodeExpiryTag(it.value) }
+            label = label ?: label(nodes)
+            name = name ?: cardholderName(nodes)
         }
         return EmvCard(
             pan = pan,

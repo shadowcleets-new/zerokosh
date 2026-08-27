@@ -27,6 +27,30 @@ object VaultMerge {
      */
     const val CONFLICT_SUFFIX = " (conflict copy)"
 
+    /** The surviving record, plus a conflict copy when both sides changed. */
+    private class Resolution(val winner: Record, val conflictCopy: Record?)
+
+    /**
+     * Last write wins by modified_at — but only after checking whether the
+     * loser said something different. A losing edit with different content is
+     * preserved as a copy rather than discarded, because the alternative is
+     * silently throwing away something a user typed.
+     */
+    private fun resolve(a: Record?, b: Record?, freshUuid: () -> String): Resolution {
+        if (a == null || b == null) return Resolution(a ?: b!!, null)
+        val unchanged = a.rev == b.rev && a.modified_at == b.modified_at && !a.contentDiffersFrom(b)
+        if (unchanged) return Resolution(a, null)
+
+        val newer = if (a.modified_at >= b.modified_at) a else b
+        val older = if (newer === a) b else a
+        val copy = if (older.contentDiffersFrom(newer)) {
+            older.copy(uuid = freshUuid(), title = older.title + CONFLICT_SUFFIX)
+        } else {
+            null
+        }
+        return Resolution(newer, copy)
+    }
+
     fun merge(
         local: VaultBody,
         remote: VaultBody,
@@ -45,23 +69,9 @@ object VaultMerge {
         val conflictCopies = mutableListOf<Record>()
 
         for (uuid in localByUuid.keys + remoteByUuid.keys) {
-            val a = localByUuid[uuid]
-            val b = remoteByUuid[uuid]
-            val winner: Record = when {
-                a != null && b != null && (a.rev != b.rev || a.contentDiffersFrom(b) || a.modified_at != b.modified_at) -> {
-                    val newer = if (a.modified_at >= b.modified_at) a else b
-                    val older = if (newer === a) b else a
-                    if (older.contentDiffersFrom(newer)) {
-                        conflictCopies += older.copy(
-                            uuid = freshUuid(),
-                            title = older.title + CONFLICT_SUFFIX,
-                        )
-                    }
-                    newer
-                }
-                a != null && b != null -> a // identical
-                else -> a ?: b!!
-            }
+            val resolution = resolve(localByUuid[uuid], remoteByUuid[uuid], freshUuid)
+            resolution.conflictCopy?.let { conflictCopies += it }
+            val winner = resolution.winner
             val tomb = tombstones[uuid]
             if (tomb != null && tomb.deleted_at > winner.modified_at) {
                 continue // tombstone beats record
@@ -70,14 +80,15 @@ object VaultMerge {
             merged += winner
         }
 
+        val survivors = merged + conflictCopies
         return VaultBody(
             format = 1,
-            records = merged + conflictCopies,
+            records = survivors,
             tombstones = tombstones.values.filter { nowMs - it.deleted_at < TOMBSTONE_TTL_MS }.sortedBy { it.uuid },
             // Named explicitly because this constructor is exhaustive: a field
             // left out here is silently dropped on every sync, which for trash
             // would mean the undo buffer quietly emptying itself.
-            trash = mergeTrash(local.trash, remote.trash, merged + conflictCopies, nowMs),
+            trash = mergeTrash(local.trash, remote.trash, survivors, nowMs),
             attachments = remote.attachments + local.attachments, // union by uuid
             meta = VaultMeta(device_names = remote.meta.device_names + local.meta.device_names),
         )

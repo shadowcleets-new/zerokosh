@@ -72,6 +72,22 @@ class CardIins private constructor(
          * Parses the bundled asset. Malformed lines are skipped rather than
          * thrown on: a damaged table should cost the prefill, not the app.
          */
+        /**
+         * `<6-digit bin> <bank index> <kind> <variant index>`, or null for any
+         * line that is not one. Pulled out of [parse] so the row format lives in
+         * one place and the reader stays a reader.
+         */
+        private fun parseRow(line: String): Pair<String, IntArray>? {
+            val parts = line.split(' ')
+            if (parts.size != 4) return null
+            val bin = parts[0]
+            if (bin.length != 6) return null
+            val bank = parts[1].toIntOrNull() ?: return null
+            val kind = parts[2].firstOrNull()?.code ?: return null
+            val variant = parts[3].toIntOrNull() ?: return null
+            return bin to intArrayOf(bank, kind, variant)
+        }
+
         fun parse(text: String): CardIins {
             var banks = emptyList<String>()
             var variants = emptyList<String>()
@@ -82,16 +98,7 @@ class CardIins private constructor(
                     line.isEmpty() || line == "v1" -> Unit
                     line.startsWith("B\t") -> banks = line.substring(2).split('\t')
                     line.startsWith("V\t") -> variants = line.substring(2).split('\t')
-                    else -> {
-                        val parts = line.split(' ')
-                        if (parts.size != 4) continue
-                        val bin = parts[0]
-                        if (bin.length != 6) continue
-                        val bank = parts[1].toIntOrNull() ?: continue
-                        val kind = parts[2].firstOrNull()?.code ?: continue
-                        val variant = parts[3].toIntOrNull() ?: continue
-                        rows[bin] = intArrayOf(bank, kind, variant)
-                    }
+                    else -> parseRow(line)?.let { (bin, row) -> rows[bin] = row }
                 }
             }
             return CardIins(banks, variants, rows)

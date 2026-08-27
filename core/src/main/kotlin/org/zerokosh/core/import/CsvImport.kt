@@ -197,42 +197,80 @@ object CsvImport {
     }
 
     // #region RFC-ish CSV parser (handles quoted fields)
-    fun parseCsv(text: String): List<List<String>> {
-        val rows = mutableListOf<List<String>>()
-        val current = mutableListOf<String>()
-        val field = StringBuilder()
+    /**
+     * The state a CSV scan carries: the row being built, the field being built,
+     * and whether we are inside quotes.
+     *
+     * Held in a type rather than in seven locals so each step of the scan is a
+     * short function instead of one nested `when` — the parser reads the same
+     * either way, but only one of them can be followed at a glance.
+     */
+    private class CsvScan {
+        private val rows = mutableListOf<List<String>>()
+        private val current = mutableListOf<String>()
+        private val field = StringBuilder()
         var inQuotes = false
-        var i = 0
-        val s = text.replace("\r\n", "\n").replace('\r', '\n')
-        while (i < s.length) {
-            val c = s[i]
-            when {
-                inQuotes -> when (c) {
-                    '"' -> if (i + 1 < s.length && s[i + 1] == '"') {
-                        field.append('"'); i++
-                    } else {
-                        inQuotes = false
-                    }
-                    else -> field.append(c)
-                }
-                c == '"' -> inQuotes = true
-                c == ',' -> {
-                    current += field.toString(); field.clear()
-                }
-                c == '\n' -> {
-                    current += field.toString(); field.clear()
-                    if (current.any { it.isNotBlank() }) rows += current.toList()
-                    current.clear()
-                }
-                else -> field.append(c)
-            }
-            i++
+
+        fun append(c: Char) {
+            field.append(c)
         }
-        if (field.isNotEmpty() || current.isNotEmpty()) {
+
+        fun endField() {
             current += field.toString()
-            if (current.any { it.isNotBlank() }) rows += current
+            field.clear()
         }
-        return rows
+
+        /** A row of nothing but empty fields is a blank line, not a record. */
+        fun endRow() {
+            endField()
+            if (current.any { it.isNotBlank() }) rows += current.toList()
+            current.clear()
+        }
+
+        fun finish(): List<List<String>> {
+            if (field.isNotEmpty() || current.isNotEmpty()) endRow()
+            return rows
+        }
+    }
+
+    /** Returns the index to continue from — a doubled quote consumes two chars. */
+    private fun CsvScan.stepQuoted(s: String, i: Int): Int {
+        val c = s[i]
+        if (c != '"') {
+            append(c)
+            return i + 1
+        }
+        // "" inside quotes is one literal quote; a lone " closes the field.
+        if (i + 1 < s.length && s[i + 1] == '"') {
+            append('"')
+            return i + 2
+        }
+        inQuotes = false
+        return i + 1
+    }
+
+    private fun CsvScan.stepPlain(c: Char) {
+        when (c) {
+            '"' -> inQuotes = true
+            ',' -> endField()
+            '\n' -> endRow()
+            else -> append(c)
+        }
+    }
+
+    fun parseCsv(text: String): List<List<String>> {
+        val scan = CsvScan()
+        val s = text.replace("\r\n", "\n").replace('\r', '\n')
+        var i = 0
+        while (i < s.length) {
+            if (scan.inQuotes) {
+                i = scan.stepQuoted(s, i)
+            } else {
+                scan.stepPlain(s[i])
+                i++
+            }
+        }
+        return scan.finish()
     }
     // #endregion
 }

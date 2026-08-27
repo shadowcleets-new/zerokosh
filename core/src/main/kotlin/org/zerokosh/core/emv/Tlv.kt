@@ -35,46 +35,69 @@ object Tlv {
      */
     fun parse(bytes: ByteArray): List<TlvNode> = parse(bytes, 0, bytes.size)
 
+    /** A field read off the wire, and where the cursor now sits. */
+    private class Read(val value: Int, val next: Int)
+
+    /**
+     * BER tag. One byte, unless the low five bits are all set, in which case it
+     * continues while the high bit of each following byte is set.
+     */
+    private fun readTag(bytes: ByteArray, from: Int, until: Int): Read? {
+        var tag = bytes[from].toInt() and 0xFF
+        var i = from + 1
+        if ((tag and 0x1F) != 0x1F) return Read(tag, i)
+        do {
+            if (i >= until) return null
+            tag = (tag shl 8) or (bytes[i].toInt() and 0xFF)
+            i++
+        } while ((bytes[i - 1].toInt() and 0x80) != 0)
+        return Read(tag, i)
+    }
+
+    /**
+     * BER length. Short form is the byte itself; long form is a count of
+     * following bytes, capped at four because nothing this app reads is larger
+     * and an unbounded shift is how a parser becomes an allocation bug.
+     */
+    private fun readLength(bytes: ByteArray, from: Int, until: Int): Read? {
+        val first = bytes[from].toInt() and 0xFF
+        if (first <= 0x7F) return Read(first, from + 1)
+        val count = first and 0x7F
+        if (count == 0 || count > 4 || from + 1 + count > until) return null
+        var length = 0
+        var i = from + 1
+        repeat(count) {
+            length = (length shl 8) or (bytes[i].toInt() and 0xFF)
+            i++
+        }
+        return Read(length, i)
+    }
+
+    /** 0x00 and 0xFF are padding between elements, not tags. */
+    private fun isPadding(b: Byte): Boolean = b == 0x00.toByte() || b == 0xFF.toByte()
+
     private fun parse(bytes: ByteArray, from: Int, until: Int): List<TlvNode> {
         val out = mutableListOf<TlvNode>()
         var i = from
         while (i < until) {
-            // 0x00 and 0xFF are padding between elements, not tags.
-            if (bytes[i] == 0x00.toByte() || bytes[i] == 0xFF.toByte()) {
+            if (isPadding(bytes[i])) {
                 i++
                 continue
             }
             val tagStart = i
-            var tag = bytes[i].toInt() and 0xFF
-            val constructed = (tag and 0x20) != 0
-            i++
-            if ((tag and 0x1F) == 0x1F) {
-                // Multi-byte tag: continue while the high bit is set.
-                do {
-                    if (i >= until) return out
-                    tag = (tag shl 8) or (bytes[i].toInt() and 0xFF)
-                    i++
-                } while ((bytes[i - 1].toInt() and 0x80) != 0)
-            }
+            val constructed = (bytes[i].toInt() and 0x20) != 0
+            val tag = readTag(bytes, i, until) ?: return out
+            i = tag.next
             if (i >= until) return out
 
-            var length = bytes[i].toInt() and 0xFF
-            i++
-            if (length > 0x7F) {
-                val lengthBytes = length and 0x7F
-                if (lengthBytes == 0 || lengthBytes > 4 || i + lengthBytes > until) return out
-                length = 0
-                repeat(lengthBytes) {
-                    length = (length shl 8) or (bytes[i].toInt() and 0xFF)
-                    i++
-                }
-            }
-            if (length < 0 || i + length > until) return out
+            val length = readLength(bytes, i, until) ?: return out
+            i = length.next
+            if (length.value < 0 || i + length.value > until) return out
 
-            val value = bytes.copyOfRange(i, i + length)
-            i += length
+            val value = bytes.copyOfRange(i, i + length.value)
+            i += length.value
             out += TlvNode(
-                tag = tag,
+                tag = tag.value,
                 value = value,
                 children = if (constructed) parse(value, 0, value.size) else emptyList(),
             )

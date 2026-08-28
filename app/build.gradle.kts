@@ -248,19 +248,16 @@ registerResourceGuard("releaseCheck")
 val templatesJson = file("src/main/assets/templates.json")
 val pickersJson = file("src/main/assets/pickers.json")
 val templateStrings = file("src/main/res/values/strings_templates.xml")
-val hindiStrings = file("src/main/res/values-hi/strings.xml")
-val hindiTemplateStrings = file("src/main/res/values-hi/strings_templates.xml")
 val baseStrings = file("src/main/res/values/strings.xml")
+val resDir = file("src/main/res")
 val galleryKt = file("src/main/java/org/zerokosh/app/ui/gallery/TemplateGalleryScreen.kt")
 val categoryKt = file("src/main/java/org/zerokosh/app/ui/common/RecordCategory.kt")
 
 val verifyTemplates by tasks.registering {
     group = "verification"
     description = "Fails if templates, labels, categories and pickers disagree."
-    val files = listOf(
-        templatesJson, pickersJson, templateStrings, galleryKt, categoryKt,
-        baseStrings, hindiStrings, hindiTemplateStrings,
-    )
+    val files = listOf(templatesJson, pickersJson, templateStrings, galleryKt, categoryKt, baseStrings)
+    inputs.files(rootProject.fileTree(resDir) { include("values-*/strings*.xml") })
     inputs.files(files)
     outputs.upToDateWhen { false }
     // Captured at configuration time: referencing the script's own properties
@@ -270,18 +267,34 @@ val verifyTemplates by tasks.registering {
     val stringsFile = templateStrings
     val galleryFile = galleryKt
     val categoryFile = categoryKt
-    val localePairs = listOf(baseStrings to hindiStrings, templateStrings to hindiTemplateStrings)
+    // Every values-XX directory is held to the same standard. Discovered rather
+    // than listed so adding a language cannot also mean remembering to add it
+    // here — the locale that gets forgotten is exactly the one that ships half
+    // translated.
+    val localeDirs = resDir.listFiles()
+        .orEmpty()
+        .filter { it.isDirectory && it.name.startsWith("values-") && it.name != "values-night" }
+        .sortedBy { it.name }
+    val localePairs = localeDirs.flatMap { dir ->
+        listOf(
+            baseStrings to File(dir, "strings.xml"),
+            templateStrings to File(dir, "strings_templates.xml"),
+        )
+    }
     doLast {
-        // Hindi is offered in the picker and applied by attachBaseContext, so a
-        // key that exists only in values/ renders as English inside an otherwise
-        // Hindi screen. The generator writes the English file alone, which means
-        // nothing but this stops a new template from quietly shipping half
-        // translated.
+        // A translation is offered in the picker and applied by attachBaseContext,
+        // so a key present only in values/ renders as English inside an otherwise
+        // translated screen. The template generator writes the English file alone,
+        // which means nothing but this stops a new template from quietly shipping
+        // half translated in every language at once.
         val stringName = Regex("""<string name="([^"]+)"""")
         fun namesIn(f: File) = stringName.findAll(f.readText()).map { it.groupValues[1] }.toSet()
         val localeProblems = localePairs.flatMap { (base, hi) ->
             if (!hi.exists()) listOf("missing translation file: ${hi.name}")
-            else (namesIn(base) - namesIn(hi)).sorted().map { "not translated into Hindi: $it" }
+            else {
+                val locale = hi.parentFile.name.removePrefix("values-")
+                (namesIn(base) - namesIn(hi)).sorted().map { "not translated into $locale: $it" }
+            }
         }
 
         // aapt trims leading and trailing whitespace from a <string> value unless

@@ -348,9 +348,9 @@ fun SettingsScreen(
                 Box {
                     var showThemeDropdown by remember { mutableStateOf(false) }
                     val currentTheme = when (app.prefs.themeOption) {
-                        1 -> "Light"
-                        2 -> "Dark"
-                        else -> "System"
+                        1 -> stringResource(R.string.st_theme_light)
+                        2 -> stringResource(R.string.st_theme_dark)
+                        else -> stringResource(R.string.st_theme_system)
                     }
                     SettingsRow(
                         title = stringResource(R.string.st_theme),
@@ -361,7 +361,11 @@ fun SettingsScreen(
                         expanded = showThemeDropdown,
                         onDismissRequest = { showThemeDropdown = false }
                     ) {
-                        listOf("System" to 0, "Light" to 1, "Dark" to 2).forEach { (label, opt) ->
+                        listOf(
+                            stringResource(R.string.st_theme_system) to 0,
+                            stringResource(R.string.st_theme_light) to 1,
+                            stringResource(R.string.st_theme_dark) to 2,
+                        ).forEach { (label, opt) ->
                             DropdownMenuItem(
                                 text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
                                 onClick = {

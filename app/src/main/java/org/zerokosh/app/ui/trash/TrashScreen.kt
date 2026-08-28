@@ -46,10 +46,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.OnboardingTopBar
 import org.zerokosh.app.ui.theme.VaultTheme
@@ -59,6 +61,14 @@ import org.zerokosh.core.model.TrashedRecord
 
 // #region Screen
 private const val DAY_MS = 86_400_000L
+
+/** "gone today" / "1 day left" / "30 days left". */
+@Composable
+private fun trashCountdown(daysLeft: Int): String = when {
+    daysLeft <= 0 -> stringResource(R.string.tr_gone_today)
+    daysLeft == 1 -> stringResource(R.string.tr_days_one, daysLeft)
+    else -> stringResource(R.string.tr_days_many, daysLeft)
+}
 
 @Composable
 fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
@@ -76,17 +86,17 @@ fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
             .background(c.paper)
             .statusBarsPadding(),
     ) {
-        OnboardingTopBar(stepLabel = "Recently deleted", onBack = onBack)
+        OnboardingTopBar(stepLabel = stringResource(R.string.st_recently_deleted), onBack = onBack)
 
         Column(Modifier.padding(horizontal = 24.dp)) {
             Text(
-                "Deleted records wait here for $TRASH_TTL_DAYS days.",
+                stringResource(R.string.tr_ttl_note, TRASH_TTL_DAYS),
                 style = MaterialTheme.typography.bodyMedium,
                 color = c.ink(0.6f),
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "After that they are gone for good — there is no copy anywhere else.",
+                stringResource(R.string.tr_ttl_warn),
                 fontSize = 12.sp,
                 color = c.ink(0.45f),
             )
@@ -95,7 +105,7 @@ fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
 
         if (trash.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Nothing deleted.", color = c.ink(0.45f))
+                Text(stringResource(R.string.tr_empty), color = c.ink(0.45f))
             }
             return@Column
         }
@@ -116,7 +126,7 @@ fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
             item {
                 Spacer(Modifier.height(12.dp))
                 TextButton(onClick = { confirmEmpty = true }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Delete all permanently", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.tr_delete_all), color = MaterialTheme.colorScheme.error)
                 }
                 Spacer(Modifier.height(24.dp))
             }
@@ -125,9 +135,11 @@ fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
 
     if (confirmEmpty) {
         DestructiveDialog(
-            title = "Delete everything in the trash?",
-            body = "${trash.size} record${if (trash.size == 1) "" else "s"} will be gone permanently. " +
-                "This cannot be undone and there is no backup to restore from.",
+            title = stringResource(R.string.tr_delete_all_title),
+            body = stringResource(
+                if (trash.size == 1) R.string.tr_delete_all_one else R.string.tr_delete_all_many,
+                trash.size,
+            ),
             onDismiss = { confirmEmpty = false },
             onConfirm = {
                 scope.launch { app.repository.emptyTrash() }
@@ -138,8 +150,8 @@ fun TrashScreen(app: ZerokoshApp, onBack: () -> Unit) {
 
     confirmPurge?.let { entry ->
         DestructiveDialog(
-            title = "Delete \"${entry.record.title}\" permanently?",
-            body = "This cannot be undone.",
+            title = stringResource(R.string.tr_delete_one_title, entry.record.title),
+            body = stringResource(R.string.tr_cannot_undo),
             onDismiss = { confirmPurge = null },
             onConfirm = {
                 scope.launch { app.repository.purgeRecord(entry.record.uuid) }
@@ -162,10 +174,10 @@ private fun DestructiveDialog(
         text = { Text(body) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Delete", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.scr_detail_delete), color = MaterialTheme.colorScheme.error)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) } },
     )
 }
 // #endregion
@@ -193,21 +205,21 @@ private fun TrashRow(
             color = c.ink,
         )
         Text(
-            if (daysLeft <= 0) "gone today" else "$daysLeft day${if (daysLeft == 1) "" else "s"} left",
+            trashCountdown(daysLeft),
             fontSize = 11.sp,
             color = if (daysLeft <= 3) MaterialTheme.colorScheme.error else c.ink(0.45f),
         )
         Spacer(Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(
-                "Restore",
+                stringResource(R.string.tr_restore),
                 modifier = Modifier.clickable(onClick = onRestore),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color = c.primary,
             )
             Text(
-                "Delete now",
+                stringResource(R.string.tr_delete_now),
                 modifier = Modifier.clickable(onClick = onPurge),
                 fontSize = 13.sp,
                 color = c.ink(0.55f),

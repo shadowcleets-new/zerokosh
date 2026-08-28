@@ -14,11 +14,14 @@
 package org.zerokosh.app.ui.common
 
 // #region Imports
+import android.content.Context
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import org.zerokosh.app.R
 // #endregion
 
 /**
@@ -28,7 +31,7 @@ import androidx.compose.runtime.Composable
  * The raw message is appended because the sync-folder cases are varied enough
  * that hiding the detail would leave the user guessing between them.
  */
-fun saveErrorMessage(cause: Throwable?): String {
+fun saveErrorMessage(context: Context, cause: Throwable?): String {
     val detail = cause?.message
         ?.takeIf { it.isNotBlank() }
         // An internal path is not an instruction. The detail earns its place on
@@ -37,13 +40,9 @@ fun saveErrorMessage(cause: Throwable?): String {
         // only hands the user something they cannot act on and cannot read.
         ?.takeUnless { it.contains("/data/user/") || it.contains("/data/data/") }
     return buildString {
-        append("Your changes were not saved, so nothing has been lost from the vault as it was.")
+        append(context.getString(R.string.se_lead))
         append("\n\n")
-        append(
-            "The vault file could not be written. If you have set a backup and sync " +
-                "folder, Android may have withdrawn permission to it — open Settings, " +
-                "pick the folder again, and retry.",
-        )
+        append(context.getString(R.string.se_body))
         if (detail != null) append("\n\n").append(detail)
     }
 }
@@ -57,7 +56,7 @@ fun SaveErrorDialog(message: String?, onDismiss: () -> Unit) {
     if (message == null) return
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Not saved", color = MaterialTheme.colorScheme.error) },
+        title = { Text(stringResource(R.string.se_title), color = MaterialTheme.colorScheme.error) },
         text = { Text(message) },
         confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
     )

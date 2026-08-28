@@ -17,6 +17,7 @@ package org.zerokosh.app.ui.record
 
 // #region Imports
 import android.nfc.Tag
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,10 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.LocalActivity
 import kotlinx.coroutines.launch
+import org.zerokosh.app.R
 import org.zerokosh.app.nfc.CardNfcReader
 import org.zerokosh.app.nfc.NfcReaderSession
 import org.zerokosh.app.ui.common.PrimaryPillButton
@@ -68,10 +70,13 @@ fun TapCardSheet(onCard: (EmvCard) -> Unit, onDismiss: () -> Unit) {
     var state by remember { mutableStateOf<TapState>(TapState.Waiting) }
 
     val unavailable = when {
-        !session.isAvailable -> "This phone has no NFC, so it cannot read a card."
-        !session.isEnabled -> "NFC is switched off. Turn it on in Settings, then try again."
+        !session.isAvailable -> stringResource(R.string.nfc_no_hardware)
+        !session.isEnabled -> stringResource(R.string.nfc_disabled)
         else -> null
     }
+
+    // Read in composition: DisposableEffect runs outside it.
+    val readFailed = stringResource(R.string.nfc_read_failed)
 
     // Reader mode is bound to the sheet's lifetime, not the screen's.
     DisposableEffect(session, unavailable) {
@@ -86,7 +91,7 @@ fun TapCardSheet(onCard: (EmvCard) -> Unit, onDismiss: () -> Unit) {
                         }
                         .onFailure { e ->
                             state = TapState.Failed(
-                                e.message ?: "That card could not be read. Try again.",
+                                e.message ?: readFailed,
                             )
                         }
                 }
@@ -116,10 +121,10 @@ fun TapCardSheet(onCard: (EmvCard) -> Unit, onDismiss: () -> Unit) {
 
             Text(
                 text = when {
-                    unavailable != null -> "Cannot read cards"
-                    state is TapState.Reading -> "Reading…"
-                    state is TapState.Failed -> "Did not catch that"
-                    else -> "Hold your card to the phone"
+                    unavailable != null -> stringResource(R.string.nfc_cannot_read)
+                    state is TapState.Reading -> stringResource(R.string.nfc_reading)
+                    state is TapState.Failed -> stringResource(R.string.nfc_missed)
+                    else -> stringResource(R.string.nfc_hold_card)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 color = c.ink,
@@ -129,9 +134,7 @@ fun TapCardSheet(onCard: (EmvCard) -> Unit, onDismiss: () -> Unit) {
             Text(
                 text = unavailable
                     ?: (state as? TapState.Failed)?.message
-                    ?: "Rest the card flat against the back of the phone until it reads. " +
-                    "This picks up the card number, expiry and name — the CVV is not on the chip, " +
-                    "so you will still type that yourself.",
+                    ?: stringResource(R.string.nfc_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = c.mute,
                 textAlign = TextAlign.Center,
@@ -140,7 +143,7 @@ fun TapCardSheet(onCard: (EmvCard) -> Unit, onDismiss: () -> Unit) {
             if (state is TapState.Failed) {
                 Spacer(Modifier.height(4.dp))
                 PrimaryPillButton(
-                    label = "Try again",
+                    label = stringResource(R.string.nfc_try_again),
                     onClick = { state = TapState.Waiting },
                     showArrow = false,
                 )

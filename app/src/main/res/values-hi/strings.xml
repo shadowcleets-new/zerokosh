@@ -414,4 +414,135 @@
     <string name="vh_kind_common">आम तौर पर ताड़ लिया जाने वाला</string>
     <string name="vh_kind_weak">कमज़ोर</string>
     <string name="vh_kind_expiring">खत्म होने वाला</string>
+
+    <!-- Trash and record detail. -->
+    <string name="tr_ttl_note">हटाए गए रिकॉर्ड यहाँ %1$d दिन रुकते हैं।</string>
+    <string name="tr_ttl_warn">उसके बाद वे हमेशा के लिए चले जाते हैं — और कहीं कोई नकल नहीं है।</string>
+    <string name="tr_empty">कुछ भी हटाया नहीं गया।</string>
+    <string name="tr_delete_all">सब कुछ हमेशा के लिए हटाएँ</string>
+    <string name="tr_delete_all_title">कूड़ेदान का सब कुछ हटा दें?</string>
+    <string name="tr_delete_all_one">%1$d रिकॉर्ड हमेशा के लिए चला जाएगा। यह वापस नहीं लाया जा सकता और बहाल करने को कोई बैकअप नहीं है।</string>
+    <string name="tr_delete_all_many">%1$d रिकॉर्ड हमेशा के लिए चले जाएँगे। यह वापस नहीं लाया जा सकता और बहाल करने को कोई बैकअप नहीं है।</string>
+    <string name="tr_delete_one_title">“%1$s” को हमेशा के लिए हटाएँ?</string>
+    <string name="tr_cannot_undo">यह वापस नहीं लाया जा सकता।</string>
+    <string name="tr_gone_today">आज चला जाएगा</string>
+    <string name="tr_days_one">%1$d दिन बाक़ी</string>
+    <string name="tr_days_many">%1$d दिन बाक़ी</string>
+    <string name="tr_restore">वापस लाएँ</string>
+    <string name="tr_delete_now">अभी हटाएँ</string>
+    <string name="rd_last_edit">आख़िरी बदलाव %1$s</string>
+    <string name="rd_history_hide">छिपाएँ</string>
+    <string name="rd_history_show">%1$d दिखाएँ</string>
+    <string name="rd_forget_these">इन्हें भुला दें</string>
+    <string name="rd_forget_title">पिछले पासवर्ड भुला दें?</string>
+    <string name="rd_forget_body">इस रिकॉर्ड के लिए याद रखे %1$d मान हटा दिए जाएँगे। यह वापस नहीं लाया जा सकता।</string>
+    <string name="rd_forget">भुला दें</string>
+    <string name="rd_copied">कॉपी हो गया</string>
+    <string name="rd_release_to_hide">छिपाने के लिए छोड़ें</string>
+    <string name="rd_hold_to_reveal">देखने के लिए दबाए रखें</string>
+
+    <!-- Navigation and the damaged-vault screen. -->
+    <string name="nav_close_menu">मेन्यू बंद करें</string>
+    <string name="nav_tap_card">कार्ड टैप करें</string>
+    <string name="nav_all_templates">सभी टेम्पलेट</string>
+    <string name="nav_scan">स्कैन</string>
+    <string name="nav_damaged_kicker">ख़राब स्थिति</string>
+    <string name="nav_damaged_lead">आपकी </string>
+    <string name="nav_damaged_emph">तिजोरी फ़ाइल</string>
+    <string name="nav_damaged_tail"> में कुछ गड़बड़ है।</string>
+    <string name="nav_integrity_title">अखंडता जाँच विफल</string>
+    <string name="nav_integrity_body">.kosh फ़ाइल का Poly1305 प्रमाणीकरण टैग मेल नहीं खाता। ऐसा अधूरे सिंक या ख़राब स्टोरेज के बाद हो सकता है।</string>
+    <string name="nav_what_next">अब क्या करें</string>
+    <string name="nav_what_next_body">Zerokosh तिजोरी फ़ाइल के साथ एक चलता-फिरता बैकअप रखता है। उसे अपने सिंक फ़ोल्डर से बहाल करें, या किसी दूसरे फ़ोन पर रिकवरी किट से तिजोरी खोलें।</string>
+
+    <!-- NFC card read and CSV import. -->
+    <string name="nfc_no_hardware">इस फ़ोन में NFC नहीं है, इसलिए यह कार्ड नहीं पढ़ सकता।</string>
+    <string name="nfc_disabled">NFC बंद है। सेटिंग में जाकर चालू करें, फिर कोशिश करें।</string>
+    <string name="nfc_read_failed">वह कार्ड पढ़ा नहीं जा सका। दोबारा कोशिश करें।</string>
+    <string name="nfc_cannot_read">कार्ड नहीं पढ़ सकते</string>
+    <string name="nfc_reading">पढ़ा जा रहा है…</string>
+    <string name="nfc_missed">पकड़ में नहीं आया</string>
+    <string name="nfc_hold_card">कार्ड को फ़ोन से लगाएँ</string>
+    <string name="nfc_hint">कार्ड को फ़ोन के पीछे सीधा टिकाए रखें जब तक वह पढ़ न ले। इससे कार्ड नंबर, वैधता और नाम आ जाते हैं — CVV चिप में नहीं होता, वह आपको ख़ुद लिखना होगा।</string>
+    <string name="nfc_try_again">दोबारा कोशिश करें</string>
+    <string name="ic_too_large">यह फ़ाइल इतनी बड़ी है कि पासवर्ड एक्सपोर्ट हो ही नहीं सकती।</string>
+    <string name="ic_unrecognised">उस फ़ाइल में पहचानने लायक कुछ नहीं मिला। Chrome, Google Password Manager, Bitwarden, LastPass और KeePass के एक्सपोर्ट समझे जाते हैं।</string>
+    <string name="ic_could_not">आयात नहीं हो सका</string>
+    <string name="ic_imported">आयात हो गया</string>
+    <string name="ic_result">%1$d जोड़े गए, %2$d बदले गए।</string>
+    <string name="ic_delete_file">अब वह फ़ाइल हटा दें जो आपने अभी आयात की। वह आपके पासवर्ड की सादी सूची है और अब भी आपके Downloads में पड़ी है।</string>
+    <string name="ic_done">हो गया</string>
+    <string name="ic_title">%1$s से आयात करें?</string>
+    <string name="ic_new_one">%1$d नया लॉगिन।</string>
+    <string name="ic_new_many">%1$d नए लॉगिन।</string>
+    <string name="ic_update_one">%1$d मौजूदा रिकॉर्ड बदला जाएगा — साइट और यूज़रनेम से मिलान करके। बदले गए पासवर्ड हर रिकॉर्ड के इतिहास में वापस मिल जाएँगे।</string>
+    <string name="ic_update_many">%1$d मौजूदा रिकॉर्ड बदले जाएँगे — साइट और यूज़रनेम से मिलान करके। बदले गए पासवर्ड हर रिकॉर्ड के इतिहास में वापस मिल जाएँगे।</string>
+    <string name="ic_local_only">सब कुछ सिर्फ़ इसी फ़ोन पर डिक्रिप्ट होता है। कुछ भी अपलोड नहीं होता, क्योंकि यह ऐप नेटवर्क कनेक्शन खोल ही नहीं सकता।</string>
+    <string name="ic_importing">आयात हो रहा है…</string>
+    <string name="ic_import">आयात करें</string>
+
+    <!-- Record edit. -->
+    <string name="re_using_template">%1$s टेम्पलेट से</string>
+    <string name="re_add_field">+ एक और फ़ील्ड जोड़ें</string>
+    <string name="re_remove">हटाएँ</string>
+    <string name="re_add_field_title">फ़ील्ड जोड़ें</string>
+    <string name="re_field_name">फ़ील्ड का नाम</string>
+    <string name="re_treat_secret">गोपनीय मानें (छिपा रहेगा, देखने के लिए दबाए रखें)</string>
+    <string name="re_pick_date">तारीख़ चुनें</string>
+    <string name="re_tap_card">कार्ड टैप करके पढ़ें</string>
+
+    <!-- Authenticator. -->
+    <string name="au_fallback_name">ऑथेंटिकेटर</string>
+    <string name="au_search_hint">कोड, जारीकर्ता खोजें…</string>
+    <string name="au_rotating">बदलते रहते हैं </string>
+    <string name="au_active_one">%1$d चालू कोड</string>
+    <string name="au_active_many">%1$d चालू कोड</string>
+    <string name="au_tap_to_copy">कॉपी करने के लिए टैप करें</string>
+    <string name="au_add_another">एक और ऑथेंटिकेटर जोड़ें</string>
+    <string name="au_no_match">कोई कोड नहीं मिला</string>
+    <string name="au_none_yet">अभी कोई कोड नहीं।</string>
+    <string name="au_empty_hint">Google, GitHub या अपने ब्रोकर का क्यूआर स्कैन करें, या सीक्रेट की हाथ से लिखें।</string>
+    <string name="au_scan_qr">क्यूआर कोड स्कैन करें</string>
+    <string name="au_copied">कॉपी हो गया · थोड़ी देर में मिट जाएगा</string>
+    <string name="au_no_qr_found">चुनी गई तस्वीर में कोई सही TOTP क्यूआर कोड नहीं मिला</string>
+    <string name="au_image_failed">तस्वीर पढ़ी नहीं जा सकी</string>
+    <string name="au_camera_needed">क्यूआर कोड स्कैन करने के लिए कैमरे की अनुमति चाहिए</string>
+    <string name="au_grant">अनुमति दें</string>
+    <string name="au_close">बंद करें</string>
+    <string name="au_scan_title">ऑथेंटिकेटर क्यूआर स्कैन करें</string>
+    <string name="au_flashlight">टॉर्च</string>
+    <string name="au_pick_image">तस्वीर चुनें</string>
+    <string name="au_enter_key">की लिखें</string>
+    <string name="au_add_secret">सीक्रेट की जोड़ें</string>
+    <string name="au_account_name">खाते का नाम (जैसे Google)</string>
+    <string name="au_secret_label">सीक्रेट की (Base32)</string>
+    <string name="au_secret_example">जैसे JBSWY3DPEHPK3PXP</string>
+    <string name="au_invalid_secret">ग़लत Base32 सीक्रेट की (सिर्फ़ A-Z अक्षर और 2-7 अंक)</string>
+    <string name="au_save_key">की सहेजें</string>
+
+    <!-- Chrome: tabs, toggles, quick adds. -->
+    <string name="ui_hide_passphrase">पासफ़्रेज़ छिपाएँ</string>
+    <string name="ui_show_passphrase">पासफ़्रेज़ दिखाएँ</string>
+    <string name="ui_label_count">%1$s, %2$s</string>
+    <string name="tab_vault">तिजोरी</string>
+    <string name="tab_codes">कोड</string>
+    <string name="tab_templates">टेम्पलेट</string>
+    <string name="tab_settings">सेटिंग</string>
+    <string name="wl_sr_headline">आपकी चाबियाँ। आपका फ़ोन। कोई सर्वर नहीं।</string>
+    <string name="wl_chip_crypto">Argon2id + XChaCha20</string>
+    <string name="wl_chip_offline">ऑफ़लाइन</string>
+    <string name="wl_chip_open">ओपन सोर्स</string>
+    <string name="wl_head_1">आपकी चाबियाँ।</string>
+    <string name="wl_head_2">आपका फ़ोन।</string>
+    <string name="wl_head_3">कोई सर्वर नहीं।</string>
+    <string name="qa_bank_account">बैंक खाता</string>
+    <string name="qa_upi_id">यूपीआई आईडी</string>
+    <string name="qa_aadhaar">आधार</string>
+    <string name="qa_pan">पैन</string>
+    <string name="qa_totp">TOTP</string>
+
+    <!-- Save failure dialog. -->
+    <string name="se_title">सहेजा नहीं गया</string>
+    <string name="se_lead">आपके बदलाव सहेजे नहीं गए, इसलिए तिजोरी में जो पहले था उसमें से कुछ नहीं खोया।</string>
+    <string name="se_body">तिजोरी फ़ाइल लिखी नहीं जा सकी। अगर आपने बैकअप और सिंक फ़ोल्डर सेट किया है, तो हो सकता है Android ने उसकी अनुमति वापस ले ली हो — सेटिंग खोलें, फ़ोल्डर दोबारा चुनें, और फिर कोशिश करें।</string>
 </resources>

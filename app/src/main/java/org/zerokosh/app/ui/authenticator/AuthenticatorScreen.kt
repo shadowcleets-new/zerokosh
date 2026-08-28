@@ -105,6 +105,13 @@ data class TotpEntry(
     val params: Totp.Params,
 )
 
+/** "1 active code" / "7 active codes". */
+@Composable
+private fun activeCodeCount(count: Int): String = stringResource(
+    if (count == 1) R.string.au_active_one else R.string.au_active_many,
+    count,
+)
+
 @Composable
 fun AuthenticatorScreen(app: ZerokoshApp) {
     val c = VaultTheme.colors
@@ -142,6 +149,8 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
         }
     }
 
+    // Read in composition: onSaveSecret is a plain lambda, not a composable.
+    val fallbackName = stringResource(R.string.au_fallback_name)
     val onSaveSecret: (String, String?) -> Unit = { secretOrUri, customTitle ->
         val params = Totp.parseOtpauthUri(secretOrUri)
             ?: Totp.Params(secretBase32 = secretOrUri.trim())
@@ -151,7 +160,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                 .filter { it.isNotBlank() }
                 .distinct()
                 .joinToString(" · ")
-                .ifBlank { "Authenticator" }
+                .ifBlank { fallbackName }
 
         val record = Record(
             uuid = UUID.randomUUID().toString(),
@@ -237,7 +246,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                     ) {
                         Icon(
                             Icons.Outlined.Close,
-                            contentDescription = "Close search",
+                            contentDescription = stringResource(R.string.hm_close_search),
                             tint = c.ink(0.55f),
                             modifier = Modifier.size(20.dp),
                         )
@@ -245,7 +254,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                 }
             } else {
                 SearchDock(
-                    placeholder = "Search codes, issuers…",
+                    placeholder = stringResource(R.string.au_search_hint),
                     initials = "ZK",
                     onClick = { searching = true },
                 )
@@ -260,7 +269,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                 Column(Modifier.padding(top = 12.dp)) {
                     Text(
                         buildAnnotatedString {
-                            append("Rotating ")
+                            append(stringResource(R.string.au_rotating))
                             withStyle(EmphasisSpan) { append("codes.") }
                         },
                         style = MaterialTheme.typography.displaySmall,
@@ -269,11 +278,11 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusPill(
-                            text = "${entries.size} active code${if (entries.size == 1) "" else "s"}",
+                            text = activeCodeCount(entries.size),
                             tone = NoticeTone.Positive,
                             showDot = true,
                         )
-                        StatusPill("Tap to copy")
+                        StatusPill(stringResource(R.string.au_tap_to_copy))
                     }
                     Spacer(Modifier.height(20.dp))
                 }
@@ -306,7 +315,7 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "Add another authenticator",
+                            stringResource(R.string.au_add_another),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = c.ink,
@@ -341,13 +350,13 @@ private fun EmptyCodes(onScan: () -> Unit, hasQuery: Boolean) {
         }
         Spacer(Modifier.height(20.dp))
         Text(
-            if (hasQuery) "No codes match" else "No codes yet.",
+            stringResource(if (hasQuery) R.string.au_no_match else R.string.au_none_yet),
             style = MaterialTheme.typography.headlineSmall,
             color = c.ink,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Scan a QR from Google, GitHub or your broker, or type a secret key by hand.",
+            stringResource(R.string.au_empty_hint),
             style = MaterialTheme.typography.bodySmall,
             color = c.mute,
             textAlign = TextAlign.Center,
@@ -363,7 +372,11 @@ private fun EmptyCodes(onScan: () -> Unit, hasQuery: Boolean) {
                 .padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("Scan a QR code", style = MaterialTheme.typography.titleSmall, color = c.paper)
+            Text(
+                stringResource(R.string.au_scan_qr),
+                style = MaterialTheme.typography.titleSmall,
+                color = c.paper,
+            )
         }
     }
 }
@@ -412,7 +425,7 @@ private fun TotpCard(entry: TotpEntry, accented: Boolean) {
             .clickable {
                 if (code.isNotBlank()) {
                     ClipboardHelper.copySensitive(context, code)
-                    Toast.makeText(context, "Copied · clears shortly", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.au_copied), Toast.LENGTH_SHORT).show()
                 }
             }
             .padding(20.dp),
@@ -488,7 +501,7 @@ private fun TotpCard(entry: TotpEntry, accented: Boolean) {
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             ) {
                 Text(
-                    "Copy",
+                    stringResource(R.string.scr_detail_copy),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = c.accent,
@@ -542,11 +555,11 @@ fun QrScannerScreen(
                     if (result != null && (result.text.startsWith("otpauth://", ignoreCase = true) || result.text.matches(Regex("^[A-Z2-7=]+$", RegexOption.IGNORE_CASE)))) {
                         onSecret(result.text)
                     } else {
-                        Toast.makeText(context, "No valid TOTP QR code found in selected image", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, context.getString(R.string.au_no_qr_found), Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.au_image_failed), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -657,14 +670,14 @@ fun QrScannerScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Camera permission needed to scan QR code",
+                    text = stringResource(R.string.au_camera_needed),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }) {
-                    Text("Grant Permission")
+                    Text(stringResource(R.string.au_grant))
                 }
             }
         }
@@ -681,11 +694,15 @@ fun QrScannerScreen(
                 onClick = onCancel,
                 modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
             ) {
-                Icon(Icons.Outlined.Close, contentDescription = "Close", tint = Color.White)
+                Icon(
+                    Icons.Outlined.Close,
+                    contentDescription = stringResource(R.string.au_close),
+                    tint = Color.White,
+                )
             }
 
             Text(
-                text = "Scan Authenticator QR",
+                text = stringResource(R.string.au_scan_title),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
@@ -702,7 +719,7 @@ fun QrScannerScreen(
             ) {
                 Icon(
                     if (torchOn) Icons.Outlined.FlashOn else Icons.Outlined.FlashOff,
-                    contentDescription = "Flashlight",
+                    contentDescription = stringResource(R.string.au_flashlight),
                     tint = if (torchOn) Color.Yellow else Color.White
                 )
             }
@@ -724,7 +741,7 @@ fun QrScannerScreen(
                 ) {
                     Icon(Icons.Outlined.PhotoLibrary, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(8.dp))
-                    Text("Pick Image", color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.au_pick_image), color = MaterialTheme.colorScheme.onSurface)
                 }
 
                 Button(
@@ -734,7 +751,7 @@ fun QrScannerScreen(
                 ) {
                     Icon(Icons.Outlined.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                     Spacer(Modifier.width(8.dp))
-                    Text("Enter Key", color = MaterialTheme.colorScheme.onPrimary)
+                    Text(stringResource(R.string.au_enter_key), color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -762,16 +779,18 @@ private fun ManualTotpDialog(
     var title by remember { mutableStateOf("") }
     var secret by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    val dialogFallbackName = stringResource(R.string.au_fallback_name)
+    val invalidSecretMessage = stringResource(R.string.au_invalid_secret)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Secret Key", fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.au_add_secret), fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Account Name (e.g. Google)") },
+                    label = { Text(stringResource(R.string.au_account_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -782,14 +801,17 @@ private fun ManualTotpDialog(
                         secret = it.uppercase()
                         error = null
                     },
-                    label = { Text("Secret Key (Base32)") },
+                    label = { Text(stringResource(R.string.au_secret_label)) },
                     singleLine = true,
                     isError = error != null,
                     supportingText = {
                         if (error != null) {
                             Text(error!!, color = MaterialTheme.colorScheme.error)
                         } else {
-                            Text("e.g. JBSWY3DPEHPK3PXP", style = MaterialTheme.typography.labelSmall)
+                            Text(
+                                stringResource(R.string.au_secret_example),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -802,18 +824,18 @@ private fun ManualTotpDialog(
                 onClick = {
                     val cleanSecret = secret.replace(" ", "").uppercase()
                     if (cleanSecret.matches(Regex("^[A-Z2-7=]+$"))) {
-                        onSave(cleanSecret, title.ifBlank { "Authenticator" })
+                        onSave(cleanSecret, title.ifBlank { dialogFallbackName })
                     } else {
-                        error = "Invalid Base32 secret key (letters A-Z and digits 2-7 only)"
+                        error = invalidSecretMessage
                     }
                 }
             ) {
-                Text("Save Key")
+                Text(stringResource(R.string.au_save_key))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.msg_cancel))
             }
         }
     )

@@ -100,12 +100,12 @@ private fun differenceSource(ground: Color, target: Color) = Color(
 )
 
 /** Spoken form of the painted hero headline. */
-private const val HeadlineForScreenReaders = "Your keys. Your device. No server."
+
 
 private val FeatureChips = listOf(
-    "Argon2id + XChaCha20",
-    "Offline",
-    "Open source",
+    R.string.wl_chip_crypto,
+    R.string.wl_chip_offline,
+    R.string.wl_chip_open,
 )
 // #endregion
 
@@ -279,11 +279,11 @@ private fun DifferenceHeadline(modifier: Modifier = Modifier) {
         .copy(color = differenceSource(c.paper, c.ink))
     val emphasis = differenceSource(c.paper, c.primary)
     val text = buildAnnotatedString {
-        append("Your keys.\n")
+        append(stringResource(R.string.wl_head_1) + "\n")
         withStyle(SpanStyle(fontStyle = FontStyle.Italic, color = emphasis)) {
-            append("Your device.")
+            append(stringResource(R.string.wl_head_2))
         }
-        append("\nNo server.")
+        append("\n" + stringResource(R.string.wl_head_3))
     }
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val layout = measurer.measure(
@@ -292,6 +292,8 @@ private fun DifferenceHeadline(modifier: Modifier = Modifier) {
             constraints = Constraints(maxWidth = constraints.maxWidth),
         )
         val heightDp = with(LocalDensity.current) { layout.size.height.toDp() }
+        // The headline is painted, so its spoken form is a resource read here.
+        val spokenHeadline = stringResource(R.string.wl_sr_headline)
         Box(
             Modifier
                 .fillMaxWidth()
@@ -299,7 +301,7 @@ private fun DifferenceHeadline(modifier: Modifier = Modifier) {
                 // The headline is painted, not laid out as a Text node, so it
                 // carries no semantics of its own — state them explicitly or a
                 // screen reader skips the screen's primary message entirely.
-                .semantics { contentDescription = HeadlineForScreenReaders }
+                .semantics { contentDescription = spokenHeadline }
                 .drawBehind { drawText(layout, blendMode = BlendMode.Difference) },
         )
     }
@@ -357,7 +359,8 @@ private fun FeatureChipRow() {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        FeatureChips.forEach { label ->
+        FeatureChips.forEach { labelRes ->
+            val label = stringResource(labelRes)
             Row(
                 modifier = Modifier
                     .height(32.dp)

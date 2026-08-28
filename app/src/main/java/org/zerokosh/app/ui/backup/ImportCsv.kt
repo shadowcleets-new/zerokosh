@@ -35,10 +35,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.core.import.CsvImport
@@ -84,14 +86,13 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
         scope.launch {
             val text = withContext(Dispatchers.IO) { readBounded(context, uri) }
             if (text == null) {
-                error = "That file is too large to be a credential export."
+                error = context.getString(R.string.ic_too_large)
                 return@launch
             }
             val preview = runCatching { CsvImport.parseAuto(text, app.prefs.deviceId, System.currentTimeMillis()) }
                 .getOrNull()
             if (preview == null || preview.records.isEmpty()) {
-                error = "Nothing recognisable in that file. Exports from Chrome, " +
-                    "Google Password Manager, Bitwarden, LastPass and KeePass are understood."
+                error = context.getString(R.string.ic_unrecognised)
                 return@launch
             }
             val existing = app.repository.body.value?.records.orEmpty()
@@ -110,7 +111,7 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
                 scope.launch {
                     app.repository.upsertRecords(p.insert + p.update)
                         .onSuccess { result = p.insert.size to p.update.size }
-                        .onFailure { error = saveErrorMessage(it) }
+                        .onFailure { error = saveErrorMessage(context, it) }
                     busy = false
                     pending = null
                 }
@@ -121,7 +122,7 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
     error?.let { message ->
         AlertDialog(
             onDismissRequest = { error = null },
-            title = { Text("Could not import") },
+            title = { Text(stringResource(R.string.ic_could_not)) },
             text = { Text(message) },
             confirmButton = { TextButton(onClick = { error = null }) { Text("OK") } },
         )
@@ -130,19 +131,18 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
     result?.let { (added, updated) ->
         AlertDialog(
             onDismissRequest = { result = null },
-            title = { Text("Imported") },
+            title = { Text(stringResource(R.string.ic_imported)) },
             text = {
                 Column {
-                    Text("$added added, $updated updated.")
+                    Text(stringResource(R.string.ic_result, added, updated))
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Now delete the file you just imported. It is a plain-text list " +
-                            "of your passwords and it is still sitting in your Downloads.",
+                        stringResource(R.string.ic_delete_file),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
             },
-            confirmButton = { TextButton(onClick = { result = null }) { Text("Done") } },
+            confirmButton = { TextButton(onClick = { result = null }) { Text(stringResource(R.string.ic_done)) } },
         )
     }
 
@@ -183,32 +183,43 @@ private fun ImportPreviewDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Import from ${pending.sourceLabel}?") },
+        title = { Text(stringResource(R.string.ic_title, pending.sourceLabel)) },
         text = {
             Column {
-                Text("${pending.insert.size} new login${if (pending.insert.size == 1) "" else "s"}.")
+                Text(
+                    stringResource(
+                        if (pending.insert.size == 1) R.string.ic_new_one else R.string.ic_new_many,
+                        pending.insert.size,
+                    ),
+                )
                 if (pending.update.isNotEmpty()) {
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "${pending.update.size} existing record${if (pending.update.size == 1) "" else "s"} " +
-                            "will be updated — matched on site and username. The replaced " +
-                            "passwords stay recoverable in each record's history.",
+                        stringResource(
+                            if (pending.update.size == 1) {
+                                R.string.ic_update_one
+                            } else {
+                                R.string.ic_update_many
+                            },
+                            pending.update.size,
+                        ),
                     )
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Everything is decrypted on this device only. Nothing is uploaded, " +
-                        "because this app cannot open a network connection.",
+                    stringResource(R.string.ic_local_only),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm, enabled = !busy) {
-                Text(if (busy) "Importing…" else "Import")
+                Text(stringResource(if (busy) R.string.ic_importing else R.string.ic_import))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !busy) { Text("Cancel") } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !busy) { Text(stringResource(R.string.msg_cancel)) }
+        },
     )
 }
 // #endregion

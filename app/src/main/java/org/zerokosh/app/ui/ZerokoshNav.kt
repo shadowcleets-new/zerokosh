@@ -25,20 +25,12 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import org.zerokosh.app.autofill.PendingSave
-import org.zerokosh.app.autofill.loginRecordFor
-import org.zerokosh.app.MainActivity
-import org.zerokosh.app.ui.health.VaultHealthScreen
-import org.zerokosh.app.ui.trash.TrashScreen
-import androidx.core.content.ContextCompat
-import org.zerokosh.app.reminders.ReminderWorker
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +46,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AccountBalance
-import org.zerokosh.app.ui.record.TapCardSheet
 import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.GridView
@@ -64,37 +55,46 @@ import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
-import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import org.zerokosh.app.MainActivity
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.autofill.PendingSave
+import org.zerokosh.app.autofill.loginRecordFor
 import org.zerokosh.app.data.VaultState
+import org.zerokosh.app.reminders.ReminderWorker
 import org.zerokosh.app.ui.authenticator.AuthenticatorScreen
 import org.zerokosh.app.ui.common.EmphasisSpan
 import org.zerokosh.app.ui.common.GroupCard
@@ -103,12 +103,11 @@ import org.zerokosh.app.ui.common.NoticeCard
 import org.zerokosh.app.ui.common.NoticeTone
 import org.zerokosh.app.ui.common.RevealAuth
 import org.zerokosh.app.ui.common.VaultExtendedFab
-import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.platform.LocalConfiguration
-import org.zerokosh.app.ui.common.VaultNavRail
 import org.zerokosh.app.ui.common.VaultNavBar
+import org.zerokosh.app.ui.common.VaultNavRail
 import org.zerokosh.app.ui.common.VaultTab
 import org.zerokosh.app.ui.gallery.TemplateGalleryScreen
+import org.zerokosh.app.ui.health.VaultHealthScreen
 import org.zerokosh.app.ui.home.HomeScreen
 import org.zerokosh.app.ui.lock.LockScreen
 import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
@@ -126,8 +125,10 @@ import org.zerokosh.app.ui.onboarding.TrustScreen
 import org.zerokosh.app.ui.onboarding.WelcomeScreen
 import org.zerokosh.app.ui.record.RecordDetailScreen
 import org.zerokosh.app.ui.record.RecordEditScreen
+import org.zerokosh.app.ui.record.TapCardSheet
 import org.zerokosh.app.ui.settings.SettingsScreen
 import org.zerokosh.app.ui.theme.VaultTheme
+import org.zerokosh.app.ui.trash.TrashScreen
 // #endregion
 
 // #region Root switch
@@ -212,10 +213,10 @@ private fun OnboardingFlow(app: ZerokoshApp) {
  * renamed away underneath us.
  */
 private val QuickAdd = listOf(
-    Triple("login", "Login", Icons.Outlined.Password),
-    Triple("card", "Card", Icons.Outlined.CreditCard),
-    Triple("upi", "UPI", Icons.Outlined.QrCode2),
-    Triple("bank_account", "Bank account", Icons.Outlined.AccountBalance),
+    Triple("login", R.string.tpl_login, Icons.Outlined.Password),
+    Triple("card", R.string.tpl_card, Icons.Outlined.CreditCard),
+    Triple("upi", R.string.tpl_upi, Icons.Outlined.QrCode2),
+    Triple("bank_account", R.string.tpl_bank_account, Icons.Outlined.AccountBalance),
 )
 
 /**
@@ -350,7 +351,9 @@ private fun MainScaffold(app: ZerokoshApp) {
                             }
                             Icon(
                                 painter = rememberVectorPainter(icon),
-                                contentDescription = if (fabMenuExpanded) "Close menu" else "Add",
+                                contentDescription = stringResource(
+                                    if (fabMenuExpanded) R.string.nav_close_menu else R.string.scr_home_add,
+                                ),
                                 // animateIcon tints through a ColorFilter, which
                                 // beats Icon(tint=) -- the colour has to go here
                                 // or the glyph keeps the M3 default and vanishes
@@ -374,16 +377,16 @@ private fun MainScaffold(app: ZerokoshApp) {
                             showTapCard = true
                         },
                         icon = { Icon(Icons.Outlined.Contactless, contentDescription = null) },
-                        text = { Text("Tap a card") },
+                        text = { Text(stringResource(R.string.nav_tap_card)) },
                     )
-                    QuickAdd.forEach { (templateId, label, icon) ->
+                    QuickAdd.forEach { (templateId, labelRes, icon) ->
                         FloatingActionButtonMenuItem(
                             onClick = {
                                 fabMenuExpanded = false
                                 openTemplate(templateId)
                             },
                             icon = { Icon(icon, contentDescription = null) },
-                            text = { Text(label) },
+                            text = { Text(stringResource(labelRes)) },
                         )
                     }
                     FloatingActionButtonMenuItem(
@@ -392,11 +395,11 @@ private fun MainScaffold(app: ZerokoshApp) {
                             openGallery()
                         },
                         icon = { Icon(Icons.Outlined.GridView, contentDescription = null) },
-                        text = { Text("All templates") },
+                        text = { Text(stringResource(R.string.nav_all_templates)) },
                     )
                 }
                 VaultTab.Codes -> VaultExtendedFab(
-                    label = "Scan",
+                    label = stringResource(R.string.nav_scan),
                     onClick = openGallery,
                     icon = Icons.Outlined.QrCodeScanner,
                 )
@@ -512,13 +515,15 @@ private fun DamagedScreen() {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 28.dp, vertical = 24.dp),
     ) {
-        Kicker("Damaged state")
+        Kicker(stringResource(R.string.nav_damaged_kicker))
         Spacer(Modifier.height(12.dp))
         Text(
             buildAnnotatedString {
-                append("Something in the ")
-                withStyle(EmphasisSpan.copy(color = c.ink)) { append("vault file") }
-                append(" is off.")
+                append(stringResource(R.string.nav_damaged_lead))
+                withStyle(EmphasisSpan.copy(color = c.ink)) {
+                    append(stringResource(R.string.nav_damaged_emph))
+                }
+                append(stringResource(R.string.nav_damaged_tail))
             },
             style = MaterialTheme.typography.displayMedium,
             color = c.ink,
@@ -526,9 +531,8 @@ private fun DamagedScreen() {
 
         Spacer(Modifier.height(24.dp))
         NoticeCard(
-            title = "Integrity check failed",
-            body = "The .kosh file's Poly1305 authentication tag doesn't match. This can " +
-                "happen after an interrupted sync or a bad flash.",
+            title = stringResource(R.string.nav_integrity_title),
+            body = stringResource(R.string.nav_integrity_body),
             icon = Icons.Outlined.WarningAmber,
             tone = NoticeTone.Warn,
         )
@@ -537,15 +541,13 @@ private fun DamagedScreen() {
         GroupCard {
             Column(Modifier.padding(16.dp)) {
                 Text(
-                    "What to do next",
+                    stringResource(R.string.nav_what_next),
                     style = MaterialTheme.typography.titleSmall,
                     color = c.ink,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Zerokosh keeps a rolling backup beside the vault file. Restore it " +
-                        "from your sync folder, or reopen the vault with your Recovery Kit " +
-                        "on another device.",
+                    stringResource(R.string.nav_what_next_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = c.ink(0.65f),
                 )

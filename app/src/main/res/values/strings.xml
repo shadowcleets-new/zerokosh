@@ -412,4 +412,135 @@
     <string name="vh_kind_common">Commonly guessed</string>
     <string name="vh_kind_weak">Weak</string>
     <string name="vh_kind_expiring">Expiring</string>
+
+    <!-- Trash and record detail. -->
+    <string name="tr_ttl_note">Deleted records wait here for %1$d days.</string>
+    <string name="tr_ttl_warn">After that they are gone for good — there is no copy anywhere else.</string>
+    <string name="tr_empty">Nothing deleted.</string>
+    <string name="tr_delete_all">Delete all permanently</string>
+    <string name="tr_delete_all_title">Delete everything in the trash?</string>
+    <string name="tr_delete_all_one">%1$d record will be gone permanently. This cannot be undone and there is no backup to restore from.</string>
+    <string name="tr_delete_all_many">%1$d records will be gone permanently. This cannot be undone and there is no backup to restore from.</string>
+    <string name="tr_delete_one_title">Delete “%1$s” permanently?</string>
+    <string name="tr_cannot_undo">This cannot be undone.</string>
+    <string name="tr_gone_today">gone today</string>
+    <string name="tr_days_one">%1$d day left</string>
+    <string name="tr_days_many">%1$d days left</string>
+    <string name="tr_restore">Restore</string>
+    <string name="tr_delete_now">Delete now</string>
+    <string name="rd_last_edit">last edit %1$s</string>
+    <string name="rd_history_hide">Hide</string>
+    <string name="rd_history_show">Show %1$d</string>
+    <string name="rd_forget_these">Forget these</string>
+    <string name="rd_forget_title">Forget previous passwords?</string>
+    <string name="rd_forget_body">The %1$d remembered value(s) for this record are removed. This cannot be undone.</string>
+    <string name="rd_forget">Forget</string>
+    <string name="rd_copied">Copied</string>
+    <string name="rd_release_to_hide">Release to hide</string>
+    <string name="rd_hold_to_reveal">Hold to reveal</string>
+
+    <!-- Navigation and the damaged-vault screen. -->
+    <string name="nav_close_menu">Close menu</string>
+    <string name="nav_tap_card">Tap a card</string>
+    <string name="nav_all_templates">All templates</string>
+    <string name="nav_scan">Scan</string>
+    <string name="nav_damaged_kicker">Damaged state</string>
+    <string name="nav_damaged_lead">Something in the </string>
+    <string name="nav_damaged_emph">vault file</string>
+    <string name="nav_damaged_tail"> is off.</string>
+    <string name="nav_integrity_title">Integrity check failed</string>
+    <string name="nav_integrity_body">The .kosh file\'s Poly1305 authentication tag doesn\'t match. This can happen after an interrupted sync or a bad flash.</string>
+    <string name="nav_what_next">What to do next</string>
+    <string name="nav_what_next_body">Zerokosh keeps a rolling backup beside the vault file. Restore it from your sync folder, or reopen the vault with your Recovery Kit on another device.</string>
+
+    <!-- NFC card read and CSV import. -->
+    <string name="nfc_no_hardware">This phone has no NFC, so it cannot read a card.</string>
+    <string name="nfc_disabled">NFC is switched off. Turn it on in Settings, then try again.</string>
+    <string name="nfc_read_failed">That card could not be read. Try again.</string>
+    <string name="nfc_cannot_read">Cannot read cards</string>
+    <string name="nfc_reading">Reading…</string>
+    <string name="nfc_missed">Did not catch that</string>
+    <string name="nfc_hold_card">Hold your card to the phone</string>
+    <string name="nfc_hint">Rest the card flat against the back of the phone until it reads. This picks up the card number, expiry and name — the CVV is not on the chip, so you will still type that yourself.</string>
+    <string name="nfc_try_again">Try again</string>
+    <string name="ic_too_large">That file is too large to be a credential export.</string>
+    <string name="ic_unrecognised">Nothing recognisable in that file. Exports from Chrome, Google Password Manager, Bitwarden, LastPass and KeePass are understood.</string>
+    <string name="ic_could_not">Could not import</string>
+    <string name="ic_imported">Imported</string>
+    <string name="ic_result">%1$d added, %2$d updated.</string>
+    <string name="ic_delete_file">Now delete the file you just imported. It is a plain-text list of your passwords and it is still sitting in your Downloads.</string>
+    <string name="ic_done">Done</string>
+    <string name="ic_title">Import from %1$s?</string>
+    <string name="ic_new_one">%1$d new login.</string>
+    <string name="ic_new_many">%1$d new logins.</string>
+    <string name="ic_update_one">%1$d existing record will be updated — matched on site and username. The replaced passwords stay recoverable in each record\'s history.</string>
+    <string name="ic_update_many">%1$d existing records will be updated — matched on site and username. The replaced passwords stay recoverable in each record\'s history.</string>
+    <string name="ic_local_only">Everything is decrypted on this device only. Nothing is uploaded, because this app cannot open a network connection.</string>
+    <string name="ic_importing">Importing…</string>
+    <string name="ic_import">Import</string>
+
+    <!-- Record edit. -->
+    <string name="re_using_template">using the %1$s template</string>
+    <string name="re_add_field">+ Add another field</string>
+    <string name="re_remove">Remove</string>
+    <string name="re_add_field_title">Add a field</string>
+    <string name="re_field_name">Field name</string>
+    <string name="re_treat_secret">Treat as a secret (masked, hold to reveal)</string>
+    <string name="re_pick_date">Pick a date</string>
+    <string name="re_tap_card">Read the card by tapping it</string>
+
+    <!-- Authenticator. -->
+    <string name="au_fallback_name">Authenticator</string>
+    <string name="au_search_hint">Search codes, issuers…</string>
+    <string name="au_rotating">Rotating </string>
+    <string name="au_active_one">%1$d active code</string>
+    <string name="au_active_many">%1$d active codes</string>
+    <string name="au_tap_to_copy">Tap to copy</string>
+    <string name="au_add_another">Add another authenticator</string>
+    <string name="au_no_match">No codes match</string>
+    <string name="au_none_yet">No codes yet.</string>
+    <string name="au_empty_hint">Scan a QR from Google, GitHub or your broker, or type a secret key by hand.</string>
+    <string name="au_scan_qr">Scan a QR code</string>
+    <string name="au_copied">Copied · clears shortly</string>
+    <string name="au_no_qr_found">No valid TOTP QR code found in selected image</string>
+    <string name="au_image_failed">Failed to process image</string>
+    <string name="au_camera_needed">Camera permission needed to scan QR code</string>
+    <string name="au_grant">Grant Permission</string>
+    <string name="au_close">Close</string>
+    <string name="au_scan_title">Scan Authenticator QR</string>
+    <string name="au_flashlight">Flashlight</string>
+    <string name="au_pick_image">Pick Image</string>
+    <string name="au_enter_key">Enter Key</string>
+    <string name="au_add_secret">Add Secret Key</string>
+    <string name="au_account_name">Account Name (e.g. Google)</string>
+    <string name="au_secret_label">Secret Key (Base32)</string>
+    <string name="au_secret_example">e.g. JBSWY3DPEHPK3PXP</string>
+    <string name="au_invalid_secret">Invalid Base32 secret key (letters A-Z and digits 2-7 only)</string>
+    <string name="au_save_key">Save Key</string>
+
+    <!-- Chrome: tabs, toggles, quick adds. -->
+    <string name="ui_hide_passphrase">Hide passphrase</string>
+    <string name="ui_show_passphrase">Show passphrase</string>
+    <string name="ui_label_count">%1$s, %2$s</string>
+    <string name="tab_vault">Vault</string>
+    <string name="tab_codes">Codes</string>
+    <string name="tab_templates">Templates</string>
+    <string name="tab_settings">Settings</string>
+    <string name="wl_sr_headline">Your keys. Your device. No server.</string>
+    <string name="wl_chip_crypto">Argon2id + XChaCha20</string>
+    <string name="wl_chip_offline">Offline</string>
+    <string name="wl_chip_open">Open source</string>
+    <string name="wl_head_1">Your keys.</string>
+    <string name="wl_head_2">Your device.</string>
+    <string name="wl_head_3">No server.</string>
+    <string name="qa_bank_account">Bank account</string>
+    <string name="qa_upi_id">UPI ID</string>
+    <string name="qa_aadhaar">Aadhaar</string>
+    <string name="qa_pan">PAN</string>
+    <string name="qa_totp">TOTP</string>
+
+    <!-- Save failure dialog. -->
+    <string name="se_title">Not saved</string>
+    <string name="se_lead">Your changes were not saved, so nothing has been lost from the vault as it was.</string>
+    <string name="se_body">The vault file could not be written. If you have set a backup and sync folder, Android may have withdrawn permission to it — open Settings, pick the folder again, and retry.</string>
 </resources>

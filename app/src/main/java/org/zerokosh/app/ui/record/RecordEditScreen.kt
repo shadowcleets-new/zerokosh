@@ -13,6 +13,9 @@
 package org.zerokosh.app.ui.record
 
 // #region Imports
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,18 +25,22 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Casino
+import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -41,12 +48,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +64,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -66,53 +74,46 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import org.zerokosh.app.ui.common.SaveErrorDialog
-import org.zerokosh.app.ui.common.saveErrorMessage
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import kotlinx.coroutines.launch
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.nfc.PendingCard
 import org.zerokosh.app.ui.common.BrandTile
 import org.zerokosh.app.ui.common.Kicker
+import org.zerokosh.app.ui.common.RevealToggle
+import org.zerokosh.app.ui.common.SaveErrorDialog
+import org.zerokosh.app.ui.common.VaultFieldCard
+import org.zerokosh.app.ui.common.VaultPickerSheet
 import org.zerokosh.app.ui.common.WhiteCard
-import org.zerokosh.app.ui.theme.FieldLabelStyle
-import org.zerokosh.app.ui.theme.VaultTheme
-import org.zerokosh.core.model.CustomField
-import org.zerokosh.app.R
 import org.zerokosh.app.ui.common.fieldLabel
+import org.zerokosh.app.ui.common.pickerHasLogos
+import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.app.ui.generator.GeneratorSheet
+import org.zerokosh.app.ui.theme.FieldLabelStyle
 import org.zerokosh.app.ui.theme.SecretTextStyle
+import org.zerokosh.app.ui.theme.VaultTheme
+import org.zerokosh.core.emv.EmvCard
+import org.zerokosh.core.model.CustomField
 import org.zerokosh.core.model.FieldType
 import org.zerokosh.core.model.FieldValidation
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.TemplateField
-import org.zerokosh.core.util.CardUtils
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
-import org.zerokosh.app.ui.common.VaultFieldCard
-import org.zerokosh.app.ui.common.VaultPickerSheet
-import androidx.compose.runtime.LaunchedEffect
-import org.zerokosh.app.nfc.PendingCard
-import org.zerokosh.core.emv.EmvCard
 import org.zerokosh.core.model.seedFieldsFromPreset
-import org.zerokosh.app.ui.common.pickerHasLogos
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.ui.semantics.Role
+import org.zerokosh.core.util.CardUtils
 // #endregion
 
 // #region Screen state & save
@@ -232,6 +233,7 @@ fun RecordEditScreen(
     brandName: String? = null,
     onDone: () -> Unit,
 ) {
+    val context = LocalContext.current
     val body = app.repository.body.collectAsState().value
     val existing = editUuid?.let { id -> body?.records?.firstOrNull { it.uuid == id } }
     val templateId = existing?.template_id ?: templateIdArg
@@ -325,7 +327,7 @@ fun RecordEditScreen(
                     scope.launch {
                         app.repository.upsertRecord(record)
                             .onSuccess { onDone() }
-                            .onFailure { saveError = saveErrorMessage(it) }
+                            .onFailure { saveError = saveErrorMessage(context, it) }
                     }
                 }
 
@@ -348,7 +350,9 @@ fun RecordEditScreen(
                 )
                 Kicker(
                     text = listOf(
-                        if (existing == null) "New" else "Edit",
+                        stringResource(
+                            if (existing == null) R.string.scr_edit_title_new else R.string.scr_detail_edit,
+                        ),
                         institution.ifBlank { org.zerokosh.app.ui.gallery.templateName(templateId) },
                     ).joinToString(" · "),
                 )
@@ -380,7 +384,10 @@ fun RecordEditScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "using the ${org.zerokosh.app.ui.gallery.templateName(templateId)} template",
+                        text = stringResource(
+                            R.string.re_using_template,
+                            org.zerokosh.app.ui.gallery.templateName(templateId),
+                        ),
                         fontSize = 11.sp,
                         color = VaultTheme.colors.mute,
                         maxLines = 1,
@@ -437,7 +444,7 @@ fun RecordEditScreen(
                 contentAlignment = androidx.compose.ui.Alignment.Center,
             ) {
                 Text(
-                    text = "+ Add another field",
+                    text = stringResource(R.string.re_add_field),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = VaultTheme.colors.primary,
@@ -482,7 +489,7 @@ private fun CustomFieldEditor(
                 color = VaultTheme.colors.mute,
             )
             Text(
-                text = "Remove",
+                text = stringResource(R.string.re_remove),
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
@@ -518,13 +525,13 @@ private fun AddCustomFieldDialog(onDismiss: () -> Unit, onAdd: (String, String) 
     var secret by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add a field") },
+        title = { Text(stringResource(R.string.re_add_field_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = label,
                     onValueChange = { label = it },
-                    label = { Text("Field name") },
+                    label = { Text(stringResource(R.string.re_field_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -533,7 +540,7 @@ private fun AddCustomFieldDialog(onDismiss: () -> Unit, onAdd: (String, String) 
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Checkbox(checked = secret, onCheckedChange = { secret = it })
-                    Text("Treat as a secret (masked, hold to reveal)")
+                    Text(stringResource(R.string.re_treat_secret))
                 }
             }
         },
@@ -758,7 +765,7 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
             IconButton(onClick = { showPicker = true }) {
                 Icon(
                     Icons.Outlined.CalendarToday,
-                    contentDescription = "Pick a date",
+                    contentDescription = stringResource(R.string.re_pick_date),
                     tint = VaultTheme.colors.ink(0.55f),
                     modifier = Modifier.size(20.dp),
                 )
@@ -817,7 +824,7 @@ private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label
             IconButton(onClick = { showPicker = true }) {
                 Icon(
                     Icons.Outlined.CalendarToday,
-                    contentDescription = "Pick a date",
+                    contentDescription = stringResource(R.string.re_pick_date),
                     tint = VaultTheme.colors.ink(0.55f),
                     modifier = Modifier.size(20.dp),
                 )
@@ -1181,7 +1188,7 @@ private fun CardNumberField(
                     IconButton(onClick = onTapCard) {
                         Icon(
                             Icons.Outlined.Contactless,
-                            contentDescription = "Read the card by tapping it",
+                            contentDescription = stringResource(R.string.re_tap_card),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp),
                         )

@@ -79,6 +79,7 @@ fun RecordDetailScreen(
     onOpenRecord: (String) -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     val body by app.repository.body.collectAsState()
     val record = body?.records?.firstOrNull { it.uuid == uuid } ?: run { onClose(); return }
     val template = app.catalog.templates.byId(record.template_id)
@@ -171,7 +172,7 @@ fun RecordDetailScreen(
                         Text(
                             text = listOf(
                                 record.institution.ifBlank { templateName(record.template_id) },
-                                "last edit " + relativeTime(record.modified_at),
+                                stringResource(R.string.rd_last_edit, relativeTime(record.modified_at)),
                             ).joinToString(" · "),
                             fontSize = 11.sp,
                             color = vaultMute,
@@ -233,7 +234,7 @@ fun RecordDetailScreen(
                         Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondary))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Never leaves this device. Encrypted at rest.",
+                            text = stringResource(R.string.hm_reassurance),
                             fontSize = 11.sp,
                             color = vaultInk
                         )
@@ -264,17 +265,17 @@ fun RecordDetailScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 ) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.scr_detail_edit))
                 }
             },
         ) {
             IconButton(onClick = onClose) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.msg_back))
             }
             IconButton(onClick = { confirmDelete = true }) {
                 Icon(
                     Icons.Filled.DeleteOutline,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.scr_detail_delete),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -292,7 +293,7 @@ fun RecordDetailScreen(
                     scope.launch {
                         app.repository.deleteRecord(uuid)
                             .onSuccess { onClose() }
-                            .onFailure { saveError = saveErrorMessage(it) }
+                            .onFailure { saveError = saveErrorMessage(context, it) }
                     }
                 }) { Text(stringResource(R.string.scr_detail_delete_confirm_yes), color = MaterialTheme.colorScheme.error) }
             },
@@ -340,7 +341,11 @@ private fun HistorySection(app: ZerokoshApp, record: Record) {
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = if (shown) "Hide" else "Show ${record.history.size}",
+                text = if (shown) {
+                    stringResource(R.string.rd_history_hide)
+                } else {
+                    stringResource(R.string.rd_history_show, record.history.size)
+                },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = VaultTheme.colors.primary,
@@ -373,7 +378,7 @@ private fun HistorySection(app: ZerokoshApp, record: Record) {
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = "Copy",
+                        text = stringResource(R.string.scr_detail_copy),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = VaultTheme.colors.primary,
@@ -385,7 +390,7 @@ private fun HistorySection(app: ZerokoshApp, record: Record) {
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Forget these",
+                text = stringResource(R.string.rd_forget_these),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.clickable { confirmForget = true },
@@ -408,14 +413,14 @@ private fun HistorySection(app: ZerokoshApp, record: Record) {
     if (confirmForget) {
         AlertDialog(
             onDismissRequest = { confirmForget = false },
-            title = { Text("Forget previous passwords?") },
-            text = { Text("The ${record.history.size} remembered value(s) for this record are removed. This cannot be undone.") },
+            title = { Text(stringResource(R.string.rd_forget_title)) },
+            text = { Text(stringResource(R.string.rd_forget_body, record.history.size)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmForget = false
                     shown = false
                     scope.launch { app.repository.forgetHistory(record.uuid) }
-                }) { Text("Forget", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.rd_forget), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmForget = false }) { Text(stringResource(R.string.msg_cancel)) }
@@ -451,7 +456,7 @@ private fun copyFieldValue(context: android.content.Context, field: TemplateFiel
         return
     }
     ClipboardHelper.copySensitive(context, value)
-    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.rd_copied), Toast.LENGTH_SHORT).show()
 }
 
 @Composable
@@ -548,7 +553,9 @@ fun FieldRow(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = if (revealed) "Release to hide" else "Hold to reveal",
+                    text = stringResource(
+                        if (revealed) R.string.rd_release_to_hide else R.string.rd_hold_to_reveal,
+                    ),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = VaultTheme.colors.paper
@@ -627,7 +634,7 @@ fun TotpRow(field: TemplateField, secret: String, templateId: String) {
             .padding(16.dp)
             .clickable {
                 ClipboardHelper.copySensitive(context, code)
-                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.rd_copied), Toast.LENGTH_SHORT).show()
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -22,6 +22,17 @@
 package org.zerokosh.app.ui.common
 
 // #region Imports
+import android.provider.Settings
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,15 +40,16 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,54 +68,37 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.ToggleButton
-import androidx.compose.material3.ToggleButtonDefaults
-import androidx.compose.runtime.getValue
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroup
-import android.provider.Settings
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.center
-import androidx.compose.ui.graphics.Matrix
-import androidx.compose.ui.platform.LocalContext
-import androidx.graphics.shapes.Morph
-import androidx.graphics.shapes.RoundedPolygon
-import androidx.compose.material3.toPath
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.toShape
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShortNavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.ShortNavigationBarItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.WideNavigationRail
 import androidx.compose.material3.WideNavigationRailDefaults
 import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.WideNavigationRailItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.toPath
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,16 +106,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Matrix
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -130,14 +130,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.RoundedPolygon
+import org.zerokosh.app.R
 import org.zerokosh.app.ui.theme.CornerCard
 import org.zerokosh.app.ui.theme.CornerGroup
 import org.zerokosh.app.ui.theme.CornerTile
+import org.zerokosh.app.ui.theme.FieldLabelStyle
 import org.zerokosh.app.ui.theme.JetBrainsMono
 import org.zerokosh.app.ui.theme.MetaTextStyle
 import org.zerokosh.app.ui.theme.Newsreader
 import org.zerokosh.app.ui.theme.SectionLabelStyle
-import org.zerokosh.app.ui.theme.FieldLabelStyle
 import org.zerokosh.app.ui.theme.VaultTheme
 // #endregion
 
@@ -233,7 +236,7 @@ fun OnboardingTopBar(
             ) {
                 Icon(
                     Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.msg_back),
                     tint = c.ink,
                     modifier = Modifier.size(20.dp),
                 )
@@ -592,7 +595,9 @@ fun RevealToggle(
     IconButton(onClick = onToggle, modifier = modifier.size(48.dp)) {
         Icon(
             if (visible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-            contentDescription = if (visible) "Hide passphrase" else "Show passphrase",
+            contentDescription = stringResource(
+                if (visible) R.string.ui_hide_passphrase else R.string.ui_show_passphrase,
+            ),
             tint = tint,
             modifier = Modifier.size(20.dp),
         )
@@ -695,6 +700,12 @@ fun VaultFilterChip(
     count: Int? = null,
 ) {
     val c = VaultTheme.colors
+    // Built here: a semantics{} block is not a composable context.
+    val description = if (count != null) {
+        stringResource(R.string.ui_label_count, label, count)
+    } else {
+        label
+    }
     // The corner morph used to be a hand-rolled animateDpAsState. Expressive
     // ships it as a first-class overload, which also gives a pressed shape the
     // hand-rolled version never had.
@@ -707,7 +718,7 @@ fun VaultFilterChip(
             pressedShape = RoundedCornerShape(8.dp),
         ),
         modifier = modifier.semantics(mergeDescendants = true) {
-            contentDescription = if (count != null) "$label, $count" else label
+            contentDescription = description
         },
         leadingIcon = if (selected) {
             {
@@ -928,11 +939,11 @@ fun SearchDock(
 // #endregion
 
 // #region Navigation
-enum class VaultTab(val label: String) {
-    Vault("Vault"),
-    Codes("Codes"),
-    Templates("Templates"),
-    Settings("Settings"),
+enum class VaultTab(@StringRes val labelRes: Int) {
+    Vault(R.string.tab_vault),
+    Codes(R.string.tab_codes),
+    Templates(R.string.tab_templates),
+    Settings(R.string.tab_settings),
 }
 
 private fun VaultTab.icon(active: Boolean): ImageVector = when (this) {
@@ -976,7 +987,7 @@ fun VaultNavBar(
                 },
                 label = {
                     Text(
-                        tab.label,
+                        stringResource(tab.labelRes),
                         fontSize = 11.sp,
                         fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                     )
@@ -1025,7 +1036,7 @@ fun VaultNavRail(
                 },
                 label = {
                     Text(
-                        tab.label,
+                        stringResource(tab.labelRes),
                         fontSize = 11.sp,
                         fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                     )

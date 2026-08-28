@@ -15,6 +15,7 @@
 package org.zerokosh.app.ui.home
 
 // #region Imports
+import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -519,20 +520,20 @@ private fun NoMatches(query: String) {
  * same record.
  */
 private data class QuickAdd(
-    val label: String,
+    @StringRes val labelRes: Int,
     val templateId: String,
     val preset: String? = null,
     val brand: String? = null,
 )
 
 private val QuickAdds = listOf(
-    QuickAdd("Bank account", "bank_account"),
-    QuickAdd("UPI ID", "upi", brand = "UPI"),
-    QuickAdd("Aadhaar", "aadhaar_card", preset = "Aadhaar", brand = "Aadhaar"),
-    QuickAdd("PAN", "pan_card", preset = "PAN Card", brand = "PAN"),
+    QuickAdd(R.string.qa_bank_account, "bank_account"),
+    QuickAdd(R.string.qa_upi_id, "upi", brand = "UPI"),
+    QuickAdd(R.string.qa_aadhaar, "aadhaar_card", preset = "Aadhaar", brand = "Aadhaar"),
+    QuickAdd(R.string.qa_pan, "pan_card", preset = "PAN Card", brand = "PAN"),
     // A TOTP secret lives on the login template's totp field. There is no
     // authenticator template of its own to send this to.
-    QuickAdd("TOTP", "login"),
+    QuickAdd(R.string.qa_totp, "login"),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -688,7 +689,7 @@ private fun EmptyVault(
                         modifier = Modifier.size(14.dp),
                     )
                     Text(
-                        quick.label,
+                        stringResource(quick.labelRes),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = c.ink(0.8f),

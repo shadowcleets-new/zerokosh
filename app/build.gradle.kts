@@ -248,13 +248,19 @@ registerResourceGuard("releaseCheck")
 val templatesJson = file("src/main/assets/templates.json")
 val pickersJson = file("src/main/assets/pickers.json")
 val templateStrings = file("src/main/res/values/strings_templates.xml")
+val hindiStrings = file("src/main/res/values-hi/strings.xml")
+val hindiTemplateStrings = file("src/main/res/values-hi/strings_templates.xml")
+val baseStrings = file("src/main/res/values/strings.xml")
 val galleryKt = file("src/main/java/org/zerokosh/app/ui/gallery/TemplateGalleryScreen.kt")
 val categoryKt = file("src/main/java/org/zerokosh/app/ui/common/RecordCategory.kt")
 
 val verifyTemplates by tasks.registering {
     group = "verification"
     description = "Fails if templates, labels, categories and pickers disagree."
-    val files = listOf(templatesJson, pickersJson, templateStrings, galleryKt, categoryKt)
+    val files = listOf(
+        templatesJson, pickersJson, templateStrings, galleryKt, categoryKt,
+        baseStrings, hindiStrings, hindiTemplateStrings,
+    )
     inputs.files(files)
     outputs.upToDateWhen { false }
     // Captured at configuration time: referencing the script's own properties
@@ -264,7 +270,20 @@ val verifyTemplates by tasks.registering {
     val stringsFile = templateStrings
     val galleryFile = galleryKt
     val categoryFile = categoryKt
+    val localePairs = listOf(baseStrings to hindiStrings, templateStrings to hindiTemplateStrings)
     doLast {
+        // Hindi is offered in the picker and applied by attachBaseContext, so a
+        // key that exists only in values/ renders as English inside an otherwise
+        // Hindi screen. The generator writes the English file alone, which means
+        // nothing but this stops a new template from quietly shipping half
+        // translated.
+        val stringName = Regex("""<string name="([^"]+)"""")
+        fun namesIn(f: File) = stringName.findAll(f.readText()).map { it.groupValues[1] }.toSet()
+        val localeProblems = localePairs.flatMap { (base, hi) ->
+            if (!hi.exists()) listOf("missing translation file: ${hi.name}")
+            else (namesIn(base) - namesIn(hi)).sorted().map { "not translated into Hindi: $it" }
+        }
+
         @Suppress("UNCHECKED_CAST")
         val catalogue = groovy.json.JsonSlurper().parse(jsonFile) as Map<String, Any>
         val templates = catalogue["templates"] as List<Map<String, Any>>
@@ -276,6 +295,7 @@ val verifyTemplates by tasks.registering {
             .findAll(galleryFile.readText()).map { it.groupValues[1] }.toSet()
 
         val problems = mutableListOf<String>()
+        problems += localeProblems
         val ids = templates.map { it["id"] as String }.toSet()
 
         (referenced - ids).forEach { problems += "gallery points at unknown template: $it" }

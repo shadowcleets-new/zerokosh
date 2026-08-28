@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §12: Hindi. Keys mirror values/strings.xml exactly.
+     Tone (§10.6): plain, warm, zero jargon — the same voice as the English,
+     not a literal translation of it. Words people actually use are kept in
+     Devanagari rather than replaced with Sanskritised coinages: ओटीपी, यूपीआई,
+     पिन, बैंक, ऐप. "तिजोरी" for vault because a locker is the thing an Indian
+     reader already pictures. -->
+<resources>
+    <string name="app_name">Zerokosh</string>
+
+    <!-- S1 Language picker -->
+    <string name="scr_language_title">अपनी भाषा चुनें</string>
+    <string name="scr_language_subtitle">Choose your language</string>
+    <string name="scr_language_continue">आगे बढ़ें</string>
+
+    <!-- S2 Trust explainer -->
+    <string name="scr_trust_card1_title">आपका डेटा इसी फ़ोन में रहता है</string>
+    <string name="scr_trust_card1_body">आप जो कुछ सहेजते हैं वह आपके फ़ोन की एक बंद फ़ाइल में रहता है। वह कभी हम तक नहीं आता — हमारे पास उसे रखने की जगह ही नहीं है।</string>
+    <string name="scr_trust_card2_title">हमारा कोई सर्वर नहीं — न हैक होने को कुछ, न बेचने को</string>
+    <string name="scr_trust_card2_body">न कोई Zerokosh खाता, न क्लाउड, न साइन-अप। इसे सिर्फ़ आप खोल सकते हैं। हम भी नहीं।</string>
+    <string name="scr_trust_card3_title">हमेशा मुफ़्त, ओपन सोर्स</string>
+    <string name="scr_trust_card3_body">न कोई सदस्यता शुल्क, न विज्ञापन। कोई भी हमारा कोड पढ़कर हमारा हर वादा जाँच सकता है।</string>
+    <string name="scr_trust_continue">आगे बढ़ें</string>
+
+    <!-- S3 Create passphrase -->
+    <string name="scr_create_title">अपना पासफ़्रेज़ बनाएँ</string>
+    <string name="scr_create_body">यही एक पासफ़्रेज़ सब कुछ बंद रखता है। कुछ लंबा चुनें, जो सिर्फ़ आप जानते हों।</string>
+    <string name="scr_create_hint">पासफ़्रेज़ (कम से कम 10 अक्षर)</string>
+    <string name="scr_create_confirm_hint">दोबारा लिखें</string>
+    <string name="scr_create_mismatch">दोनों एक जैसे नहीं हैं</string>
+    <string name="scr_create_too_short">कम से कम 10 अक्षर रखें — जितना लंबा, उतना मज़बूत</string>
+    <string name="scr_create_strength_weak">कमज़ोर</string>
+    <string name="scr_create_strength_fair">ठीक-ठाक</string>
+    <string name="scr_create_strength_good">अच्छा</string>
+    <string name="scr_create_strength_strong">मज़बूत</string>
+    <string name="scr_create_pin_option">इसकी जगह 6 अंकों का पिन रखें</string>
+    <string name="scr_create_pin_hint">6 अंकों का पिन</string>
+    <string name="scr_create_pin_why">पिन इसलिए चल जाता है क्योंकि यह फ़ोन उसे अपनी सुरक्षा चिप और आपके फ़िंगरप्रिंट या चेहरे से बचाता है।</string>
+    <string name="scr_create_pin_unavailable">पिन के लिए फ़िंगरप्रिंट या फ़ेस अनलॉक वाला फ़ोन चाहिए। कृपया पासफ़्रेज़ चुनें।</string>
+    <string name="scr_create_button">बंद कर दें</string>
+    <string name="scr_create_working">आपकी तिजोरी तैयार हो रही है…</string>
+
+    <!-- S4 Recovery kit -->
+    <string name="scr_recovery_title">आपकी रिकवरी कुंजी</string>
+    <string name="scr_recovery_body">अगर कभी पासफ़्रेज़ भूल जाएँ, तो अंदर लौटने का सिर्फ़ यही एक रास्ता है। हम इसे रीसेट नहीं कर सकते — कोई नहीं कर सकता।</string>
+    <string name="scr_recovery_save_pdf">पीडीएफ़ में सहेजें</string>
+    <string name="scr_recovery_confirm_check">मैंने इसे लिख लिया है और सुरक्षित जगह रख दिया है</string>
+    <string name="scr_recovery_done">आगे बढ़ें</string>
+    <string name="scr_recovery_never_again">इस स्क्रीन के बाद यह कुंजी दोबारा नहीं दिखेगी।</string>
+    <string name="scr_recovery_pdf_saved">रिकवरी किट पीडीएफ़ सहेज दी गई</string>
+    <string name="scr_recovery_pdf_instructions">इस पन्ने को अपने ज़मीन-जायदाद के कागज़ों या दूसरे ज़रूरी दस्तावेज़ों के साथ रखें। जिसके पास यह कुंजी होगी वह आपकी तिजोरी खोल सकता है — इसे लॉकर की चाबी की तरह सँभालें।</string>
+    <string name="scr_recovery_pdf_title">Zerokosh रिकवरी किट</string>
+
+    <!-- S5 Quick unlock opt-in -->
+    <string name="scr_quickunlock_title">फ़िंगरप्रिंट या चेहरे से खोलें</string>
+    <string name="scr_quickunlock_body">जैसे आप अपना फ़ोन खोलते हैं, वैसे ही तिजोरी भी। पासफ़्रेज़ हमेशा काम करता रहेगा।</string>
+    <string name="scr_quickunlock_enable">चालू करें</string>
+    <string name="scr_quickunlock_skip">अभी नहीं</string>
+    <string name="scr_quickunlock_backup_footer">अभी बैकअप फ़ोल्डर सेट करें</string>
+
+    <!-- S6 Home -->
+    <string name="scr_home_title">होम</string>
+    <string name="scr_home_search_hint">अपनी तिजोरी में खोजें</string>
+    <string name="scr_home_tab_home">होम</string>
+    <string name="scr_home_tab_authenticator">कोड</string>
+    <string name="scr_home_tab_settings">सेटिंग</string>
+    <string name="scr_home_add">जोड़ें</string>
+    <string name="scr_home_empty_sample_bank">आपका बैंक खाता ऐसा दिखेगा</string>
+    <string name="scr_home_empty_sample_card">आपके कार्ड, यूपीआई और ऐप लॉगिन भी यहीं रहेंगे</string>
+    <string name="scr_home_no_results">आपकी खोज से कुछ नहीं मिला</string>
+    <string name="scr_home_group_other">अन्य</string>
+
+    <!-- §10.5 rotating safety tips -->
+    <string name="msg_safety_tip_1">बैंक कभी आपका ओटीपी नहीं माँगते। जो माँगे, वह ठग है।</string>
+    <string name="msg_safety_tip_2">कोई बैंक अधिकारी आपसे स्क्रीन शेयर करने वाला ऐप कभी नहीं डलवाएगा।</string>
+    <string name="msg_safety_tip_3">आपका यूपीआई पिन सिर्फ़ यूपीआई ऐप के कीपैड के लिए है — कॉल पर किसी को मत बताइए।</string>
+    <string name="msg_safety_tip_4">केवाईसी एक दिन में खत्म नहीं होती। “आज केवाईसी खत्म हो रही है” वाले संदेश ठगी हैं।</string>
+    <string name="msg_safety_tip_5">पैसे लेने के लिए कभी पिन डालने या क्यूआर स्कैन करने की ज़रूरत नहीं होती।</string>
+    <string name="msg_safety_tip_6">बिजली कटने का एसएमएस, और उसमें किसी का निजी नंबर? वह ठगी है।</string>
+
+    <!-- S8 Template gallery -->
+    <string name="scr_gallery_title">आप क्या सहेजना चाहते हैं?</string>
+    <string name="scr_gallery_quick_add">झटपट जोड़ें</string>
+
+    <!-- S9 Record detail -->
+    <string name="scr_detail_copy">कॉपी</string>
+    <string name="scr_detail_reveal">दिखाएँ</string>
+    <string name="scr_detail_hide">छिपाएँ</string>
+    <string name="scr_detail_copied">कॉपी हो गया · 30 सेकंड में मिट जाएगा</string>
+    <string name="scr_detail_edit">बदलें</string>
+    <string name="scr_detail_delete">हटाएँ</string>
+    <string name="scr_detail_favorite">पसंदीदा</string>
+    <string name="scr_detail_delete_confirm_title">यह रिकॉर्ड हटाएँ?</string>
+    <string name="scr_detail_delete_confirm_body">यह 30 दिन तक “हाल में हटाए गए” में रहेगा, और आपके दूसरे फ़ोनों से सिंक होने पर हट जाएगा।</string>
+    <string name="scr_detail_delete_confirm_yes">हटाएँ</string>
+    <string name="scr_detail_hidden">छिपा है</string>
+    <string name="scr_detail_shown">दिख रहा है</string>
+
+    <!-- S10 Record edit -->
+    <string name="scr_edit_title_new">नया</string>
+    <string name="scr_edit_title_hint">नाम</string>
+    <string name="scr_edit_institution_hint">बैंक / कंपनी (समूह बनाने के लिए)</string>
+    <string name="scr_edit_save">सहेजें</string>
+    <string name="scr_edit_cancel">रद्द करें</string>
+    <string name="scr_edit_invalid">यह सही नहीं लग रहा — एक बार देख लें</string>
+    <string name="scr_edit_picker_other">अन्य…</string>
+    <string name="scr_edit_picker_other_hint">अपना लिखें</string>
+    <string name="scr_edit_generate">बनाएँ</string>
+    <string name="scr_edit_luhn_warning">यह कार्ड नंबर सामान्य जाँच में खरा नहीं उतरता — अगर सही है तो सहेज दें</string>
+    <string name="scr_edit_link_none">कोई नहीं</string>
+    <string name="scr_edit_totp_hint">सीक्रेट या otpauth:// लिंक चिपकाएँ</string>
+    <string name="scr_edit_required_title">पहले इसे कोई नाम दें</string>
+
+    <!-- S13 Lock screen -->
+    <string name="scr_lock_title">तिजोरी बंद है</string>
+    <string name="scr_lock_hint">पासफ़्रेज़</string>
+    <string name="scr_lock_unlock">खोलें</string>
+    <string name="scr_lock_wrong">पासफ़्रेज़ ग़लत है</string>
+    <string name="scr_lock_cooldown">बहुत बार ग़लत कोशिश हुई। %1$d सेकंड रुकें।</string>
+    <string name="scr_lock_use_recovery">रिकवरी कुंजी इस्तेमाल करें</string>
+    <string name="scr_lock_use_passphrase">पासफ़्रेज़ इस्तेमाल करें</string>
+    <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_invalid">यह रिकवरी कुंजी सही नहीं है — एक-एक अक्षर मिलाकर देखें</string>
+    <string name="scr_lock_biometric_title">Zerokosh खोलें</string>
+    <string name="scr_lock_biometric_subtitle">अपना फ़िंगरप्रिंट या चेहरा इस्तेमाल करें</string>
+    <string name="scr_lock_use_passphrase_once">कृपया एक बार पासफ़्रेज़ से खोलें</string>
+    <string name="msg_file_damaged">फ़ाइल ख़राब थी — बैकअप से ठीक कर दी गई</string>
+
+    <!-- S12 Settings (M2 scaffold) -->
+    <string name="scr_settings_title">सेटिंग</string>
+    <string name="scr_settings_autolock">ऐप छोड़ते ही बंद कर दें</string>
+    <string name="scr_settings_autolock_immediately">तुरंत</string>
+    <string name="scr_settings_autolock_1min">1 मिनट बाद</string>
+    <string name="scr_settings_autolock_5min">5 मिनट बाद</string>
+    <string name="scr_settings_autolock_15min">15 मिनट बाद</string>
+    <string name="scr_settings_quick_unlock">फ़िंगरप्रिंट / फ़ेस अनलॉक</string>
+    <string name="scr_settings_change_passphrase">पासफ़्रेज़ बदलें</string>
+    <string name="scr_settings_new_recovery">नई रिकवरी कुंजी लें</string>
+    <string name="scr_settings_sync_folder">बैकअप और सिंक फ़ोल्डर</string>
+    <string name="scr_settings_sync_not_set">बैकअप नहीं है</string>
+    <string name="scr_settings_import">पासवर्ड आयात करें</string>
+    <string name="scr_settings_export">निर्यात करें</string>
+    <string name="scr_settings_language">भाषा</string>
+    <string name="scr_settings_about">परिचय</string>
+    <string name="scr_settings_security_info">आपका डेटा कैसे सुरक्षित है</string>
+    <string name="scr_settings_allow_screenshots">स्क्रीनशॉट लेने दें</string>
+    <string name="scr_settings_autofill">ऑटोफ़िल सेवा</string>
+    <string name="scr_autofill_save_failed">Zerokosh वह लॉगिन सहेज नहीं सका।</string>
+    <string name="scr_detail_history_title">पिछले पासवर्ड</string>
+    <string name="scr_detail_history_empty">अभी तक कुछ नहीं बदला।</string>
+    <string name="scr_settings_autofill_on">Zerokosh</string>
+    <string name="scr_settings_autofill_off">सेट नहीं है</string>
+    <string name="scr_settings_autofill_unsupported">उपलब्ध नहीं</string>
+    <string name="scr_settings_allow_screenshots_warning">तिजोरी के स्क्रीनशॉट क्लाउड फ़ोटो बैकअप में पहुँच सकते हैं। बहुत ज़रूरी हो तभी चालू करें।</string>
+    <string name="scr_settings_current_passphrase">मौजूदा पासफ़्रेज़</string>
+    <string name="scr_settings_new_passphrase">नया पासफ़्रेज़ (कम से कम 10 अक्षर)</string>
+    <string name="scr_settings_passphrase_changed">पासफ़्रेज़ बदल गया</string>
+
+    <!-- About -->
+    <string name="scr_about_version">वर्शन %1$s</string>
+    <string name="scr_about_license">लाइसेंस: GPL-3.0 — हमेशा मुफ़्त</string>
+    <string name="scr_about_source">सोर्स कोड</string>
+    <string name="scr_about_body">Zerokosh मुफ़्त और ओपन सोर्स है, और इसका कोई सर्वर नहीं है। आपकी तिजोरी सिर्फ़ आप खोल सकते हैं। हम भी नहीं।</string>
+
+    <!-- S11 Authenticator -->
+    <string name="scr_auth_add_qr">क्यूआर से जोड़ें</string>
+    <string name="scr_auth_empty">आपके ऐप और ब्रोकर के कोड यहाँ दिखेंगे</string>
+    <string name="scr_auth_scan_title">कैमरे को क्यूआर कोड पर रखें</string>
+    <string name="scr_auth_camera_denied">कैमरे की अनुमति सिर्फ़ क्यूआर कोड स्कैन करने के लिए चाहिए। रिकॉर्ड जोड़ते समय आप सीक्रेट हाथ से भी चिपका सकते हैं।</string>
+
+    <!-- §6.7 Autofill -->
+    <string name="scr_autofill_unlock_first">भरने के लिए Zerokosh खोलें</string>
+
+    <!-- §6.7 Login helper (copy-mode fallback) -->
+    <string name="scr_login_helper_channel">लॉगिन सहायक</string>
+    <string name="scr_login_helper_channel_desc">उन बैंक ऐप के लिए, जो ऑटोफ़िल नहीं चलने देते — बटन दबाकर लॉगिन की जानकारी एक-एक करके कॉपी करें</string>
+    <string name="scr_login_helper_title">%1$s में लॉगिन हो रहे हैं</string>
+    <string name="scr_login_helper_body">कॉपी करने के लिए बटन दबाएँ · 30 सेकंड में मिट जाएगा</string>
+
+    <!-- §5.7 Reminders -->
+    <string name="scr_reminder_channel">नवीनीकरण याद-दिलावे</string>
+    <string name="scr_reminder_title">Zerokosh याद दिला रहा है</string>
+    <string name="scr_reminder_body">%1$s की तारीख़ पास है · Zerokosh खोलें</string>
+
+    <!-- Common -->
+    <string name="import_title">बैकअप आयात करें</string>
+    <string name="import_passphrase_hint">वह पासफ़्रेज़ डालें जो इस बैकअप फ़ाइल को खोलता है। यह आपके मौजूदा पासफ़्रेज़ से अलग हो सकता है।</string>
+    <string name="import_passphrase_label">बैकअप का पासफ़्रेज़</string>
+    <string name="import_action">आयात करें</string>
+    <string name="import_merged">%1$d जोड़े गए, %2$d बदले गए। कुछ भी मिटाया नहीं गया।</string>
+    <string name="import_nothing_new">उस बैकअप का सब कुछ पहले से यहाँ था।</string>
+    <string name="import_conflicts">%1$d रिकॉर्ड दोनों जगह बदले गए थे। दोनों रूप रखे गए हैं — “(conflict copy)” खोजें।</string>
+    <string name="import_not_a_vault">वह फ़ाइल Zerokosh तिजोरी के रूप में नहीं पढ़ी जा सकी।</string>
+    <string name="import_locked">आयात करने से पहले अपनी तिजोरी खोलें।</string>
+    <string name="scr_edit_month">महीना</string>
+    <string name="scr_edit_year">साल</string>
+    <string name="msg_ok">ठीक है</string>
+    <string name="msg_cancel">रद्द करें</string>
+    <string name="msg_back">वापस</string>
+    <string name="msg_saved">सहेज लिया</string>
+    <string name="msg_auth_needed">देखने के लिए पुष्टि करें कि यह आप ही हैं</string>
+    <string name="cd_mask_hidden">छिपा हुआ</string>
+    <string name="cd_shield_high_sensitivity">अतिरिक्त सुरक्षित जानकारी</string>
+</resources>

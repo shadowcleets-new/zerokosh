@@ -208,20 +208,20 @@
     <string name="ob_soon">जल्द</string>
     <string name="ob_reveal_show">दिखाएँ</string>
     <string name="ob_reveal_hide">छिपाएँ</string>
-    <string name="ob_lang_head_lead">अपनी </string>
+    <string name="ob_lang_head_lead">"अपनी "</string>
     <string name="ob_lang_head_emph">भाषा चुनें।</string>
     <string name="ob_lang_subhead">तिजोरी के लेबल, टेम्पलेट और चेतावनियाँ तुरंत बदल जाएँगी। सेटिंग में कभी भी बदल सकते हैं।</string>
     <string name="ob_lang_search">%1$d भाषाओं में खोजें</string>
     <string name="ob_lang_continue">%1$s में आगे बढ़ें</string>
-    <string name="ob_trust_head_lead">हम असल में क्या </string>
+    <string name="ob_trust_head_lead">"हम असल में क्या "</string>
     <string name="ob_trust_head_emph">नहीं</string>
-    <string name="ob_trust_head_tail"> जानते।</string>
+    <string name="ob_trust_head_tail">" जानते।"</string>
     <string name="ob_trust_subhead">इसे एक बार पढ़ लें। पूरी सुरक्षा व्यवस्था यही है, सीधी भाषा में।</string>
     <string name="ob_trust_continue">समझ गया · आगे बढ़ें</string>
     <string name="ob_trust_stat_servers">सर्वर से संपर्क</string>
     <string name="ob_trust_stat_trackers">ट्रैकर या SDK</string>
     <string name="ob_trust_stat_files">फ़ोन में .kosh फ़ाइल</string>
-    <string name="ob_trust_keys_emph">चाबियाँ आपके पास हैं। </string>
+    <string name="ob_trust_keys_emph">"चाबियाँ आपके पास हैं। "</string>
     <string name="ob_trust_keys_body">पासफ़्रेज़ भूल गए और रिकवरी किट भी खो गई, तो तिजोरी बंद ही रहेगी — आपके लिए भी, हमारे लिए भी, किसी के लिए भी।</string>
     <string name="ob_trust_tag_audited">ऑडिट किया गया बिल्ड</string>
     <string name="ob_trust_tag_reproducible">दोबारा बनाया जा सकने वाला APK</string>
@@ -240,9 +240,9 @@
     <string name="ob_fact_lost_title">अगर चाबियाँ खो जाएँ</string>
     <string name="ob_fact_lost_value">कोई वापस नहीं ला सकता</string>
     <string name="ob_fact_lost_note">न रीसेट लिंक, न सपोर्ट का पिछला दरवाज़ा।</string>
-    <string name="ob_pass_head_lead">एक ही राज़, </string>
+    <string name="ob_pass_head_lead">"एक ही राज़, "</string>
     <string name="ob_pass_head_emph">सिर्फ़ आपके</string>
-    <string name="ob_pass_head_tail"> पास।</string>
+    <string name="ob_pass_head_tail">" पास।"</string>
     <string name="ob_pass_subhead">तीन-चार बेमेल शब्द, एक चालाक शब्द से बेहतर हैं। इस स्क्रीन से कुछ बाहर नहीं जाता।</string>
     <string name="ob_pass_sealing">बंद किया जा रहा है…</string>
     <string name="ob_pass_seal">तिजोरी बंद करें</string>
@@ -284,9 +284,9 @@
     <string name="ob_crack_forever">सूरज से भी ज़्यादा टिकेगा</string>
     <string name="ob_kit_working">काम चल रहा है…</string>
     <string name="ob_kit_regenerate">नई बनाएँ</string>
-    <string name="ob_kit_head_lead">एक चाबी। </string>
+    <string name="ob_kit_head_lead">"एक चाबी। "</string>
     <string name="ob_kit_head_emph">काग़ज़ पर।</string>
-    <string name="ob_kit_head_tail"> कभी ऑनलाइन नहीं।</string>
+    <string name="ob_kit_head_tail">" कभी ऑनलाइन नहीं।"</string>
     <string name="ob_kit_subhead">इसी फ़ोन पर बनी, एक ही बार दिखेगी। पासफ़्रेज़ भूल जाने पर अंदर लौटने का यही एक रास्ता है।</string>
     <string name="ob_kit_saved">मैंने अपनी किट सहेज ली</string>
     <string name="ob_kit_footer">यह चाबी एक ही बार दिखती है और कभी सादे रूप में नहीं रखी जाती।</string>
@@ -296,12 +296,12 @@
     <string name="ob_kit_qr_note">ऑफ़लाइन गैलरी में</string>
     <string name="ob_kit_offline_title">इसे इंटरनेट से दूर रखें</string>
     <string name="ob_kit_offline_body">न जीमेल, न व्हाट्सऐप, न स्क्रीनशॉट। तिजोरी, बैंक लॉकर, या स्टील की प्लेट।</string>
-    <string name="ob_kit_confirm_emph">मैंने इसे ऑफ़लाइन रख लिया है। </string>
+    <string name="ob_kit_confirm_emph">"मैंने इसे ऑफ़लाइन रख लिया है। "</string>
     <string name="ob_kit_confirm_body">कोई भी — Zerokosh भी — इसे मेरे लिए वापस नहीं ला सकता।</string>
     <string name="ob_kit_card_label">ZEROKOSH रिकवरी</string>
     <string name="ob_kit_qr_cd">रिकवरी कुंजी का क्यूआर कोड</string>
     <string name="ob_kit_card_note">स्कैन करें या टाइप कर दें। दोबारा इंस्टॉल, फ़ैक्टरी रीसेट, या फ़ोन खोने के बाद भी काम करेगी।</string>
-    <string name="ob_quick_head_lead">एक छुअन में खुल जाए। </string>
+    <string name="ob_quick_head_lead">"एक छुअन में खुल जाए। "</string>
     <string name="ob_quick_head_emph">बिना क्लाउड के।</string>
     <string name="ob_quick_subhead">अंदर लौटने का एक तेज़ रास्ता चुनें। तिजोरी की पहरेदारी पासफ़्रेज़ ही करता रहेगा; यह सिर्फ़ इसी फ़ोन पर चाबी खोलता है।</string>
     <string name="ob_quick_opening">आपकी तिजोरी खुल रही है…</string>
@@ -366,8 +366,8 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, पैन… खोजें</string>
     <string name="hm_pinned">पिन किए गए</string>
-    <string name="hm_count_one">%1$d जानकारी, </string>
-    <string name="hm_count_many">%1$d जानकारियाँ, </string>
+    <string name="hm_count_one">"%1$d जानकारी, "</string>
+    <string name="hm_count_many">"%1$d जानकारियाँ, "</string>
     <string name="hm_all_offline">सब ऑफ़लाइन।</string>
     <string name="hm_lock_immediate">खुला है · छोड़ते ही बंद</string>
     <string name="hm_lock_one">खुला है · छोड़ने के 1 मिनट बाद बंद</string>
@@ -377,7 +377,7 @@
     <string name="hm_close_search">खोज बंद करें</string>
     <string name="hm_no_match">“%1$s” से कुछ नहीं मिला</string>
     <string name="hm_no_match_hint">कोई संस्था, यूपीआई हैंडल, या आख़िरी चार अंक आज़माएँ।</string>
-    <string name="hm_empty_head_lead">आपकी तिजोरी </string>
+    <string name="hm_empty_head_lead">"आपकी तिजोरी "</string>
     <string name="hm_empty_head_emph">इंतज़ार कर रही है।</string>
     <string name="hm_empty_blank">खाली तिजोरी, तैयार है।</string>
     <string name="hm_empty_body">उसी एक जानकारी से शुरू करें जो सबसे ज़्यादा काम आती है। नोट्स ऐप में पड़े बारह पासवर्ड से एक सहेजा पासवर्ड भी ज़्यादा सुरक्षित है।</string>
@@ -447,9 +447,9 @@
     <string name="nav_all_templates">सभी टेम्पलेट</string>
     <string name="nav_scan">स्कैन</string>
     <string name="nav_damaged_kicker">ख़राब स्थिति</string>
-    <string name="nav_damaged_lead">आपकी </string>
+    <string name="nav_damaged_lead">"आपकी "</string>
     <string name="nav_damaged_emph">तिजोरी फ़ाइल</string>
-    <string name="nav_damaged_tail"> में कुछ गड़बड़ है।</string>
+    <string name="nav_damaged_tail">" में कुछ गड़बड़ है।"</string>
     <string name="nav_integrity_title">अखंडता जाँच विफल</string>
     <string name="nav_integrity_body">.kosh फ़ाइल का Poly1305 प्रमाणीकरण टैग मेल नहीं खाता। ऐसा अधूरे सिंक या ख़राब स्टोरेज के बाद हो सकता है।</string>
     <string name="nav_what_next">अब क्या करें</string>
@@ -494,7 +494,7 @@
     <!-- Authenticator. -->
     <string name="au_fallback_name">ऑथेंटिकेटर</string>
     <string name="au_search_hint">कोड, जारीकर्ता खोजें…</string>
-    <string name="au_rotating">बदलते रहते हैं </string>
+    <string name="au_rotating">"बदलते रहते हैं "</string>
     <string name="au_active_one">%1$d चालू कोड</string>
     <string name="au_active_many">%1$d चालू कोड</string>
     <string name="au_tap_to_copy">कॉपी करने के लिए टैप करें</string>
@@ -545,4 +545,35 @@
     <string name="se_title">सहेजा नहीं गया</string>
     <string name="se_lead">आपके बदलाव सहेजे नहीं गए, इसलिए तिजोरी में जो पहले था उसमें से कुछ नहीं खोया।</string>
     <string name="se_body">तिजोरी फ़ाइल लिखी नहीं जा सकी। अगर आपने बैकअप और सिंक फ़ोल्डर सेट किया है, तो हो सकता है Android ने उसकी अनुमति वापस ले ली हो — सेटिंग खोलें, फ़ोल्डर दोबारा चुनें, और फिर कोशिश करें।</string>
+
+    <!-- Screen kickers. -->
+    <string name="kicker_locked">बंद है</string>
+
+    <!-- Lock screen. -->
+    <string name="lk_welcome_lead">वापस स्वागत है।</string>
+    <string name="lk_welcome_emph">आपकी तिजोरी बंद है।</string>
+    <string name="lk_crypto_note">Argon2id · XChaCha20-Poly1305 · कुछ भी इस फ़ोन से बाहर नहीं गया</string>
+    <string name="lk_touch_unlock">खोलने के लिए छुएँ</string>
+
+    <!-- Template gallery. -->
+    <string name="gl_head_lead">"हम क्या "</string>
+    <string name="gl_head_emph">सहेज रहे हैं?</string>
+    <string name="gl_search">%1$d भारतीय सेवाओं में खोजें…</string>
+    <string name="gl_suggested">आपके लिए सुझाव</string>
+    <string name="gl_most_used">सबसे ज़्यादा इस्तेमाल पहले</string>
+    <string name="gl_matches">%1$d मिले</string>
+    <string name="gl_not_found">सेवा नहीं मिल रही?</string>
+    <string name="gl_not_found_body">खाली से शुरू करें और अपने फ़ील्ड ख़ुद नाम दें — टेम्पलेट सिर्फ़ लेबल भरते हैं, डेटा कभी नहीं।</string>
+    <string name="gl_blank">खाली टेम्पलेट</string>
+    <string name="gl_cat_popular">लोकप्रिय</string>
+    <string name="gl_cat_banks">बैंक</string>
+    <string name="gl_cat_upi">यूपीआई</string>
+    <string name="gl_cat_cards">कार्ड</string>
+    <string name="gl_cat_demat">डीमैट</string>
+    <string name="gl_cat_govid">सरकारी पहचान</string>
+    <string name="gl_cat_shopping">ख़रीदारी</string>
+    <string name="gl_cat_travel">यात्रा</string>
+    <string name="gl_cat_utilities">बिल और कनेक्शन</string>
+    <string name="gl_cat_apps">ऐप</string>
+    <string name="au_rotating_emph">कोड।</string>
 </resources>

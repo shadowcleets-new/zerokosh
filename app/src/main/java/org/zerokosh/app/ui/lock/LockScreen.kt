@@ -224,19 +224,19 @@ fun LockScreen(app: ZerokoshApp) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(48.dp))
-            Kicker("Locked", color = LockOnSurface.copy(alpha = 0.6f))
+            Kicker(stringResource(R.string.kicker_locked), color = LockOnSurface.copy(alpha = 0.6f))
 
             Spacer(Modifier.height(20.dp))
             Text(
                 buildAnnotatedString {
-                    append("Welcome back.\n")
+                    append(stringResource(R.string.lk_welcome_lead) + "\n")
                     withStyle(
                         SpanStyle(
                             fontFamily = Newsreader,
                             fontStyle = FontStyle.Italic,
                             color = VaultPrimary,
                         ),
-                    ) { append("Your vault is sealed.") }
+                    ) { append(stringResource(R.string.lk_welcome_emph)) }
                 },
                 style = MaterialTheme.typography.displayMedium,
                 color = LockOnSurface,
@@ -244,7 +244,7 @@ fun LockScreen(app: ZerokoshApp) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Argon2id · XChaCha20-Poly1305 · nothing left this device",
+                stringResource(R.string.lk_crypto_note),
                 fontSize = 12.sp,
                 color = LockOnSurface.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,
@@ -274,7 +274,7 @@ fun LockScreen(app: ZerokoshApp) {
                 SensorTarget(enabled = !busy) { scope.launch { tryBiometric() } }
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    "Touch to unlock",
+                    stringResource(R.string.lk_touch_unlock),
                     fontSize = 12.sp,
                     color = LockOnSurface.copy(alpha = 0.7f),
                 )

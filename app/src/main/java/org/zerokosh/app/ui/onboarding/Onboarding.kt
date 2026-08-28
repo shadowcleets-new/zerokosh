@@ -494,7 +494,7 @@ fun LanguageScreen(app: ZerokoshApp, onBack: (() -> Unit)? = null, onDone: () ->
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
                         Text(
-                            "Search ${Languages.size} languages",
+                            stringResource(R.string.ob_lang_search, Languages.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = c.ink(0.4f),
                         )
@@ -513,7 +513,10 @@ fun LanguageScreen(app: ZerokoshApp, onBack: (() -> Unit)? = null, onDone: () ->
             }
         },
         bottomBar = {
-            PrimaryPillButton("Continue in ${selected.english}", onDone)
+            PrimaryPillButton(
+                stringResource(R.string.ob_lang_continue, selected.native),
+                onDone,
+            )
         },
     ) {
         Column(

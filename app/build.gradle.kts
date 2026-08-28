@@ -284,6 +284,29 @@ val verifyTemplates by tasks.registering {
             else (namesIn(base) - namesIn(hi)).sorted().map { "not translated into Hindi: $it" }
         }
 
+        // aapt trims leading and trailing whitespace from a <string> value unless
+        // the value is wrapped in double quotes. Headlines here are split into a
+        // lead and an emphasised tail and appended, so a stripped trailing space
+        // renders as "Choose yourlanguage." — which is exactly what shipped until
+        // it was caught on a device. Cheap to check, invisible until someone reads
+        // the screen.
+        val spaceRe = Regex("""<string name="([^"]+)">(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)
+        val whitespaceProblems = localePairs.flatMap { listOf(it.first, it.second) }
+            .filter { it.exists() }
+            .flatMap { f ->
+                spaceRe.findAll(f.readText()).mapNotNull { m ->
+                    val value = m.groupValues[2]
+                    val quoted = value.startsWith("\"") && value.endsWith("\"")
+                    val trimmed = value != value.trim()
+                    if (trimmed && !quoted) {
+                        "${f.parentFile.name}/${m.groupValues[1]} has edge whitespace and is not quoted " +
+                            "— aapt will strip it"
+                    } else {
+                        null
+                    }
+                }.toList()
+            }
+
         @Suppress("UNCHECKED_CAST")
         val catalogue = groovy.json.JsonSlurper().parse(jsonFile) as Map<String, Any>
         val templates = catalogue["templates"] as List<Map<String, Any>>
@@ -296,6 +319,7 @@ val verifyTemplates by tasks.registering {
 
         val problems = mutableListOf<String>()
         problems += localeProblems
+        problems += whitespaceProblems
         val ids = templates.map { it["id"] as String }.toSet()
 
         (referenced - ids).forEach { problems += "gallery points at unknown template: $it" }

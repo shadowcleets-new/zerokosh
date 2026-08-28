@@ -206,20 +206,20 @@
     <string name="ob_soon">SOON</string>
     <string name="ob_reveal_show">Show</string>
     <string name="ob_reveal_hide">Hide</string>
-    <string name="ob_lang_head_lead">Choose your </string>
+    <string name="ob_lang_head_lead">"Choose your "</string>
     <string name="ob_lang_head_emph">language.</string>
     <string name="ob_lang_subhead">Vault labels, templates and warnings adapt instantly. Change it anytime in Settings.</string>
     <string name="ob_lang_search">Search %1$d languages</string>
     <string name="ob_lang_continue">Continue in %1$s</string>
-    <string name="ob_trust_head_lead">Exactly what we </string>
+    <string name="ob_trust_head_lead">"Exactly what we "</string>
     <string name="ob_trust_head_emph">don\'t</string>
-    <string name="ob_trust_head_tail"> know.</string>
+    <string name="ob_trust_head_tail">" know."</string>
     <string name="ob_trust_subhead">Read this once. It is the whole security model, in plain words.</string>
     <string name="ob_trust_continue">I understand · Continue</string>
     <string name="ob_trust_stat_servers">servers contacted</string>
     <string name="ob_trust_stat_trackers">trackers or SDKs</string>
     <string name="ob_trust_stat_files">.kosh file on device</string>
-    <string name="ob_trust_keys_emph">You hold the keys. </string>
+    <string name="ob_trust_keys_emph">"You hold the keys. "</string>
     <string name="ob_trust_keys_body">Forget your passphrase and lose the Recovery Kit, and the vault stays sealed — for you, for us, for anyone.</string>
     <string name="ob_trust_tag_audited">Audited build</string>
     <string name="ob_trust_tag_reproducible">Reproducible APK</string>
@@ -238,9 +238,9 @@
     <string name="ob_fact_lost_title">If you lose your keys</string>
     <string name="ob_fact_lost_value">Nobody can recover it</string>
     <string name="ob_fact_lost_note">No reset link. No support backdoor.</string>
-    <string name="ob_pass_head_lead">One secret, </string>
+    <string name="ob_pass_head_lead">"One secret, "</string>
     <string name="ob_pass_head_emph">held only</string>
-    <string name="ob_pass_head_tail"> by you.</string>
+    <string name="ob_pass_head_tail">" by you."</string>
     <string name="ob_pass_subhead">Three or four unrelated words beat one clever word. Nothing leaves this screen.</string>
     <string name="ob_pass_sealing">Sealing…</string>
     <string name="ob_pass_seal">Seal the vault</string>
@@ -282,9 +282,9 @@
     <string name="ob_crack_forever">longer than the sun</string>
     <string name="ob_kit_working">Working…</string>
     <string name="ob_kit_regenerate">Regenerate</string>
-    <string name="ob_kit_head_lead">One key. </string>
+    <string name="ob_kit_head_lead">"One key. "</string>
     <string name="ob_kit_head_emph">On paper.</string>
-    <string name="ob_kit_head_tail"> Never online.</string>
+    <string name="ob_kit_head_tail">" Never online."</string>
     <string name="ob_kit_subhead">Generated on this device, shown once. It is the only way back in if the passphrase slips away.</string>
     <string name="ob_kit_saved">I\'ve saved my kit</string>
     <string name="ob_kit_footer">This key is shown once and never stored in plain text.</string>
@@ -294,12 +294,12 @@
     <string name="ob_kit_qr_note">To an offline gallery</string>
     <string name="ob_kit_offline_title">Keep it off the internet</string>
     <string name="ob_kit_offline_body">Not Gmail, not WhatsApp, not a screenshot. A safe, a bank locker, or a steel plate.</string>
-    <string name="ob_kit_confirm_emph">I\'ve stored this offline. </string>
+    <string name="ob_kit_confirm_emph">"I\'ve stored this offline. "</string>
     <string name="ob_kit_confirm_body">No one — including Zerokosh — can recover it for me.</string>
     <string name="ob_kit_card_label">ZEROKOSH RECOVERY</string>
     <string name="ob_kit_qr_cd">Recovery key QR code</string>
     <string name="ob_kit_card_note">Scan or type it back. Works after a reinstall, a factory reset, or a lost phone.</string>
-    <string name="ob_quick_head_lead">Unlock in a touch. </string>
+    <string name="ob_quick_head_lead">"Unlock in a touch. "</string>
     <string name="ob_quick_head_emph">Without the cloud.</string>
     <string name="ob_quick_subhead">Pick a quick way back in. Your passphrase still guards the vault; this only unlocks the key on this device.</string>
     <string name="ob_quick_opening">Opening your vault…</string>
@@ -364,8 +364,8 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">Search HDFC, priya@upi, PAN…</string>
     <string name="hm_pinned">Pinned</string>
-    <string name="hm_count_one">%1$d credential, </string>
-    <string name="hm_count_many">%1$d credentials, </string>
+    <string name="hm_count_one">"%1$d credential, "</string>
+    <string name="hm_count_many">"%1$d credentials, "</string>
     <string name="hm_all_offline">all offline.</string>
     <string name="hm_lock_immediate">Unlocked · locks when you leave</string>
     <string name="hm_lock_one">Unlocked · locks 1 min after you leave</string>
@@ -375,7 +375,7 @@
     <string name="hm_close_search">Close search</string>
     <string name="hm_no_match">Nothing matches “%1$s”</string>
     <string name="hm_no_match_hint">Try an institution, a UPI handle, or the last four digits.</string>
-    <string name="hm_empty_head_lead">Your vault is </string>
+    <string name="hm_empty_head_lead">"Your vault is "</string>
     <string name="hm_empty_head_emph">waiting.</string>
     <string name="hm_empty_blank">A blank vault, ready.</string>
     <string name="hm_empty_body">Start with the one credential you use the most. Even one saved password is safer than twelve in a notes app.</string>
@@ -445,9 +445,9 @@
     <string name="nav_all_templates">All templates</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_damaged_kicker">Damaged state</string>
-    <string name="nav_damaged_lead">Something in the </string>
+    <string name="nav_damaged_lead">"Something in the "</string>
     <string name="nav_damaged_emph">vault file</string>
-    <string name="nav_damaged_tail"> is off.</string>
+    <string name="nav_damaged_tail">" is off."</string>
     <string name="nav_integrity_title">Integrity check failed</string>
     <string name="nav_integrity_body">The .kosh file\'s Poly1305 authentication tag doesn\'t match. This can happen after an interrupted sync or a bad flash.</string>
     <string name="nav_what_next">What to do next</string>
@@ -492,7 +492,7 @@
     <!-- Authenticator. -->
     <string name="au_fallback_name">Authenticator</string>
     <string name="au_search_hint">Search codes, issuers…</string>
-    <string name="au_rotating">Rotating </string>
+    <string name="au_rotating">"Rotating "</string>
     <string name="au_active_one">%1$d active code</string>
     <string name="au_active_many">%1$d active codes</string>
     <string name="au_tap_to_copy">Tap to copy</string>
@@ -543,4 +543,35 @@
     <string name="se_title">Not saved</string>
     <string name="se_lead">Your changes were not saved, so nothing has been lost from the vault as it was.</string>
     <string name="se_body">The vault file could not be written. If you have set a backup and sync folder, Android may have withdrawn permission to it — open Settings, pick the folder again, and retry.</string>
+
+    <!-- Screen kickers. -->
+    <string name="kicker_locked">Locked</string>
+
+    <!-- Lock screen. -->
+    <string name="lk_welcome_lead">Welcome back.</string>
+    <string name="lk_welcome_emph">Your vault is sealed.</string>
+    <string name="lk_crypto_note">Argon2id · XChaCha20-Poly1305 · nothing left this device</string>
+    <string name="lk_touch_unlock">Touch to unlock</string>
+
+    <!-- Template gallery. -->
+    <string name="gl_head_lead">"What are we "</string>
+    <string name="gl_head_emph">storing?</string>
+    <string name="gl_search">Search %1$d Indian services…</string>
+    <string name="gl_suggested">Suggested for you</string>
+    <string name="gl_most_used">Most-used first</string>
+    <string name="gl_matches">%1$d matches</string>
+    <string name="gl_not_found">Can’t find a service?</string>
+    <string name="gl_not_found_body">Start blank and name your own fields — templates only pre-fill labels, never data.</string>
+    <string name="gl_blank">Blank template</string>
+    <string name="gl_cat_popular">Popular</string>
+    <string name="gl_cat_banks">Banks</string>
+    <string name="gl_cat_upi">UPI</string>
+    <string name="gl_cat_cards">Cards</string>
+    <string name="gl_cat_demat">Demat</string>
+    <string name="gl_cat_govid">Gov ID</string>
+    <string name="gl_cat_shopping">Shopping</string>
+    <string name="gl_cat_travel">Travel</string>
+    <string name="gl_cat_utilities">Utilities</string>
+    <string name="gl_cat_apps">Apps</string>
+    <string name="au_rotating_emph">codes.</string>
 </resources>

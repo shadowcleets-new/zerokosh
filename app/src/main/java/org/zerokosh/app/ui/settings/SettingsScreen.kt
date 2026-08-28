@@ -195,7 +195,7 @@ fun SettingsScreen(
     ) {
         // Header - mono kicker over the serif statement, plus a lock-now action.
         Column(modifier = Modifier.padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 8.dp)) {
-            Kicker("Settings")
+            Kicker(stringResource(R.string.tab_settings))
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(

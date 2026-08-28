@@ -98,6 +98,30 @@ private data class GalleryItem(
     val isPopular: Boolean = false,
 )
 
+/**
+ * The chip label for a category key.
+ *
+ * GalleryCategories doubles as the match key on every GalleryItem, so the keys
+ * themselves have to stay English — this is the only place the user-facing name
+ * is decided.
+ */
+private val CategoryLabels = mapOf(
+    "Popular" to R.string.gl_cat_popular,
+    "Banks" to R.string.gl_cat_banks,
+    "UPI" to R.string.gl_cat_upi,
+    "Cards" to R.string.gl_cat_cards,
+    "Demat" to R.string.gl_cat_demat,
+    "Gov ID" to R.string.gl_cat_govid,
+    "Shopping" to R.string.gl_cat_shopping,
+    "Travel" to R.string.gl_cat_travel,
+    "Utilities" to R.string.gl_cat_utilities,
+    "Apps" to R.string.gl_cat_apps,
+)
+
+@Composable
+private fun categoryLabel(key: String): String =
+    stringResource(CategoryLabels[key] ?: R.string.gl_cat_apps)
+
 private val GalleryCategories =
     listOf("Popular", "Banks", "UPI", "Cards", "Demat", "Gov ID", "Shopping", "Travel", "Utilities", "Apps")
 // #endregion
@@ -530,12 +554,14 @@ fun TemplateGalleryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Kicker("Templates")
+                    Kicker(stringResource(R.string.tab_templates))
                     Spacer(Modifier.height(4.dp))
                     Text(
                         buildAnnotatedString {
-                            append("What are we ")
-                            withStyle(EmphasisSpan) { append("storing?") }
+                            append(stringResource(R.string.gl_head_lead))
+                            withStyle(EmphasisSpan) {
+                                append(stringResource(R.string.gl_head_emph))
+                            }
                         },
                         style = MaterialTheme.typography.headlineMedium,
                         color = c.ink,
@@ -579,7 +605,7 @@ fun TemplateGalleryScreen(
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
                         Text(
-                            "Search ${catalog.size} Indian services…",
+                            stringResource(R.string.gl_search, catalog.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = c.ink(0.45f),
                             maxLines = 1,
@@ -628,7 +654,7 @@ fun TemplateGalleryScreen(
                         )
                     }
                     Text(
-                        cat,
+                        categoryLabel(cat),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = if (selected) c.paper else c.ink(0.7f),
@@ -651,9 +677,9 @@ fun TemplateGalleryScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        SectionLabel("Suggested for you", Modifier.weight(1f))
+                        SectionLabel(stringResource(R.string.gl_suggested), Modifier.weight(1f))
                         Text(
-                            "Most-used first",
+                            stringResource(R.string.gl_most_used),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = c.accent,
@@ -701,8 +727,11 @@ fun TemplateGalleryScreen(
             if (tiles.isNotEmpty()) {
                 item(span = { GridItemSpan(2) }) {
                     SectionLabel(
-                        if (query.isNotBlank()) "${tiles.size + suggested.size} matches"
-                        else category,
+                        if (query.isNotBlank()) {
+                            stringResource(R.string.gl_matches, tiles.size + suggested.size)
+                        } else {
+                            categoryLabel(category)
+                        },
                     )
                 }
             }
@@ -725,15 +754,14 @@ fun TemplateGalleryScreen(
                         .padding(16.dp),
                 ) {
                     Text(
-                        "Can’t find a service?",
+                        stringResource(R.string.gl_not_found),
                         style = MaterialTheme.typography.titleSmall,
                         fontSize = 12.5.sp,
                         color = c.ink,
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "Start blank and name your own fields — templates only pre-fill " +
-                            "labels, never data.",
+                        stringResource(R.string.gl_not_found_body),
                         style = MaterialTheme.typography.bodySmall,
                         color = c.ink(0.65f),
                     )
@@ -752,7 +780,7 @@ fun TemplateGalleryScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             PrimaryPillButton(
-                label = "Blank template",
+                label = stringResource(R.string.gl_blank),
                 onClick = { onPick("secure_note", null, null) },
                 modifier = Modifier.weight(1f),
                 showArrow = false,

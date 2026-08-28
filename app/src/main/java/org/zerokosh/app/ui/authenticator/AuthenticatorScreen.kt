@@ -270,7 +270,9 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                     Text(
                         buildAnnotatedString {
                             append(stringResource(R.string.au_rotating))
-                            withStyle(EmphasisSpan) { append("codes.") }
+                            withStyle(EmphasisSpan) {
+                                append(stringResource(R.string.au_rotating_emph))
+                            }
                         },
                         style = MaterialTheme.typography.displaySmall,
                         color = c.ink,

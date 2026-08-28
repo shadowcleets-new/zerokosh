@@ -7,6 +7,10 @@
 package org.zerokosh.app.ui.common
 
 // #region Imports
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import org.zerokosh.app.R
 import org.zerokosh.app.data.AssetCatalog
 import org.zerokosh.core.model.FieldType
 import org.zerokosh.core.model.Record
@@ -14,13 +18,13 @@ import org.zerokosh.core.model.Sensitivity
 // #endregion
 
 // #region Categories
-enum class RecordCategory(val label: String) {
-    BanksUpi("Banks & UPI"),
-    Cards("Cards"),
-    Investments("Investments"),
-    GovId("Gov & ID"),
-    Utilities("Utilities"),
-    Apps("Apps & Logins"),
+enum class RecordCategory(@StringRes val labelRes: Int) {
+    BanksUpi(R.string.cat_banks),
+    Cards(R.string.cat_cards),
+    Investments(R.string.cat_investments),
+    GovId(R.string.cat_govid),
+    Utilities(R.string.cat_utilities),
+    Apps(R.string.cat_apps),
 }
 
 private val CategoryByTemplate = mapOf(
@@ -90,18 +94,19 @@ fun recordBadge(record: Record): String? = when {
 
 // #region Time formatting
 /** "3d ago" / "just now" — the relative stamp under a record title. */
+@Composable
 fun relativeTime(millis: Long, nowMs: Long = System.currentTimeMillis()): String {
     val delta = (nowMs - millis).coerceAtLeast(0)
     val minutes = delta / 60_000
     val hours = minutes / 60
     val days = hours / 24
     return when {
-        minutes < 1 -> "just now"
-        minutes < 60 -> "${minutes}m ago"
-        hours < 24 -> "${hours}h ago"
-        days < 30 -> "${days}d ago"
-        days < 365 -> "${days / 30}mo ago"
-        else -> "${days / 365}y ago"
+        minutes < 1 -> stringResource(R.string.time_just_now)
+        minutes < 60 -> stringResource(R.string.time_minutes, minutes.toInt())
+        hours < 24 -> stringResource(R.string.time_hours, hours.toInt())
+        days < 30 -> stringResource(R.string.time_days, days.toInt())
+        days < 365 -> stringResource(R.string.time_months, (days / 30).toInt())
+        else -> stringResource(R.string.time_years, (days / 365).toInt())
     }
 }
 // #endregion

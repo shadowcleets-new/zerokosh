@@ -70,6 +70,15 @@ import org.zerokosh.app.ui.record.DropdownSelector
 // #endregion
 
 // #region Screen list
+/** "Active · Vault" or "Not backed up" — its own function to keep the branching
+ *  out of SettingsScreen, which sits at the top of the complexity baseline. */
+@Composable
+private fun syncFolderValue(isConfigured: Boolean, folderName: String?): String {
+    if (!isConfigured) return stringResource(R.string.scr_settings_sync_not_set)
+    val name = folderName ?: stringResource(R.string.st_folder_fallback)
+    return stringResource(R.string.st_active_value, name)
+}
+
 @Composable
 fun SettingsScreen(
     app: ZerokoshApp,
@@ -117,15 +126,27 @@ fun SettingsScreen(
                     syncBusy = true
                     val success = runCatching { app.repository.manualBackup(context) }.getOrDefault(false)
                     syncBusy = false
-                    val folderName = runCatching { DocumentFile.fromTreeUri(context, uri)?.name }.getOrNull() ?: "Folder"
+                    val folderName = runCatching { DocumentFile.fromTreeUri(context, uri)?.name }.getOrNull() ?: context.getString(R.string.st_folder_fallback)
                     if (success) {
-                        Toast.makeText(context, "Backup folder connected & vault backed up to $folderName!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.st_toast_folder_backed, folderName),
+                            Toast.LENGTH_LONG,
+                        ).show()
                     } else {
-                        Toast.makeText(context, "Backup folder connected: $folderName", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.st_toast_folder_connected, folderName),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     }
                 }
             }.onFailure { e ->
-                Toast.makeText(context, "Failed to bind folder: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.st_toast_folder_failed, e.localizedMessage.orEmpty()),
+                    Toast.LENGTH_LONG,
+                ).show()
             }
         }
     }
@@ -149,7 +170,9 @@ fun SettingsScreen(
                 }
                 Toast.makeText(
                     context,
-                    if (ok) "Encrypted vault exported" else "Export failed",
+                    context.getString(
+                        if (ok) R.string.st_toast_exported else R.string.st_toast_export_failed,
+                    ),
                     Toast.LENGTH_SHORT,
                 ).show()
             }
@@ -176,7 +199,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Your rules.",
+                    text = stringResource(R.string.st_subtitle),
                     style = MaterialTheme.typography.displaySmall,
                     color = VaultTheme.colors.ink,
                     modifier = Modifier.weight(1f)
@@ -189,7 +212,7 @@ fun SettingsScreen(
 
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
             // Security Group
-            SettingsGroupTitle("Security")
+            SettingsGroupTitle(stringResource(R.string.st_group_security))
             SettingsCard {
                 // Auto-lock
                 val autoLockOptions = listOf(
@@ -265,13 +288,13 @@ fun SettingsScreen(
                 )
                 SettingsDivider()
                 SettingsRow(
-                    title = "Vault review",
-                    value = "Reused, weak, expiring",
+                    title = stringResource(R.string.st_vault_review),
+                    value = stringResource(R.string.st_vault_review_detail),
                     onClick = onOpenHealth,
                 )
                 SettingsDivider()
                 SettingsRow(
-                    title = "Recently deleted",
+                    title = stringResource(R.string.st_recently_deleted),
                     value = if (trashCount > 0) "$trashCount" else null,
                     onClick = onOpenTrash,
                 )
@@ -290,20 +313,22 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
             
             // Sync Group
-            SettingsGroupTitle("Sync")
+            SettingsGroupTitle(stringResource(R.string.st_group_sync))
             SettingsCard {
                 val isConfigured = syncUri.isNotEmpty()
-                val folderName = remember(syncUri) {
+                // Read outside remember{}: a lambda is not a composable context.
+                val activeFolderFallback = stringResource(R.string.st_active_folder)
+                val folderName = remember(syncUri, activeFolderFallback) {
                     if (isConfigured) {
                         runCatching {
                             DocumentFile.fromTreeUri(context, Uri.parse(syncUri))?.name
-                        }.getOrNull() ?: "Active Folder"
+                        }.getOrNull() ?: activeFolderFallback
                     } else null
                 }
 
                 SettingsRow(
                     title = stringResource(R.string.scr_settings_sync_folder),
-                    value = if (isConfigured) "Active · ${folderName ?: "Folder"}" else stringResource(R.string.scr_settings_sync_not_set),
+                    value = syncFolderValue(isConfigured, folderName),
                     valueColor = if (isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                     onClick = {
                         if (isConfigured) {
@@ -318,7 +343,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
 
             // Appearance Group
-            SettingsGroupTitle("Appearance")
+            SettingsGroupTitle(stringResource(R.string.st_group_appearance))
             SettingsCard {
                 Box {
                     var showThemeDropdown by remember { mutableStateOf(false) }
@@ -328,7 +353,7 @@ fun SettingsScreen(
                         else -> "System"
                     }
                     SettingsRow(
-                        title = "Theme",
+                        title = stringResource(R.string.st_theme),
                         value = currentTheme,
                         onClick = { showThemeDropdown = true }
                     )
@@ -377,7 +402,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
             
             // About Section
-            SettingsGroupTitle("About")
+            SettingsGroupTitle(stringResource(R.string.st_group_about))
             SettingsCard {
                 SettingsRow(
                     title = stringResource(R.string.scr_settings_about),
@@ -386,13 +411,13 @@ fun SettingsScreen(
                 )
                 SettingsDivider()
                 SettingsRow(
-                    title = "License",
+                    title = stringResource(R.string.st_license),
                     value = "GPL-3.0",
                     onClick = { }
                 )
                 SettingsDivider()
                 SettingsRow(
-                    title = "Logos provided by",
+                    title = stringResource(R.string.st_logos_by),
                     value = "Logo.dev",
                     onClick = { }
                 )
@@ -412,7 +437,7 @@ fun SettingsScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "Export encrypted .kosh",
+                    stringResource(R.string.st_export_kosh),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = VaultTheme.colors.primary,
@@ -433,7 +458,7 @@ fun SettingsScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "Import a .kosh backup",
+                    stringResource(R.string.st_import_kosh),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = VaultTheme.colors.ink(0.8f),
@@ -455,13 +480,13 @@ fun SettingsScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Import from another password manager",
+                        stringResource(R.string.st_import_other),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = VaultTheme.colors.ink(0.8f),
                     )
                     Text(
-                        "Chrome · Google · Bitwarden · LastPass · KeePass",
+                        stringResource(R.string.st_import_other_detail),
                         fontSize = 11.sp,
                         color = VaultTheme.colors.ink(0.45f),
                     )
@@ -492,10 +517,11 @@ fun SettingsScreen(
     }
 
     if (showSyncSheet) {
-        val folderName = remember(syncUri) {
+        val activeFolderFallback = stringResource(R.string.st_active_folder)
+        val folderName = remember(syncUri, activeFolderFallback) {
             runCatching {
                 DocumentFile.fromTreeUri(context, Uri.parse(syncUri))?.name
-            }.getOrNull() ?: "Active Folder"
+            }.getOrNull() ?: activeFolderFallback
         }
         SyncFolderDialog(
             app = app,
@@ -506,9 +532,17 @@ fun SettingsScreen(
                     val success = app.repository.manualBackup(context)
                     syncBusy = false
                     if (success) {
-                        Toast.makeText(context, "Vault backed up to $folderName!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.st_toast_backed_up, folderName),
+                            Toast.LENGTH_SHORT,
+                        ).show()
                     } else {
-                        Toast.makeText(context, "Backup failed — check folder permissions", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.st_toast_backup_failed),
+                            Toast.LENGTH_LONG,
+                        ).show()
                     }
                 }
             },
@@ -520,7 +554,11 @@ fun SettingsScreen(
                 app.repository.updateSyncFolder(context, null)
                 syncUri = ""
                 showSyncSheet = false
-                Toast.makeText(context, "Backup folder disconnected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.st_toast_disconnected),
+                    Toast.LENGTH_SHORT,
+                ).show()
             },
             onDismiss = { showSyncSheet = false },
             busy = syncBusy
@@ -664,7 +702,7 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                 )
                 OutlinedTextField(
                     value = confirm, onValueChange = { confirm = it },
-                    label = { Text("Confirm new passphrase") },
+                    label = { Text(stringResource(R.string.st_confirm_new_passphrase)) },
                     visualTransformation = if (showConfirm) VisualTransformation.None
                     else PasswordVisualTransformation(),
                     trailingIcon = { RevealToggle(visible = showConfirm, onToggle = { showConfirm = !showConfirm }) },
@@ -716,7 +754,10 @@ private fun NewRecoveryKeyDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
         text = {
             if (newKey == null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Confirm your passphrase to generate a new Recovery Key. The previous key will stop working.", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(R.string.st_new_recovery_body),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                     var showPass by remember { mutableStateOf(false) }
                     OutlinedTextField(
                         value = passphrase, onValueChange = { passphrase = it; wrong = false },
@@ -731,7 +772,10 @@ private fun NewRecoveryKeyDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Your new Recovery Key:", style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        stringResource(R.string.st_new_recovery_result),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(8.dp),
@@ -744,7 +788,11 @@ private fun NewRecoveryKeyDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                             modifier = Modifier.padding(12.dp)
                         )
                     }
-                    Text("Store this offline. The old Recovery Key is no longer valid.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                    Text(
+                        stringResource(R.string.st_new_recovery_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
                 }
             }
         },
@@ -766,10 +814,10 @@ private fun NewRecoveryKeyDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                     }
                 ) {
                     if (busy) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                    else Text("Generate")
+                    else Text(stringResource(R.string.st_generate))
                 }
             } else {
-                Button(onClick = onDismiss) { Text("Done") }
+                Button(onClick = onDismiss) { Text(stringResource(R.string.st_done)) }
             }
         },
         dismissButton = {
@@ -797,18 +845,18 @@ private fun SyncFolderDialog(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Outlined.FolderZip, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Text("Backup & Sync Folder")
+                Text(stringResource(R.string.st_backup_sheet_title))
             }
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Connected folder: $folderName",
+                    text = stringResource(R.string.st_connected_folder, folderName),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Your encrypted .kosh vault files are saved directly inside this folder. Sync this directory with Google Drive, Syncthing, Nextcloud, or an SD card for automated multi-device backup.",
+                    text = stringResource(R.string.st_backup_sheet_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -819,7 +867,10 @@ private fun SyncFolderDialog(
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text("Backing up vault...", style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            stringResource(R.string.st_backing_up),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
                     }
                 }
             }
@@ -831,16 +882,16 @@ private fun SyncFolderDialog(
             ) {
                 Icon(Icons.Outlined.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Backup Now")
+                Text(stringResource(R.string.st_backup_now))
             }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedButton(onClick = onChangeFolder, enabled = !busy) {
-                    Text("Change Folder")
+                    Text(stringResource(R.string.st_change_folder))
                 }
                 TextButton(onClick = onDisconnect, enabled = !busy) {
-                    Text("Disconnect", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.st_disconnect), color = MaterialTheme.colorScheme.error)
                 }
             }
         }

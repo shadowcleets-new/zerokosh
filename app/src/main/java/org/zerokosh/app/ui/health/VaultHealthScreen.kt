@@ -48,9 +48,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.OnboardingTopBar
 import org.zerokosh.app.ui.common.fieldLabel
@@ -61,6 +63,14 @@ import org.zerokosh.core.health.reviewVault
 // #endregion
 
 // #region Screen
+/** "Nothing to fix." or "3 things worth a look." */
+@Composable
+private fun healthHeadline(count: Int): String = when {
+    count == 0 -> stringResource(R.string.vh_nothing)
+    count == 1 -> stringResource(R.string.vh_count_one, count)
+    else -> stringResource(R.string.vh_count_many, count)
+}
+
 @Composable
 fun VaultHealthScreen(app: ZerokoshApp, onBack: () -> Unit, onOpen: (String) -> Unit) {
     val c = VaultTheme.colors
@@ -83,18 +93,20 @@ fun VaultHealthScreen(app: ZerokoshApp, onBack: () -> Unit, onOpen: (String) -> 
             .background(c.paper)
             .statusBarsPadding(),
     ) {
-        OnboardingTopBar(stepLabel = "Vault review", onBack = onBack)
+        OnboardingTopBar(stepLabel = stringResource(R.string.st_vault_review), onBack = onBack)
 
         Column(Modifier.padding(horizontal = 24.dp)) {
             Text(
-                if (findings.isEmpty()) "Nothing to fix." else "${findings.size} thing${if (findings.size == 1) "" else "s"} worth a look.",
+                healthHeadline(findings.size),
                 style = MaterialTheme.typography.titleMedium,
                 color = c.ink,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Checked on this device against ${records.size} record${if (records.size == 1) "" else "s"}. " +
-                    "Nothing was sent anywhere.",
+                stringResource(
+                    if (records.size == 1) R.string.vh_checked_one else R.string.vh_checked_many,
+                    records.size,
+                ),
                 fontSize = 12.sp,
                 color = c.ink(0.45f),
             )
@@ -103,7 +115,7 @@ fun VaultHealthScreen(app: ZerokoshApp, onBack: () -> Unit, onOpen: (String) -> 
 
         if (findings.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No reused, weak or expiring credentials.", color = c.ink(0.45f))
+                Text(stringResource(R.string.vh_empty), color = c.ink(0.45f))
             }
             return@Column
         }
@@ -132,10 +144,10 @@ private fun FindingRow(app: ZerokoshApp, finding: HealthFinding, onClick: () -> 
     }
 
     val (headline, tint) = when (finding.kind) {
-        HealthKind.REUSED -> "Reused password" to MaterialTheme.colorScheme.error
-        HealthKind.COMMON -> "Commonly guessed" to MaterialTheme.colorScheme.error
-        HealthKind.WEAK -> "Weak" to c.primary
-        HealthKind.EXPIRING -> "Expiring" to c.primary
+        HealthKind.REUSED -> stringResource(R.string.vh_kind_reused) to MaterialTheme.colorScheme.error
+        HealthKind.COMMON -> stringResource(R.string.vh_kind_common) to MaterialTheme.colorScheme.error
+        HealthKind.WEAK -> stringResource(R.string.vh_kind_weak) to c.primary
+        HealthKind.EXPIRING -> stringResource(R.string.vh_kind_expiring) to c.primary
     }
 
     Row(

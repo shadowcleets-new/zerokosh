@@ -31,6 +31,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import android.view.WindowManager
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -118,7 +119,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.zerokosh.app.ZerokoshApp
+import androidx.compose.ui.res.stringResource
 import org.zerokosh.app.MainActivity
+import org.zerokosh.app.R
 import org.zerokosh.app.pdf.RecoveryKitPdf
 import org.zerokosh.app.quickunlock.QuickUnlockManager
 import org.zerokosh.app.ui.common.BottomActionBar
@@ -194,7 +197,7 @@ private fun OnboardingScaffold(
         val header: @Composable ColumnScope.() -> Unit = {
         Column(Modifier.widthIn(max = 560.dp).align(Alignment.CenterHorizontally).fillMaxWidth()) {
             OnboardingTopBar(
-                stepLabel = "Step $step of 6",
+                stepLabel = stringResource(R.string.ob_step_label, step),
                 onBack = onBack,
                 actionLabel = actionLabel,
                 onAction = onAction,
@@ -390,7 +393,7 @@ private fun OptionCard(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            "Recommended",
+                            stringResource(R.string.ob_recommended),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = c.primary,
@@ -463,11 +466,10 @@ fun LanguageScreen(app: ZerokoshApp, onBack: (() -> Unit)? = null, onDone: () ->
         step = 2,
         onBack = onBack,
         headline = buildAnnotatedString {
-            append("Choose your ")
-            withStyle(EmphasisSpan) { append("language.") }
+            append(stringResource(R.string.ob_lang_head_lead))
+            withStyle(EmphasisSpan) { append(stringResource(R.string.ob_lang_head_emph)) }
         },
-        subhead = "Vault labels, templates and warnings adapt instantly. " +
-            "Change it anytime in Settings.",
+        subhead = stringResource(R.string.ob_lang_subhead),
         afterHeader = {
             // M3 search bar.
             Row(
@@ -567,7 +569,7 @@ private fun LanguageRow(lang: Language, selected: Boolean, onClick: () -> Unit) 
             Text(lang.english, fontSize = 11.5.sp, color = c.ink(0.5f))
         }
         if (!lang.available) {
-            MicroBadge("SOON")
+            MicroBadge(stringResource(R.string.ob_soon))
         } else {
             Box(
                 Modifier
@@ -586,32 +588,34 @@ private fun LanguageRow(lang: Language, selected: Boolean, onClick: () -> Unit) 
 
 // #region S3 Trust / threat model
 private data class TrustFact(
-    val key: String,
-    val value: String,
-    val detail: String,
+    @StringRes val key: Int,
+    @StringRes val value: Int,
+    @StringRes val detail: Int,
     val icon: ImageVector,
     val tone: NoticeTone,
 )
 
 private val TrustFacts = listOf(
     TrustFact(
-        "Encryption", "XChaCha20-Poly1305", "Authenticated, per-vault nonce",
+        R.string.ob_fact_encryption_title, R.string.ob_fact_encryption_value,
+        R.string.ob_fact_encryption_note,
         Icons.Outlined.Lock, NoticeTone.Neutral,
     ),
     TrustFact(
-        "Key stretching", "Argon2id · 64 MB · t=3", "Measured on your phone at setup",
+        R.string.ob_fact_kdf_title, R.string.ob_fact_kdf_value, R.string.ob_fact_kdf_note,
         Icons.Outlined.Memory, NoticeTone.Neutral,
     ),
     TrustFact(
-        "Quick unlock", "Hardware keystore", "Biometric never leaves the enclave",
+        R.string.ob_fact_quick_title, R.string.ob_fact_quick_value, R.string.ob_fact_quick_note,
         Icons.Outlined.Fingerprint, NoticeTone.Positive,
     ),
     TrustFact(
-        "Network permission", "Not requested", "The app literally cannot phone home",
+        R.string.ob_fact_network_title, R.string.ob_fact_network_value,
+        R.string.ob_fact_network_note,
         Icons.Outlined.CloudOff, NoticeTone.Positive,
     ),
     TrustFact(
-        "If you lose your keys", "Nobody can recover it", "No reset link. No support backdoor.",
+        R.string.ob_fact_lost_title, R.string.ob_fact_lost_value, R.string.ob_fact_lost_note,
         Icons.Outlined.WarningAmber, NoticeTone.Warn,
     ),
 )
@@ -623,12 +627,12 @@ fun TrustScreen(onBack: (() -> Unit)? = null, onDone: () -> Unit) {
         step = 3,
         onBack = onBack,
         headline = buildAnnotatedString {
-            append("Exactly what we ")
-            withStyle(EmphasisSpan) { append("don't") }
-            append(" know.")
+            append(stringResource(R.string.ob_trust_head_lead))
+            withStyle(EmphasisSpan) { append(stringResource(R.string.ob_trust_head_emph)) }
+            append(stringResource(R.string.ob_trust_head_tail))
         },
-        subhead = "Read this once. It is the whole security model, in plain words.",
-        bottomBar = { PrimaryPillButton("I understand · Continue", onDone) },
+        subhead = stringResource(R.string.ob_trust_subhead),
+        bottomBar = { PrimaryPillButton(stringResource(R.string.ob_trust_continue), onDone) },
     ) {
         // Expressive stat band.
         Row(
@@ -641,9 +645,9 @@ fun TrustScreen(onBack: (() -> Unit)? = null, onDone: () -> Unit) {
                 .padding(vertical = 16.dp),
         ) {
             listOf(
-                "0" to "servers contacted",
-                "0" to "trackers or SDKs",
-                "1" to ".kosh file on device",
+                "0" to stringResource(R.string.ob_trust_stat_servers),
+                "0" to stringResource(R.string.ob_trust_stat_trackers),
+                "1" to stringResource(R.string.ob_trust_stat_files),
             ).forEachIndexed { i, (n, label) ->
                 Column(
                     modifier = Modifier
@@ -696,12 +700,9 @@ fun TrustScreen(onBack: (() -> Unit)? = null, onDone: () -> Unit) {
                 Text(
                     buildAnnotatedString {
                         withStyle(EmphasisSpan.copy(color = c.paper)) {
-                            append("You hold the keys. ")
+                            append(stringResource(R.string.ob_trust_keys_emph))
                         }
-                        append(
-                            "Forget your passphrase and lose the Recovery Kit, and the vault " +
-                                "stays sealed — for you, for us, for anyone.",
-                        )
+                        append(stringResource(R.string.ob_trust_keys_body))
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     fontSize = 12.5.sp,
@@ -710,7 +711,10 @@ fun TrustScreen(onBack: (() -> Unit)? = null, onDone: () -> Unit) {
                 )
                 Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("Audited build", "Reproducible APK").forEach { tag ->
+                    listOf(
+                        stringResource(R.string.ob_trust_tag_audited),
+                        stringResource(R.string.ob_trust_tag_reproducible),
+                    ).forEach { tag ->
                         Box(
                             Modifier
                                 .height(28.dp)
@@ -774,14 +778,14 @@ private fun TrustFactRow(f: TrustFact) {
         }
         Column(Modifier.weight(1f)) {
             Text(
-                f.key.uppercase(),
+                stringResource(f.key).uppercase(),
                 fontSize = 11.sp,
                 letterSpacing = 0.66.sp,
                 color = c.ink(0.45f),
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                f.value,
+                stringResource(f.value),
                 style = MaterialTheme.typography.titleMedium,
                 color = when (f.tone) {
                     NoticeTone.Positive -> c.accent
@@ -790,7 +794,7 @@ private fun TrustFactRow(f: TrustFact) {
                 },
             )
             Spacer(Modifier.height(4.dp))
-            Text(f.detail, style = MaterialTheme.typography.bodySmall, color = c.ink(0.5f))
+            Text(stringResource(f.detail), style = MaterialTheme.typography.bodySmall, color = c.ink(0.5f))
         }
     }
 }
@@ -854,15 +858,14 @@ fun CreatePassphraseScreen(
         // and stepping backwards would offer to create a second one.
         onBack = onBack,
         headline = buildAnnotatedString {
-            append("One secret, ")
-            withStyle(EmphasisSpan) { append("held only") }
-            append(" by you.")
+            append(stringResource(R.string.ob_pass_head_lead))
+            withStyle(EmphasisSpan) { append(stringResource(R.string.ob_pass_head_emph)) }
+            append(stringResource(R.string.ob_pass_head_tail))
         },
-        subhead = "Three or four unrelated words beat one clever word. " +
-            "Nothing leaves this screen.",
+        subhead = stringResource(R.string.ob_pass_subhead),
         bottomBar = {
             PrimaryPillButton(
-                label = if (busy) "Sealing…" else "Seal the vault",
+                label = stringResource(if (busy) R.string.ob_pass_sealing else R.string.ob_pass_seal),
                 loading = busy,
                 onClick = {
                     busy = true
@@ -892,7 +895,10 @@ fun CreatePassphraseScreen(
         Column(Modifier.padding(horizontal = 16.dp)) {
             if (pinAllowed) {
                 VaultToggleRow(
-                    options = listOf("Passphrase", "6-digit PIN"),
+                    options = listOf(
+                        stringResource(R.string.ob_pass_tab_passphrase),
+                        stringResource(R.string.ob_pass_tab_pin),
+                    ),
                     selectedIndex = if (pinMode) 1 else 0,
                     onSelect = { index ->
                         pinMode = index == 1
@@ -904,10 +910,14 @@ fun CreatePassphraseScreen(
             }
 
             FilledSecretField(
-                label = if (pinMode) "6-digit PIN" else "Passphrase",
+                label = stringResource(
+                    if (pinMode) R.string.ob_pass_tab_pin else R.string.ob_pass_tab_passphrase,
+                ),
                 value = pass,
                 onValueChange = { pass = if (pinMode) it.filter(Char::isDigit).take(6) else it },
-                counter = if (pinMode) "${pass.length} / 6" else "${pass.length} / 10",
+                counter = stringResource(
+                    R.string.ob_pass_counter, pass.length, if (pinMode) 6 else 10,
+                ),
                 keyboardType = if (pinMode) KeyboardType.NumberPassword else KeyboardType.Password,
                 visible = visible,
                 onToggleVisible = { visible = !visible },
@@ -917,10 +927,14 @@ fun CreatePassphraseScreen(
             // silent typo here means a permanently unopenable vault.
             Spacer(Modifier.height(8.dp))
             FilledSecretField(
-                label = "Confirm",
+                label = stringResource(R.string.ob_pass_confirm),
                 value = confirm,
                 onValueChange = { confirm = if (pinMode) it.filter(Char::isDigit).take(6) else it },
-                counter = if (confirm.isNotEmpty() && confirm != pass) "no match" else null,
+                counter = if (confirm.isNotEmpty() && confirm != pass) {
+                    stringResource(R.string.ob_pass_no_match)
+                } else {
+                    null
+                },
                 keyboardType = if (pinMode) KeyboardType.NumberPassword else KeyboardType.Password,
                 visible = visible,
                 onToggleVisible = { visible = !visible },
@@ -974,25 +988,34 @@ private fun litSegments(pass: String, pinMode: Boolean, score: Int): Int = when 
     else -> (score + 2).coerceAtMost(5)
 }
 
-private fun pinStrengthLabel(score: Int, bits: Int): String = when (score) {
-    0 -> "Too short · needs 6 digits"
-    1 -> "Weak · among the first PINs anyone tries"
-    else -> "Fair · $bits bits — a PIN can only be so strong"
+@StringRes
+private fun pinStrengthLabel(score: Int): Int = when (score) {
+    0 -> R.string.ob_strength_pin_short
+    1 -> R.string.ob_strength_pin_weak
+    else -> R.string.ob_strength_pin_fair
 }
 
-private fun passphraseStrengthLabel(score: Int, bits: Int): String = when (score) {
-    0 -> "Too short · needs 10 characters"
-    1 -> "Weak · $bits bits of entropy"
-    2 -> "Good · $bits bits of entropy"
-    else -> "Strong · $bits bits of entropy"
+@StringRes
+private fun passphraseStrengthLabel(score: Int): Int = when (score) {
+    0 -> R.string.ob_strength_pass_short
+    1 -> R.string.ob_strength_pass_weak
+    2 -> R.string.ob_strength_pass_good
+    else -> R.string.ob_strength_pass_strong
 }
 
-/** Kept out of the composable so the branching is testable and countable. */
-private fun strengthLabel(pass: String, pinMode: Boolean, score: Int, bits: Int): String = when {
-    pass.isNotEmpty() && pinMode -> pinStrengthLabel(score, bits)
-    pass.isNotEmpty() -> passphraseStrengthLabel(score, bits)
-    pinMode -> "Six digits nobody could guess from your life"
-    else -> "Pick something only you would say"
+/**
+ * Kept out of the composable so the branching is testable and countable.
+ *
+ * Returns a resource id rather than a String: the caller formats it with the
+ * bit count, and the two labels that carry no count simply ignore the extra
+ * argument, which java.util.Formatter allows.
+ */
+@StringRes
+private fun strengthLabel(pass: String, pinMode: Boolean, score: Int): Int = when {
+    pass.isNotEmpty() && pinMode -> pinStrengthLabel(score)
+    pass.isNotEmpty() -> passphraseStrengthLabel(score)
+    pinMode -> R.string.ob_strength_pin_empty
+    else -> R.string.ob_strength_pass_empty
 }
 
 @Composable
@@ -1022,7 +1045,7 @@ private fun ColumnScope.StrengthMeter(pass: String, pinMode: Boolean) {
     Spacer(Modifier.height(8.dp))
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(
-            text = strengthLabel(pass, pinMode, score, bits),
+            text = stringResource(strengthLabel(pass, pinMode, score), bits),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = if (pass.isEmpty()) c.ink(0.45f) else meterColor,
@@ -1040,26 +1063,29 @@ private fun ColumnScope.StrengthMeter(pass: String, pinMode: Boolean) {
 
 @Composable
 private fun ColumnScope.PinChecklist(pass: String) {
-    PassphraseCheck("All six digits entered", pass.length == 6)
+    PassphraseCheck(stringResource(R.string.ob_check_pin_digits), pass.length == 6)
     Spacer(Modifier.height(6.dp))
-    PassphraseCheck("Not a run or a repeated pattern", pass.length == 6 && !isWeakPinPattern(pass))
+    PassphraseCheck(
+        stringResource(R.string.ob_check_pin_pattern),
+        pass.length == 6 && !isWeakPinPattern(pass),
+    )
     Spacer(Modifier.height(6.dp))
     // Unverifiable from here, like "not reused" below — a prompt, not a tick
     // the app pretends to have checked.
-    PassphraseCheck("Not a birthday or anniversary", null)
+    PassphraseCheck(stringResource(R.string.ob_check_pin_birthday), null)
 }
 
 @Composable
 private fun ColumnScope.PassphraseChecklist(pass: String) {
     val c = VaultTheme.colors
-    PassphraseCheck("10 characters or more", pass.length >= 10)
+    PassphraseCheck(stringResource(R.string.ob_check_pass_length), pass.length >= 10)
     Spacer(Modifier.height(6.dp))
     PassphraseCheck(
-        "Not a single dictionary word",
+        stringResource(R.string.ob_check_pass_dictionary),
         pass.length >= 10 && (pass.contains(' ') || pass.any { !it.isLetter() }),
     )
     Spacer(Modifier.height(6.dp))
-    PassphraseCheck("Not reused from another app", null)
+    PassphraseCheck(stringResource(R.string.ob_check_pass_reuse), null)
 
         val suggestions = remember { PassphraseSuggestions.suggest() }
         Spacer(Modifier.height(16.dp))
@@ -1068,7 +1094,7 @@ private fun ColumnScope.PassphraseChecklist(pass: String) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                "TRY",
+                stringResource(R.string.ob_try_label),
                 fontSize = 11.sp,
                 letterSpacing = 0.88.sp,
                 color = c.ink(0.4f),
@@ -1157,13 +1183,17 @@ private fun ArgonHardnessCard(memBytes: Long, ops: Long) {
                 }
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Argon2id hardness",
+                        stringResource(R.string.ob_argon_title),
                         style = MaterialTheme.typography.titleSmall,
                         color = c.ink,
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        if (mb == 0) "Measuring this device…" else "$mb MB · t=$ops · measured on this device",
+                        if (mb == 0) {
+                            stringResource(R.string.ob_argon_measuring)
+                        } else {
+                            stringResource(R.string.ob_argon_detail, mb, ops)
+                        },
                         fontSize = 11.5.sp,
                         color = c.ink(0.5f),
                     )
@@ -1186,8 +1216,8 @@ private fun ArgonHardnessCard(memBytes: Long, ops: Long) {
             }
             Spacer(Modifier.height(6.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Faster unlock", fontSize = 10.5.sp, color = c.ink(0.4f))
-                Text("Harder to attack", fontSize = 10.5.sp, color = c.ink(0.4f))
+                Text(stringResource(R.string.ob_argon_faster), fontSize = 10.5.sp, color = c.ink(0.4f))
+                Text(stringResource(R.string.ob_argon_harder), fontSize = 10.5.sp, color = c.ink(0.4f))
             }
         }
     }
@@ -1223,11 +1253,16 @@ private fun SealToDeviceCard(checked: Boolean, enabled: Boolean, onToggle: (Bool
             )
         }
         Column(Modifier.weight(1f)) {
-            Text("Seal to this device", style = MaterialTheme.typography.titleSmall, color = c.ink)
+            Text(
+                stringResource(R.string.ob_seal_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = c.ink,
+            )
             Spacer(Modifier.height(4.dp))
             Text(
-                if (enabled) "Wrapping key lives in the hardware Keystore. Biometrics come next."
-                else "This device has no hardware-backed biometrics.",
+                stringResource(
+                    if (enabled) R.string.ob_seal_body else R.string.ob_seal_unavailable,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = c.ink(0.6f),
             )
@@ -1316,7 +1351,9 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
     OnboardingScaffold(
         step = 5,
         onBack = null,
-        actionLabel = if (rotating) "Working…" else "Regenerate",
+        actionLabel = stringResource(
+            if (rotating) R.string.ob_kit_working else R.string.ob_kit_regenerate,
+        ),
         onAction = {
             val pass = onboarding.passphrase
             if (pass != null && !rotating) {
@@ -1328,15 +1365,14 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             }
         },
         headline = buildAnnotatedString {
-            append("One key. ")
-            withStyle(EmphasisSpan) { append("On paper.") }
-            append(" Never online.")
+            append(stringResource(R.string.ob_kit_head_lead))
+            withStyle(EmphasisSpan) { append(stringResource(R.string.ob_kit_head_emph)) }
+            append(stringResource(R.string.ob_kit_head_tail))
         },
-        subhead = "Generated on this device, shown once. It is the only way back in " +
-            "if the passphrase slips away.",
+        subhead = stringResource(R.string.ob_kit_subhead),
         bottomBar = {
             PrimaryPillButton(
-                label = "I've saved my kit",
+                label = stringResource(R.string.ob_kit_saved),
                 onClick = {
                     onboarding.recoveryKey = null
                     onDone()
@@ -1345,7 +1381,7 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "This key is shown once and never stored in plain text.",
+                stringResource(R.string.ob_kit_footer),
                 fontSize = 11.sp,
                 color = c.ink(0.45f),
                 textAlign = TextAlign.Center,
@@ -1359,24 +1395,23 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
         GroupCard(Modifier.padding(horizontal = 16.dp)) {
             SaveOptionRow(
                 icon = Icons.Outlined.PictureAsPdf,
-                title = "Save PDF",
-                detail = "Printable one-page kit",
+                title = stringResource(R.string.ob_kit_save_pdf),
+                detail = stringResource(R.string.ob_kit_save_pdf_note),
                 onClick = { pdfLauncher.launch("Zerokosh-Recovery-Kit.pdf") },
             )
             RowDivider()
             SaveOptionRow(
                 icon = Icons.Outlined.QrCode2,
-                title = "QR image",
-                detail = "To an offline gallery",
+                title = stringResource(R.string.ob_kit_qr),
+                detail = stringResource(R.string.ob_kit_qr_note),
                 onClick = { pngLauncher.launch("Zerokosh-Recovery-Key.png") },
             )
         }
 
         Spacer(Modifier.height(12.dp))
         NoticeCard(
-            title = "Keep it off the internet",
-            body = "Not Gmail, not WhatsApp, not a screenshot. A safe, a bank locker, " +
-                "or a steel plate.",
+            title = stringResource(R.string.ob_kit_offline_title),
+            body = stringResource(R.string.ob_kit_offline_body),
             icon = Icons.Outlined.WarningAmber,
             tone = NoticeTone.Warn,
             modifier = Modifier.padding(horizontal = 16.dp),
@@ -1417,9 +1452,9 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             }
             Text(
                 buildAnnotatedString {
-                    append("I've stored this offline. ")
+                    append(stringResource(R.string.ob_kit_confirm_emph))
                     withStyle(SpanStyle(fontWeight = FontWeight.Medium, color = c.ink)) {
-                        append("No one — including Zerokosh — can recover it for me.")
+                        append(stringResource(R.string.ob_kit_confirm_body))
                     }
                 },
                 fontSize = 12.5.sp,
@@ -1462,7 +1497,7 @@ private fun RecoveryCard(key: String, qr: ImageBitmap?, modifier: Modifier = Mod
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "ZEROKOSH RECOVERY",
+                    stringResource(R.string.ob_kit_card_label),
                     fontFamily = JetBrainsMono,
                     fontSize = 9.5.sp,
                     letterSpacing = 2.47.sp,
@@ -1498,14 +1533,13 @@ private fun RecoveryCard(key: String, qr: ImageBitmap?, modifier: Modifier = Mod
                     if (qr != null) {
                         Image(
                             bitmap = qr,
-                            contentDescription = "Recovery key QR code",
+                            contentDescription = stringResource(R.string.ob_kit_qr_cd),
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
                 }
                 Text(
-                    "Scan or type it back. Works after a reinstall, a factory reset, " +
-                        "or a lost phone.",
+                    stringResource(R.string.ob_kit_card_note),
                     fontSize = 11.sp,
                     lineHeight = 15.sp,
                     color = c.paper.copy(alpha = 0.65f),
@@ -1657,17 +1691,16 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
         step = 6,
         onBack = null,
         headline = buildAnnotatedString {
-            append("Unlock in a touch. ")
-            withStyle(EmphasisSpan) { append("Without the cloud.") }
+            append(stringResource(R.string.ob_quick_head_lead))
+            withStyle(EmphasisSpan) { append(stringResource(R.string.ob_quick_head_emph)) }
         },
-        subhead = "Pick a quick way back in. Your passphrase still guards the vault; " +
-            "this only unlocks the key on this device.",
+        subhead = stringResource(R.string.ob_quick_subhead),
         bottomBar = {
             PrimaryPillButton(
                 label = when {
-                    finishing -> "Opening your vault…"
-                    useBiometrics -> "Enable quick unlock"
-                    else -> "Continue with passphrase"
+                    finishing -> stringResource(R.string.ob_quick_opening)
+                    useBiometrics -> stringResource(R.string.ob_quick_enable)
+                    else -> stringResource(R.string.ob_quick_continue_pass)
                 },
                 onClick = { finish(useBiometrics) },
                 enabled = !finishing,
@@ -1677,7 +1710,7 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             if (quickUnlockRefused) {
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    "Quick unlock was not set up. Try again, or carry on with just your passphrase.",
+                    stringResource(R.string.ob_quick_refused),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
@@ -1685,7 +1718,10 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
                 )
             }
             Spacer(Modifier.height(10.dp))
-            SubtleTextButton("Skip for now — I'll type my passphrase", onClick = { finish(false) })
+            SubtleTextButton(
+                stringResource(R.string.ob_quick_skip),
+                onClick = { finish(false) },
+            )
         },
     ) {
         Column(
@@ -1694,9 +1730,10 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
         ) {
             OptionCard(
                 icon = Icons.Outlined.Fingerprint,
-                title = "Fingerprint",
-                body = if (available) "Fast, hardware-backed unlock."
-                else "No hardware-backed sensor on this device.",
+                title = stringResource(R.string.ob_quick_fingerprint),
+                body = stringResource(
+                    if (available) R.string.ob_quick_fingerprint_body else R.string.ob_quick_no_sensor,
+                ),
                 selected = useBiometrics,
                 recommended = available,
                 enabled = available,
@@ -1704,8 +1741,8 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             )
             OptionCard(
                 icon = Icons.Outlined.Password,
-                title = "Passphrase only",
-                body = "Type it every time. Most secure.",
+                title = stringResource(R.string.ob_quick_pass_only),
+                body = stringResource(R.string.ob_quick_pass_only_body),
                 selected = !useBiometrics,
                 onClick = { useBiometrics = false },
             )
@@ -1737,13 +1774,13 @@ fun QuickUnlockScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
                 }
                 Column {
                     Text(
-                        "Hardware-backed",
+                        stringResource(R.string.ob_quick_hw_title),
                         style = MaterialTheme.typography.titleSmall,
                         color = c.paper,
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        "Android Keystore / StrongBox. No biometric data ever reaches Zerokosh.",
+                        stringResource(R.string.ob_quick_hw_body),
                         fontSize = 11.5.sp,
                         lineHeight = 15.sp,
                         color = c.paper.copy(alpha = 0.6f),
@@ -1795,11 +1832,14 @@ private fun LiveScanHint(modifier: Modifier = Modifier) {
                 }
             }
             Column(Modifier.weight(1f)) {
-                Text("Touch the sensor", style = MaterialTheme.typography.titleSmall, color = c.ink)
+                Text(
+                    stringResource(R.string.ob_quick_touch_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = c.ink,
+                )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Your fingerprint is stored inside your phone's secure enclave. " +
-                        "It never leaves this device.",
+                    stringResource(R.string.ob_quick_touch_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = c.ink(0.55f),
                 )
@@ -1849,17 +1889,18 @@ fun passphraseEntropyBits(p: String): Int {
  * well-funded attacker is far below a billion guesses a second; 100k/s is a
  * deliberately pessimistic ceiling.
  */
+@Composable
 fun crackTimeLabel(bits: Int): String {
-    if (bits <= 0) return "instant"
+    if (bits <= 0) return stringResource(R.string.ob_crack_seconds)
     val seconds = 2.0.pow((bits - 1).toDouble()) / 1e5
     val years = seconds / 31_557_600.0
     return when {
-        seconds < 60 -> "~seconds to crack"
-        seconds < 86_400 -> "~hours to crack"
-        years < 1 -> "~${(seconds / 86_400).toInt()} days to crack"
-        years < 100 -> "~${years.toInt()} years to crack"
-        years < 1e6 -> "~${(years / 100).toInt()} centuries to crack"
-        else -> "longer than the sun"
+        seconds < 60 -> stringResource(R.string.ob_crack_seconds)
+        seconds < 86_400 -> stringResource(R.string.ob_crack_hours)
+        years < 1 -> stringResource(R.string.ob_crack_days, (seconds / 86_400).toInt())
+        years < 100 -> stringResource(R.string.ob_crack_years, years.toInt())
+        years < 1e6 -> stringResource(R.string.ob_crack_centuries, (years / 100).toInt())
+        else -> stringResource(R.string.ob_crack_forever)
     }
 }
 

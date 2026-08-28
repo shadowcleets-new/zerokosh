@@ -19,6 +19,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,16 +37,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -56,12 +54,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,33 +72,35 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.ui.backup.rememberImportBackup
 import org.zerokosh.app.ui.common.BrandTile
 import org.zerokosh.app.ui.common.EmphasisSpan
 import org.zerokosh.app.ui.common.GroupCard
+import org.zerokosh.app.ui.common.NoticeTone
 import org.zerokosh.app.ui.common.RecordCategory
 import org.zerokosh.app.ui.common.RowDivider
-import org.zerokosh.app.ui.common.SectionLabel
 import org.zerokosh.app.ui.common.SearchDock
+import org.zerokosh.app.ui.common.SectionLabel
 import org.zerokosh.app.ui.common.StatusPill
-import org.zerokosh.app.ui.common.NoticeTone
+import org.zerokosh.app.ui.common.VaultBlobs
 import org.zerokosh.app.ui.common.VaultFilterChip
 import org.zerokosh.app.ui.common.VaultListRow
 import org.zerokosh.app.ui.common.category
 import org.zerokosh.app.ui.common.recordBadge
 import org.zerokosh.app.ui.common.recordMeta
-import org.zerokosh.app.ui.common.VaultBlobs
 import org.zerokosh.app.ui.motion.LocalAnimatedVisibilityScope
 import org.zerokosh.app.ui.motion.LocalSharedTransitionScope
 import org.zerokosh.app.ui.theme.CornerGroup
-import androidx.compose.ui.semantics.Role
-import org.zerokosh.app.ui.backup.rememberImportBackup
 import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.core.model.Record
 // #endregion
@@ -152,7 +154,7 @@ fun HomeScreen(
                 )
             } else {
                 SearchDock(
-                    placeholder = "Search HDFC, priya@upi, PAN…",
+                    placeholder = stringResource(R.string.hm_search_hint),
                     initials = vaultInitials(records),
                     onClick = { searching = true },
                 )
@@ -193,6 +195,10 @@ fun HomeScreen(
             }
         }
 
+        // Read outside the list builder: LazyListScope is not a composable
+        // context, and recordSection writes into it.
+        val pinnedLabel = stringResource(R.string.hm_pinned)
+        val categoryLabels = RecordCategory.entries.associateWith { stringResource(it.labelRes) }
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -216,12 +222,17 @@ fun HomeScreen(
 
             val pinned = visible.filter { it.favorite }
             if (pinned.isNotEmpty()) {
-                recordSection(title = "Pinned", rows = pinned, app = app, onOpen = onOpen)
+                recordSection(title = pinnedLabel, rows = pinned, app = app, onOpen = onOpen)
             }
             RecordCategory.entries.forEach { cat ->
                 val rows = visible.filter { it.category == cat && !it.favorite }
                 if (rows.isNotEmpty()) {
-                    recordSection(title = cat.label, rows = rows, app = app, onOpen = onOpen)
+                    recordSection(
+                        title = categoryLabels.getValue(cat),
+                        rows = rows,
+                        app = app,
+                        onOpen = onOpen,
+                    )
                 }
             }
 
@@ -247,8 +258,13 @@ private fun VaultHeader(total: Int, institutions: Int, autoLockMinutes: Int) {
     Column(Modifier.padding(horizontal = 24.dp).padding(top = 12.dp)) {
         Text(
             buildAnnotatedString {
-                append("$total credential${if (total == 1) "" else "s"}, ")
-                withStyle(EmphasisSpan) { append("all offline.") }
+                append(
+                    stringResource(
+                        if (total == 1) R.string.hm_count_one else R.string.hm_count_many,
+                        total,
+                    ),
+                )
+                withStyle(EmphasisSpan) { append(stringResource(R.string.hm_all_offline)) }
             },
             style = MaterialTheme.typography.displaySmall,
             color = c.ink,
@@ -259,15 +275,20 @@ private fun VaultHeader(total: Int, institutions: Int, autoLockMinutes: Int) {
                 // BV-17: "auto-lock 1:00" read as a running MM:SS timer. There is
                 // no foreground idle timeout — it locks N minutes after you leave.
                 text = when (autoLockMinutes) {
-                    0 -> "Unlocked · locks when you leave"
-                    1 -> "Unlocked · locks 1 min after you leave"
-                    else -> "Unlocked · locks $autoLockMinutes min after you leave"
+                    0 -> stringResource(R.string.hm_lock_immediate)
+                    1 -> stringResource(R.string.hm_lock_one)
+                    else -> stringResource(R.string.hm_lock_many, autoLockMinutes)
                 },
                 tone = NoticeTone.Positive,
                 showDot = true,
             )
             if (institutions > 0) {
-                StatusPill("$institutions institution${if (institutions == 1) "" else "s"}")
+                StatusPill(
+                    stringResource(
+                        if (institutions == 1) R.string.hm_inst_one else R.string.hm_inst_many,
+                        institutions,
+                    ),
+                )
             }
         }
     }
@@ -296,7 +317,7 @@ private fun FilterChipRow(
             val n = records.count { it.category == cat }
             if (n > 0) {
                 VaultFilterChip(
-                    label = cat.label,
+                    label = stringResource(cat.labelRes),
                     selected = selected == cat,
                     count = n,
                     onClick = { onSelect(if (selected == cat) null else cat) },
@@ -349,7 +370,7 @@ private fun ActiveSearchBar(
         ) {
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "Close search",
+                contentDescription = stringResource(R.string.hm_close_search),
                 tint = c.ink(0.55f),
                 modifier = Modifier.size(20.dp),
             )
@@ -472,14 +493,14 @@ private fun NoMatches(query: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            "Nothing matches “$query”",
+            stringResource(R.string.hm_no_match, query),
             style = MaterialTheme.typography.headlineSmall,
             color = c.ink,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Try an institution, a UPI handle, or the last four digits.",
+            stringResource(R.string.hm_no_match_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = c.mute,
             textAlign = TextAlign.Center,
@@ -535,8 +556,8 @@ private fun EmptyVault(
         Spacer(Modifier.height(16.dp))
         Text(
             buildAnnotatedString {
-                append("Your vault is ")
-                withStyle(EmphasisSpan) { append("waiting.") }
+                append(stringResource(R.string.hm_empty_head_lead))
+                withStyle(EmphasisSpan) { append(stringResource(R.string.hm_empty_head_emph)) }
             },
             style = MaterialTheme.typography.displaySmall,
             color = c.ink,
@@ -606,14 +627,13 @@ private fun EmptyVault(
                 }
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    "A blank vault, ready.",
+                    stringResource(R.string.hm_empty_blank),
                     style = MaterialTheme.typography.headlineSmall,
                     color = c.ink,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Start with the one credential you use the most. Even one saved " +
-                        "password is safer than twelve in a notes app.",
+                    stringResource(R.string.hm_empty_body),
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
@@ -632,7 +652,7 @@ private fun EmptyVault(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        "Add your first record",
+                        stringResource(R.string.hm_add_first),
                         style = MaterialTheme.typography.titleSmall,
                         color = c.paper,
                     )
@@ -641,7 +661,7 @@ private fun EmptyVault(
         }
 
         Spacer(Modifier.height(24.dp))
-        SectionLabel("Start with a template")
+        SectionLabel(stringResource(R.string.hm_start_template))
         Spacer(Modifier.height(12.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -705,12 +725,16 @@ private fun EmptyVault(
             }
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Import an encrypted backup",
+                    stringResource(R.string.hm_import_backup),
                     style = MaterialTheme.typography.titleSmall,
                     fontSize = 13.sp,
                     color = c.ink,
                 )
-                Text("Open a .kosh file from this device", fontSize = 11.sp, color = c.mute)
+                Text(
+                    stringResource(R.string.hm_import_backup_note),
+                    fontSize = 11.sp,
+                    color = c.mute,
+                )
             }
         }
 
@@ -734,7 +758,7 @@ fun TrustStrip(modifier: Modifier = Modifier) {
     ) {
         Box(Modifier.size(6.dp).background(c.accent, CircleShape))
         Text(
-            "Never leaves this device. Encrypted at rest.",
+            stringResource(R.string.hm_reassurance),
             fontSize = 11.sp,
             color = c.ink,
         )

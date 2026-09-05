@@ -426,7 +426,7 @@ private fun OptionCard(
 // #endregion
 
 // #region S2 Language
-private data class Language(
+internal data class Language(
     val tag: String,
     val script: String,
     val native: String,
@@ -434,17 +434,17 @@ private data class Language(
     val available: Boolean,
 )
 
-private val Languages = listOf(
+internal val Languages = listOf(
     Language("en", "Aa", "English", "English", true),
     Language("hi", "अ", "हिन्दी", "Hindi", true),
-    Language("ta", "அ", "தமிழ்", "Tamil", false),
-    Language("te", "అ", "తెలుగు", "Telugu", false),
-    Language("mr", "म", "मराठी", "Marathi", false),
+    Language("ta", "அ", "தமிழ்", "Tamil", true),
+    Language("te", "అ", "తెలుగు", "Telugu", true),
+    Language("mr", "म", "मराठी", "Marathi", true),
     Language("bn", "অ", "বাংলা", "Bengali", false),
-    Language("kn", "ಅ", "ಕನ್ನಡ", "Kannada", false),
-    Language("gu", "અ", "ગુજરાતી", "Gujarati", false),
+    Language("kn", "ಅ", "ಕನ್ನಡ", "Kannada", true),
+    Language("gu", "અ", "ગુજરાતી", "Gujarati", true),
     Language("ml", "മ", "മലയാളം", "Malayalam", false),
-    Language("or", "ଓ", "ଓଡ଼ିଆ", "Odia", false),
+    Language("or", "ଓ", "ଓଡ଼ିଆ", "Odia", true),
     Language("pa", "ਪ", "ਪੰਜਾਬੀ", "Punjabi", false),
 )
 

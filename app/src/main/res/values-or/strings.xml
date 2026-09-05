@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Odia. Generated from values/ by genloc.py; key order matches. -->
+<resources>
+    <string name="app_name">Zerokosh</string>
+
+    <!-- S1 Language picker -->
+    <string name="scr_language_title">ଆପଣଙ୍କ ଭାଷା ବାଛନ୍ତୁ</string>
+    <string name="scr_language_subtitle">Choose your language</string>
+    <string name="scr_language_continue">ଆଗକୁ ଯାଆନ୍ତୁ</string>
+
+    <!-- S2 Trust explainer -->
+    <string name="scr_trust_card1_title">ଆପଣଙ୍କ ତଥ୍ୟ ଏହି ଫୋନରେ ହିଁ ରହେ</string>
+    <string name="scr_trust_card1_body">ଆପଣ ଯାହା ସଞ୍ଚୟ କରନ୍ତି ସବୁ ଆପଣଙ୍କ ଫୋନର ଗୋଟିଏ ତାଲା ପଡ଼ିଥିବା ଫାଇଲରେ ରହେ। ତାହା କେବେ ଆମ ପାଖକୁ ଆସେ ନାହିଁ — ତାହା ରଖିବାକୁ ଆମ ପାଖରେ ଜାଗା ହିଁ ନାହିଁ।</string>
+    <string name="scr_trust_card2_title">ଆମର କୌଣସି ସର୍ଭର ନାହିଁ — ହ୍ୟାକ୍ କରିବାକୁ କିଛି ନାହିଁ, ବିକ୍ରି କରିବାକୁ ବି ନାହିଁ</string>
+    <string name="scr_trust_card2_body">Zerokosh ଖାତା ନାହିଁ, କ୍ଲାଉଡ୍ ନାହିଁ, ସାଇନ୍-ଅପ୍ ନାହିଁ। ଏହାକୁ କେବଳ ଆପଣ ଖୋଲିପାରିବେ। ଆମେ ବି ପାରିବୁ ନାହିଁ।</string>
+    <string name="scr_trust_card3_title">ସବୁବେଳେ ମାଗଣା, ଓପନ୍ ସୋର୍ସ</string>
+    <string name="scr_trust_card3_body">ଚାନ୍ଦା ନାହିଁ, ବିଜ୍ଞାପନ ନାହିଁ। ଯେ କେହି ଆମ କୋଡ୍ ପଢ଼ି ଆମର ପ୍ରତିଟି ପ୍ରତିଶ୍ରୁତି ଯାଞ୍ଚ କରିପାରିବେ।</string>
+    <string name="scr_trust_continue">ଆଗକୁ ଯାଆନ୍ତୁ</string>
+
+    <!-- S3 Create passphrase -->
+    <string name="scr_create_title">ଆପଣଙ୍କ ପାସ୍‌ଫ୍ରେଜ୍ ତିଆରି କରନ୍ତୁ</string>
+    <string name="scr_create_body">ଏହି ଗୋଟିଏ ପାସ୍‌ଫ୍ରେଜ୍ ସବୁକିଛି ତାଲା ପକାଇ ରଖେ। କେବଳ ଆପଣ ଜାଣିଥିବା ଲମ୍ବା କିଛି ବାଛନ୍ତୁ।</string>
+    <string name="scr_create_hint">ପାସ୍‌ଫ୍ରେଜ୍ (ଅତି କମ୍‌ରେ 10 ଅକ୍ଷର)</string>
+    <string name="scr_create_confirm_hint">ପୁଣି ଲେଖନ୍ତୁ</string>
+    <string name="scr_create_mismatch">ଦୁଇଟି ସମାନ ନୁହେଁ</string>
+    <string name="scr_create_too_short">ଅତି କମ୍‌ରେ 10 ଅକ୍ଷର ରଖନ୍ତୁ — ଯେତେ ଲମ୍ବା, ସେତେ ଶକ୍ତ</string>
+    <string name="scr_create_strength_weak">ଦୁର୍ବଳ</string>
+    <string name="scr_create_strength_fair">ଠିକ୍‌ଠାକ୍</string>
+    <string name="scr_create_strength_good">ଭଲ</string>
+    <string name="scr_create_strength_strong">ଶକ୍ତ</string>
+    <string name="scr_create_pin_option">ତା ବଦଳରେ 6 ଅଙ୍କର ପିନ୍ ରଖନ୍ତୁ</string>
+    <string name="scr_create_pin_hint">6 ଅଙ୍କର ପିନ୍</string>
+    <string name="scr_create_pin_why">ପିନ୍ ଚଳେ କାରଣ ଏହି ଫୋନ୍ ତାହାକୁ ନିଜର ସୁରକ୍ଷା ଚିପ୍ ଓ ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ଚିହ୍ନ କିମ୍ବା ମୁହଁରେ ରକ୍ଷା କରେ।</string>
+    <string name="scr_create_pin_unavailable">ପିନ୍ ପାଇଁ ଆଙ୍ଗୁଠି ଚିହ୍ନ କିମ୍ବା ମୁହଁ ଅନ୍‌ଲକ୍ ଥିବା ଫୋନ୍ ଦରକାର। ଦୟାକରି ପାସ୍‌ଫ୍ରେଜ୍ ବାଛନ୍ତୁ।</string>
+    <string name="scr_create_button">ତାଲା ପକାଇ ଦିଅନ୍ତୁ</string>
+    <string name="scr_create_working">ଆପଣଙ୍କ ସିନ୍ଦୁକ ପ୍ରସ୍ତୁତ ହେଉଛି…</string>
+
+    <!-- S4 Recovery kit -->
+    <string name="scr_recovery_title">ଆପଣଙ୍କ ରିକଭରି ଚାବି</string>
+    <string name="scr_recovery_body">କେବେ ପାସ୍‌ଫ୍ରେଜ୍ ଭୁଲିଗଲେ, ଭିତରକୁ ଫେରିବାର ଏହା ହିଁ ଏକମାତ୍ର ରାସ୍ତା। ଆମେ ତାହା ରିସେଟ୍ କରିପାରିବୁ ନାହିଁ — କେହି ପାରିବେ ନାହିଁ।</string>
+    <string name="scr_recovery_save_pdf">PDF ଭାବରେ ସଞ୍ଚୟ କରନ୍ତୁ</string>
+    <string name="scr_recovery_confirm_check">ମୁଁ ତାହା ଲେଖି ସୁରକ୍ଷିତ ଜାଗାରେ ରଖିଛି</string>
+    <string name="scr_recovery_done">ଆଗକୁ ଯାଆନ୍ତୁ</string>
+    <string name="scr_recovery_never_again">ଏହି ସ୍କ୍ରିନ୍ ପରେ ଏହି ଚାବି ଆଉ ଦେଖାଯିବ ନାହିଁ।</string>
+    <string name="scr_recovery_pdf_saved">ରିକଭରି କିଟ୍ PDF ସଞ୍ଚିତ ହେଲା</string>
+    <string name="scr_recovery_pdf_instructions">ଏହି ପୃଷ୍ଠାକୁ ଆପଣଙ୍କ ସମ୍ପତ୍ତି କାଗଜପତ୍ର କିମ୍ବା ଅନ୍ୟ ଜରୁରୀ ଦଲିଲ ସହିତ ରଖନ୍ତୁ। ଏହି ଚାବି ଯାହା ପାଖରେ ଥିବ ସେ ଆପଣଙ୍କ ସିନ୍ଦୁକ ଖୋଲିପାରିବେ — ଏହାକୁ ଲକରର ଚାବି ପରି ସମ୍ଭାଳନ୍ତୁ।</string>
+    <string name="scr_recovery_pdf_title">Zerokosh ରିକଭରି କିଟ୍</string>
+
+    <!-- S5 Quick unlock opt-in -->
+    <string name="scr_quickunlock_title">ଆଙ୍ଗୁଠି ଚିହ୍ନ କିମ୍ବା ମୁହଁରେ ଖୋଲନ୍ତୁ</string>
+    <string name="scr_quickunlock_body">ଆପଣ ଯେମିତି ଫୋନ୍ ଖୋଲନ୍ତି, ସିନ୍ଦୁକ ବି ସେମିତି। ପାସ୍‌ଫ୍ରେଜ୍ ସବୁବେଳେ କାମ କରୁଥିବ।</string>
+    <string name="scr_quickunlock_enable">ଚାଲୁ କରନ୍ତୁ</string>
+    <string name="scr_quickunlock_skip">ଏବେ ନୁହେଁ</string>
+    <string name="scr_quickunlock_backup_footer">ଏବେ ହିଁ ବ୍ୟାକଅପ୍ ଫୋଲ୍ଡର ସେଟ୍ କରନ୍ତୁ</string>
+
+    <!-- S6 Home -->
+    <string name="scr_home_title">ମୂଳପୃଷ୍ଠା</string>
+    <string name="scr_home_search_hint">ଆପଣଙ୍କ ସିନ୍ଦୁକରେ ଖୋଜନ୍ତୁ</string>
+    <string name="scr_home_tab_home">ମୂଳପୃଷ୍ଠା</string>
+    <string name="scr_home_tab_authenticator">କୋଡ୍</string>
+    <string name="scr_home_tab_settings">ସେଟିଂ</string>
+    <string name="scr_home_add">ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="scr_home_empty_sample_bank">ଆପଣଙ୍କ ବ୍ୟାଙ୍କ ଖାତା ଏମିତି ଦେଖାଯିବ</string>
+    <string name="scr_home_empty_sample_card">ଆପଣଙ୍କ କାର୍ଡ, UPI ଓ ଆପ୍ ଲଗଇନ୍ ବି ଏଠାରେ ହିଁ ରହିବ</string>
+    <string name="scr_home_no_results">ଆପଣଙ୍କ ଖୋଜାରେ କିଛି ମିଳିଲା ନାହିଁ</string>
+    <string name="scr_home_group_other">ଅନ୍ୟାନ୍ୟ</string>
+
+    <!-- §10.5 rotating safety tips -->
+    <string name="msg_safety_tip_1">ବ୍ୟାଙ୍କ କେବେ ଆପଣଙ୍କ OTP ମାଗେ ନାହିଁ। ଯିଏ ମାଗେ, ସେ ଠକ।</string>
+    <string name="msg_safety_tip_2">କୌଣସି ବ୍ୟାଙ୍କ ଅଧିକାରୀ ଆପଣଙ୍କୁ ସ୍କ୍ରିନ୍ ସେୟାର୍ ଆପ୍ ଲଗାଇବାକୁ କହିବେ ନାହିଁ।</string>
+    <string name="msg_safety_tip_3">ଆପଣଙ୍କ UPI ପିନ୍ କେବଳ UPI ଆପ୍ କୀପ୍ୟାଡ୍ ପାଇଁ — କଲରେ କାହାକୁ କୁହନ୍ତୁ ନାହିଁ।</string>
+    <string name="msg_safety_tip_4">KYC ଗୋଟିଏ ଦିନରେ ସରେ ନାହିଁ। “ଆଜି KYC ସରୁଛି” ଏଭଳି ବାର୍ତ୍ତା ଠକାମି।</string>
+    <string name="msg_safety_tip_5">ଟଙ୍କା ପାଇବା ପାଇଁ କେବେ ପିନ୍ ଦେବାକୁ କିମ୍ବା QR ସ୍କାନ୍ କରିବାକୁ ପଡ଼େ ନାହିଁ।</string>
+    <string name="msg_safety_tip_6">ବିଦ୍ୟୁତ୍ କଟିବାର SMS, ଆଉ ସେଥିରେ କାହାର ବ୍ୟକ୍ତିଗତ ନମ୍ବର? ସେଇଆ ଠକାମି।</string>
+
+    <!-- S8 Template gallery -->
+    <string name="scr_gallery_title">ଆପଣ କଣ ସଞ୍ଚୟ କରିବାକୁ ଚାହାନ୍ତି?</string>
+    <string name="scr_gallery_quick_add">ଶୀଘ୍ର ଯୋଡ଼ନ୍ତୁ</string>
+
+    <!-- S9 Record detail -->
+    <string name="scr_detail_copy">କପି</string>
+    <string name="scr_detail_reveal">ଦେଖାନ୍ତୁ</string>
+    <string name="scr_detail_hide">ଲୁଚାନ୍ତୁ</string>
+    <string name="scr_detail_copied">କପି ହେଲା · 30 ସେକେଣ୍ଡରେ ମିଳାଇଯିବ</string>
+    <string name="scr_detail_edit">ବଦଳାନ୍ତୁ</string>
+    <string name="scr_detail_delete">ହଟାନ୍ତୁ</string>
+    <string name="scr_detail_favorite">ପସନ୍ଦ</string>
+    <string name="scr_detail_delete_confirm_title">ଏହି ରେକର୍ଡ ହଟାଇବେ?</string>
+    <string name="scr_detail_delete_confirm_body">ତାହା 30 ଦିନ “ନିକଟରେ ହଟାଯାଇଥିବା”ରେ ରହିବ, ଆଉ ଆପଣଙ୍କ ଅନ୍ୟ ଫୋନ ସହ ସିଙ୍କ ହେଲାପରେ ଚାଲିଯିବ।</string>
+    <string name="scr_detail_delete_confirm_yes">ହଟାନ୍ତୁ</string>
+    <string name="scr_detail_hidden">ଲୁଚିଛି</string>
+    <string name="scr_detail_shown">ଦେଖାଯାଉଛି</string>
+
+    <!-- S10 Record edit -->
+    <string name="scr_edit_title_new">ନୂଆ</string>
+    <string name="scr_edit_title_hint">ନାମ</string>
+    <string name="scr_edit_institution_hint">ବ୍ୟାଙ୍କ / କମ୍ପାନୀ (ଗୋଷ୍ଠୀ କରିବା ପାଇଁ)</string>
+    <string name="scr_edit_save">ସଞ୍ଚୟ</string>
+    <string name="scr_edit_cancel">ବାତିଲ୍</string>
+    <string name="scr_edit_invalid">ଏହା ଠିକ୍ ଲାଗୁନାହିଁ — ଥରେ ଦେଖନ୍ତୁ</string>
+    <string name="scr_edit_picker_other">ଅନ୍ୟାନ୍ୟ…</string>
+    <string name="scr_edit_picker_other_hint">ନିଜର ଲେଖନ୍ତୁ</string>
+    <string name="scr_edit_generate">ତିଆରି କରନ୍ତୁ</string>
+    <string name="scr_edit_luhn_warning">ଏହି କାର୍ଡ ନମ୍ବର ସାଧାରଣ ଯାଞ୍ଚରେ ଉତ୍ତୀର୍ଣ୍ଣ ହେଉନାହିଁ — ଠିକ୍ ଥିଲେ ସଞ୍ଚୟ କରିଦିଅନ୍ତୁ</string>
+    <string name="scr_edit_link_none">କିଛି ନାହିଁ</string>
+    <string name="scr_edit_totp_hint">ସିକ୍ରେଟ୍ କିମ୍ବା otpauth:// ଲିଙ୍କ ଲଗାନ୍ତୁ</string>
+    <string name="scr_edit_required_title">ପ୍ରଥମେ ଏହାକୁ ଗୋଟିଏ ନାମ ଦିଅନ୍ତୁ</string>
+
+    <!-- S13 Lock screen -->
+    <string name="scr_lock_title">ସିନ୍ଦୁକରେ ତାଲା ପଡ଼ିଛି</string>
+    <string name="scr_lock_hint">ପାସ୍‌ଫ୍ରେଜ୍</string>
+    <string name="scr_lock_unlock">ଖୋଲନ୍ତୁ</string>
+    <string name="scr_lock_wrong">ପାସ୍‌ଫ୍ରେଜ୍ ଭୁଲ୍</string>
+    <string name="scr_lock_cooldown">ବହୁତ ଥର ଭୁଲ୍ ଚେଷ୍ଟା ହେଲା। %1$d ସେକେଣ୍ଡ ଅପେକ୍ଷା କରନ୍ତୁ।</string>
+    <string name="scr_lock_use_recovery">ରିକଭରି ଚାବି ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="scr_lock_use_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_invalid">ଏହି ରିକଭରି ଚାବି ଠିକ୍ ନାହିଁ — ଗୋଟି ଗୋଟି ଅକ୍ଷର ମିଳାଇ ଦେଖନ୍ତୁ</string>
+    <string name="scr_lock_biometric_title">Zerokosh ଖୋଲନ୍ତୁ</string>
+    <string name="scr_lock_biometric_subtitle">ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ଚିହ୍ନ କିମ୍ବା ମୁହଁ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="scr_lock_use_passphrase_once">ଦୟାକରି ଥରେ ପାସ୍‌ଫ୍ରେଜ୍‌ରେ ଖୋଲନ୍ତୁ</string>
+    <string name="msg_file_damaged">ଫାଇଲ୍ ଖରାପ ହୋଇଥିଲା — ବ୍ୟାକଅପ୍‌ରୁ ଠିକ୍ କରାଗଲା</string>
+
+    <!-- S12 Settings (M2 scaffold) -->
+    <string name="scr_settings_title">ସେଟିଂ</string>
+    <string name="scr_settings_autolock">ଆପ୍ ଛାଡ଼ିବା ମାତ୍ରେ ତାଲା ପକାଅ</string>
+    <string name="scr_settings_autolock_immediately">ସଙ୍ଗେ ସଙ୍ଗେ</string>
+    <string name="scr_settings_autolock_1min">1 ମିନିଟ୍ ପରେ</string>
+    <string name="scr_settings_autolock_5min">5 ମିନିଟ୍ ପରେ</string>
+    <string name="scr_settings_autolock_15min">15 ମିନିଟ୍ ପରେ</string>
+    <string name="scr_settings_quick_unlock">ଆଙ୍ଗୁଠି ଚିହ୍ନ / ମୁହଁ ଅନ୍‌ଲକ୍</string>
+    <string name="scr_settings_change_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ବଦଳାନ୍ତୁ</string>
+    <string name="scr_settings_new_recovery">ନୂଆ ରିକଭରି ଚାବି ନିଅନ୍ତୁ</string>
+    <string name="scr_settings_sync_folder">ବ୍ୟାକଅପ୍ ଓ ସିଙ୍କ ଫୋଲ୍ଡର</string>
+    <string name="scr_settings_sync_not_set">ବ୍ୟାକଅପ୍ ନାହିଁ</string>
+    <string name="scr_settings_import">ପାସୱାର୍ଡ ଆମଦାନୀ କରନ୍ତୁ</string>
+    <string name="scr_settings_export">ରପ୍ତାନୀ କରନ୍ତୁ</string>
+    <string name="scr_settings_language">ଭାଷା</string>
+    <string name="scr_settings_about">ପରିଚୟ</string>
+    <string name="scr_settings_security_info">ଆପଣଙ୍କ ତଥ୍ୟ କିପରି ସୁରକ୍ଷିତ</string>
+    <string name="scr_settings_allow_screenshots">ସ୍କ୍ରିନସଟ୍ ନେବାକୁ ଦିଅନ୍ତୁ</string>
+    <string name="scr_settings_autofill">ଅଟୋଫିଲ୍ ସେବା</string>
+    <string name="scr_autofill_save_failed">Zerokosh ସେହି ଲଗଇନ୍ ସଞ୍ଚୟ କରିପାରିଲା ନାହିଁ।</string>
+    <string name="scr_detail_history_title">ପୂର୍ବ ପାସୱାର୍ଡ</string>
+    <string name="scr_detail_history_empty">ଏପର୍ଯ୍ୟନ୍ତ କିଛି ବଦଳି ନାହିଁ।</string>
+    <string name="scr_settings_autofill_on">Zerokosh</string>
+    <string name="scr_settings_autofill_off">ସେଟ୍ ହୋଇନାହିଁ</string>
+    <string name="scr_settings_autofill_unsupported">ଉପଲବ୍ଧ ନାହିଁ</string>
+    <string name="scr_settings_allow_screenshots_warning">ସିନ୍ଦୁକର ସ୍କ୍ରିନସଟ୍ କ୍ଲାଉଡ୍ ଫଟୋ ବ୍ୟାକଅପ୍‌କୁ ଯାଇପାରେ। ପ୍ରକୃତରେ ଦରକାର ହେଲେ ହିଁ ଚାଲୁ କରନ୍ତୁ।</string>
+    <string name="scr_settings_current_passphrase">ବର୍ତ୍ତମାନର ପାସ୍‌ଫ୍ରେଜ୍</string>
+    <string name="scr_settings_new_passphrase">ନୂଆ ପାସ୍‌ଫ୍ରେଜ୍ (ଅତି କମ୍‌ରେ 10 ଅକ୍ଷର)</string>
+    <string name="scr_settings_passphrase_changed">ପାସ୍‌ଫ୍ରେଜ୍ ବଦଳିଲା</string>
+
+    <!-- About -->
+    <string name="scr_about_version">ସଂସ୍କରଣ %1$s</string>
+    <string name="scr_about_license">ଲାଇସେନ୍ସ: GPL-3.0 — ସବୁବେଳେ ମାଗଣା</string>
+    <string name="scr_about_source">ସୋର୍ସ କୋଡ୍</string>
+    <string name="scr_about_body">Zerokosh ମାଗଣା, ଓପନ୍ ସୋର୍ସ, ଆଉ ଏହାର କୌଣସି ସର୍ଭର ନାହିଁ। ଆପଣଙ୍କ ସିନ୍ଦୁକ କେବଳ ଆପଣ ଖୋଲିପାରିବେ। ଆମେ ବି ପାରିବୁ ନାହିଁ।</string>
+
+    <!-- S11 Authenticator -->
+    <string name="scr_auth_add_qr">QR ଦ୍ୱାରା ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="scr_auth_empty">ଆପଣଙ୍କ ଆପ୍ ଓ ବ୍ରୋକରର କୋଡ୍ ଏଠାରେ ଦେଖାଯିବ</string>
+    <string name="scr_auth_scan_title">କ୍ୟାମେରାକୁ QR କୋଡ୍ ଉପରେ ରଖନ୍ତୁ</string>
+    <string name="scr_auth_camera_denied">QR କୋଡ୍ ସ୍କାନ୍ କରିବାକୁ ହିଁ କ୍ୟାମେରା ଅନୁମତି ଦରକାର। ରେକର୍ଡ ଯୋଡ଼ିବା ସମୟରେ ସିକ୍ରେଟ୍ ହାତରେ ବି ଲଗାଇପାରିବେ।</string>
+
+    <!-- §6.7 Autofill -->
+    <string name="scr_autofill_unlock_first">ଭରିବା ପାଇଁ Zerokosh ଖୋଲନ୍ତୁ</string>
+
+    <!-- §6.7 Login helper (copy-mode fallback) -->
+    <string name="scr_login_helper_channel">ଲଗଇନ୍ ସହାୟକ</string>
+    <string name="scr_login_helper_channel_desc">ଅଟୋଫିଲ୍ ଚାଲିବାକୁ ନଦେଉଥିବା ବ୍ୟାଙ୍କ ଆପ୍ ପାଇଁ — ବଟନ୍ ଦବାଇ ଲଗଇନ୍ ବିବରଣୀ ଗୋଟି ଗୋଟି କରି କପି କରନ୍ତୁ</string>
+    <string name="scr_login_helper_title">%1$s ରେ ଲଗଇନ୍ ହେଉଛି</string>
+    <string name="scr_login_helper_body">କପି କରିବାକୁ ବଟନ୍ ଦବାନ୍ତୁ · 30 ସେକେଣ୍ଡରେ ମିଳାଇଯିବ</string>
+
+    <!-- §5.7 Reminders -->
+    <string name="scr_reminder_channel">ନବୀକରଣ ମନେପକାଇବା</string>
+    <string name="scr_reminder_title">Zerokosh ମନେ ପକାଉଛି</string>
+    <string name="scr_reminder_body">%1$s ର ତାରିଖ ପାଖେଇ ଆସିଛି · Zerokosh ଖୋଲନ୍ତୁ</string>
+
+    <!-- Common -->
+    <string name="import_title">ବ୍ୟାକଅପ୍ ଆମଦାନୀ କରନ୍ତୁ</string>
+    <string name="import_passphrase_hint">ଏହି ବ୍ୟାକଅପ୍ ଫାଇଲ୍ ଖୋଲୁଥିବା ପାସ୍‌ଫ୍ରେଜ୍ ଦିଅନ୍ତୁ। ତାହା ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଠାରୁ ଅଲଗା ହୋଇପାରେ।</string>
+    <string name="import_passphrase_label">ବ୍ୟାକଅପ୍‌ର ପାସ୍‌ଫ୍ରେଜ୍</string>
+    <string name="import_action">ଆମଦାନୀ</string>
+    <string name="import_merged">%1$d ଯୋଡ଼ାଗଲା, %2$d ବଦଳିଲା। କିଛି ମିଟାଯାଇ ନାହିଁ।</string>
+    <string name="import_nothing_new">ସେହି ବ୍ୟାକଅପ୍‌ର ସବୁକିଛି ପୂର୍ବରୁ ଏଠାରେ ଥିଲା।</string>
+    <string name="import_conflicts">%1$d ରେକର୍ଡ ଦୁଇ ପଟେ ବଦଳିଥିଲା। ଦୁଇଟି ରୂପ ରଖାଯାଇଛି — “(conflict copy)” ଖୋଜନ୍ତୁ।</string>
+    <string name="import_not_a_vault">ସେହି ଫାଇଲ୍‌କୁ Zerokosh ସିନ୍ଦୁକ ଭାବରେ ପଢ଼ିହେଲା ନାହିଁ।</string>
+    <string name="import_locked">ଆମଦାନୀ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ସିନ୍ଦୁକ ଖୋଲନ୍ତୁ।</string>
+    <string name="scr_edit_month">ମାସ</string>
+    <string name="scr_edit_year">ବର୍ଷ</string>
+    <string name="msg_ok">ଠିକ୍ ଅଛି</string>
+    <string name="msg_cancel">ବାତିଲ୍</string>
+    <string name="msg_back">ପଛକୁ</string>
+    <string name="msg_saved">ସଞ୍ଚିତ ହେଲା</string>
+    <string name="msg_auth_needed">ଦେଖିବାକୁ ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ଏହା ଆପଣ ହିଁ</string>
+    <string name="cd_mask_hidden">ଲୁଚିଛି</string>
+    <string name="cd_shield_high_sensitivity">ଅତିରିକ୍ତ ସୁରକ୍ଷିତ ସୂଚନା</string>
+
+    <!-- Onboarding (S1-S6). Extracted from composable literals so the flow
+         a Hindi user meets first is not English. -->
+    <string name="ob_step_label">ପାଦ %1$d / 6</string>
+    <string name="ob_recommended">ସୁପାରିଶ</string>
+    <string name="ob_soon">ଶୀଘ୍ର</string>
+    <string name="ob_reveal_show">ଦେଖାନ୍ତୁ</string>
+    <string name="ob_reveal_hide">ଲୁଚାନ୍ତୁ</string>
+    <string name="ob_lang_head_lead">"ଆପଣଙ୍କ "</string>
+    <string name="ob_lang_head_emph">ଭାଷା ବାଛନ୍ତୁ।</string>
+    <string name="ob_lang_subhead">ସିନ୍ଦୁକର ଲେବଲ୍, ଟେମ୍ପ୍ଲେଟ୍ ଓ ଚେତାବନୀ ସଙ୍ଗେ ସଙ୍ଗେ ବଦଳିଯିବ। ସେଟିଂରେ ଯେକୌଣସି ସମୟରେ ବଦଳାଇପାରିବେ।</string>
+    <string name="ob_lang_search">%1$d ଭାଷାରେ ଖୋଜନ୍ତୁ</string>
+    <string name="ob_lang_continue">%1$s ରେ ଆଗକୁ ଯାଆନ୍ତୁ</string>
+    <string name="ob_trust_head_lead">"ଆମେ ପ୍ରକୃତରେ କଣ "</string>
+    <string name="ob_trust_head_emph">ଜାଣୁ ନାହିଁ</string>
+    <string name="ob_trust_head_tail">" ତାହା।"</string>
+    <string name="ob_trust_subhead">ଏହା ଥରେ ପଢ଼ିନିଅନ୍ତୁ। ପୂରା ସୁରକ୍ଷା ବ୍ୟବସ୍ଥା ଏହା ହିଁ, ସରଳ ଭାଷାରେ।</string>
+    <string name="ob_trust_continue">ବୁଝିଗଲି · ଆଗକୁ ଯାଆନ୍ତୁ</string>
+    <string name="ob_trust_stat_servers">ସର୍ଭର ସହ ସମ୍ପର୍କ</string>
+    <string name="ob_trust_stat_trackers">ଟ୍ରାକର୍ କିମ୍ବା SDK</string>
+    <string name="ob_trust_stat_files">ଫୋନରେ .kosh ଫାଇଲ୍</string>
+    <string name="ob_trust_keys_emph">"ଚାବି ଆପଣଙ୍କ ପାଖରେ। "</string>
+    <string name="ob_trust_keys_body">ପାସ୍‌ଫ୍ରେଜ୍ ଭୁଲିଗଲେ ଆଉ ରିକଭରି କିଟ୍ ବି ହରାଇଲେ, ସିନ୍ଦୁକ ବନ୍ଦ ହୋଇ ରହିବ — ଆପଣଙ୍କ ପାଇଁ ବି, ଆମ ପାଇଁ ବି, କାହା ପାଇଁ ବି।</string>
+    <string name="ob_trust_tag_audited">ଅଡିଟ୍ ହୋଇଥିବା ବିଲ୍ଡ୍</string>
+    <string name="ob_trust_tag_reproducible">ପୁଣି ତିଆରି କରାଯାଉଥିବା APK</string>
+    <string name="ob_fact_encryption_title">ଏନ୍‌କ୍ରିପ୍ସନ୍</string>
+    <string name="ob_fact_encryption_value">XChaCha20-Poly1305</string>
+    <string name="ob_fact_encryption_note">ପ୍ରମାଣିତ, ପ୍ରତି ସିନ୍ଦୁକ ପାଇଁ ଅଲଗା ନନ୍ସ</string>
+    <string name="ob_fact_kdf_title">କୀ ଷ୍ଟ୍ରେଚିଂ</string>
+    <string name="ob_fact_kdf_value">Argon2id · 64 MB · t=3</string>
+    <string name="ob_fact_kdf_note">ସେଟଅପ୍ ସମୟରେ ଆପଣଙ୍କ ଫୋନରେ ମପାଯାଇଥିଲା</string>
+    <string name="ob_fact_quick_title">ଶୀଘ୍ର ଅନ୍‌ଲକ୍</string>
+    <string name="ob_fact_quick_value">ହାର୍ଡୱେର୍ କୀଷ୍ଟୋର୍</string>
+    <string name="ob_fact_quick_note">ବାୟୋମେଟ୍ରିକ୍ ସୁରକ୍ଷା ଚିପ୍ ବାହାରକୁ କେବେ ଯାଏ ନାହିଁ</string>
+    <string name="ob_fact_network_title">ନେଟୱାର୍କ ଅନୁମତି</string>
+    <string name="ob_fact_network_value">ମାଗିହିଁ ନାହିଁ</string>
+    <string name="ob_fact_network_note">ଏହି ଆପ୍ କେଉଁଠାକୁ ସମ୍ପର୍କ କରିପାରିବ ନାହିଁ</string>
+    <string name="ob_fact_lost_title">ଚାବି ହଜିଗଲେ</string>
+    <string name="ob_fact_lost_value">କେହି ଫେରାଇ ଆଣିପାରିବେ ନାହିଁ</string>
+    <string name="ob_fact_lost_note">ରିସେଟ୍ ଲିଙ୍କ ନାହିଁ। ସପୋର୍ଟ ପଛ ଦୁଆର ବି ନାହିଁ।</string>
+    <string name="ob_pass_head_lead">"ଗୋଟିଏ ହିଁ ଗୁପ୍ତ କଥା, "</string>
+    <string name="ob_pass_head_emph">କେବଳ ଆପଣଙ୍କ</string>
+    <string name="ob_pass_head_tail">" ପାଖରେ।"</string>
+    <string name="ob_pass_subhead">ସମ୍ପର୍କହୀନ ତିନି ଚାରିଟି ଶବ୍ଦ, ଗୋଟିଏ ଚତୁର ଶବ୍ଦଠାରୁ ଭଲ। ଏହି ସ୍କ୍ରିନରୁ କିଛି ବାହାରକୁ ଯାଏ ନାହିଁ।</string>
+    <string name="ob_pass_sealing">ତାଲା ପଡ଼ୁଛି…</string>
+    <string name="ob_pass_seal">ସିନ୍ଦୁକରେ ତାଲା ପକାନ୍ତୁ</string>
+    <string name="ob_pass_footer">ଏହା ଆମକୁ କେବେ ଦେଖାଯାଏ ନାହିଁ। କୌଣସି ରିସେଟ୍ ଲିଙ୍କ ନାହିଁ।</string>
+    <string name="ob_pass_tab_passphrase">ପାସ୍‌ଫ୍ରେଜ୍</string>
+    <string name="ob_pass_tab_pin">6 ଅଙ୍କର ପିନ୍</string>
+    <string name="ob_pass_confirm">ପୁଣି ଲେଖନ୍ତୁ</string>
+    <string name="ob_pass_no_match">ମେଳ ଖାଉନାହିଁ</string>
+    <string name="ob_pass_counter">%1$d / %2$d</string>
+    <string name="ob_strength_pin_short">ବହୁତ ଛୋଟ · 6 ଅଙ୍କ ଦରକାର</string>
+    <string name="ob_strength_pin_weak">ଦୁର୍ବଳ · ଏହି ପିନ୍ ହିଁ ସବୁଠାରୁ ଆଗେ ଚେଷ୍ଟା କରାଯାଏ</string>
+    <string name="ob_strength_pin_fair">ଠିକ୍‌ଠାକ୍ · %1$d ବିଟ୍ — ପିନ୍ ଏଥିରୁ ଅଧିକ ଶକ୍ତ ହୋଇପାରିବ ନାହିଁ</string>
+    <string name="ob_strength_pass_short">ବହୁତ ଛୋଟ · 10 ଅକ୍ଷର ଦରକାର</string>
+    <string name="ob_strength_pass_weak">ଦୁର୍ବଳ · %1$d ବିଟ୍ ଏଣ୍ଟ୍ରୋପି</string>
+    <string name="ob_strength_pass_good">ଭଲ · %1$d ବିଟ୍ ଏଣ୍ଟ୍ରୋପି</string>
+    <string name="ob_strength_pass_strong">ଶକ୍ତ · %1$d ବିଟ୍ ଏଣ୍ଟ୍ରୋପି</string>
+    <string name="ob_strength_pin_empty">ଏମିତି ଛଅଟି ଅଙ୍କ ଯାହା ଆପଣଙ୍କ ଜୀବନ ଦେଖି କେହି ଅନୁମାନ କରିପାରିବେ ନାହିଁ</string>
+    <string name="ob_strength_pass_empty">ଏମିତି କିଛି ବାଛନ୍ତୁ ଯାହା କେବଳ ଆପଣ କୁହନ୍ତି</string>
+    <string name="ob_check_pin_digits">ଛଅଟି ଯାକ ଅଙ୍କ ଭରିଗଲା</string>
+    <string name="ob_check_pin_pattern">କ୍ରମାଗତ ଅଙ୍କ ବି ନୁହେଁ, ପୁନରାବୃତ୍ତି ବି ନୁହେଁ</string>
+    <string name="ob_check_pin_birthday">ଜନ୍ମଦିନ ବି ନୁହେଁ, ବାର୍ଷିକୀ ବି ନୁହେଁ</string>
+    <string name="ob_check_pass_length">10 କିମ୍ବା ତା ଠାରୁ ଅଧିକ ଅକ୍ଷର</string>
+    <string name="ob_check_pass_dictionary">ଅଭିଧାନର ଗୋଟିଏ ବି ଶବ୍ଦ ନୁହେଁ</string>
+    <string name="ob_check_pass_reuse">ଅନ୍ୟ ଆପ୍‌ରୁ ପୁଣି ବ୍ୟବହାର କରାଯାଇନାହିଁ</string>
+    <string name="ob_try_label">ଚେଷ୍ଟା</string>
+    <string name="ob_argon_title">Argon2id କଠିନତା</string>
+    <string name="ob_argon_measuring">ଏହି ଫୋନ୍ ମପାଯାଉଛି…</string>
+    <string name="ob_argon_detail">%1$d MB · t=%2$d · ଏହି ଫୋନରେ ହିଁ ମପାଯାଇଛି</string>
+    <string name="ob_argon_faster">ଶୀଘ୍ର ଖୋଲିବ</string>
+    <string name="ob_argon_harder">ଭାଙ୍ଗିବା କଷ୍ଟ</string>
+    <string name="ob_seal_title">ଏହି ଫୋନ ସହ ବାନ୍ଧି ଦିଅନ୍ତୁ</string>
+    <string name="ob_seal_body">ଗୁଡ଼ାଉଥିବା ଚାବି ହାର୍ଡୱେର୍ କୀଷ୍ଟୋର୍‌ରେ ରହେ। ବାୟୋମେଟ୍ରିକ୍ ପରବର୍ତ୍ତୀ ପାଦରେ।</string>
+    <string name="ob_seal_unavailable">ଏହି ଫୋନରେ ହାର୍ଡୱେର୍ ବାୟୋମେଟ୍ରିକ୍ ନାହିଁ।</string>
+    <string name="ob_crack_seconds">~ଭାଙ୍ଗିବାକୁ କିଛି ସେକେଣ୍ଡ</string>
+    <string name="ob_crack_hours">~ଭାଙ୍ଗିବାକୁ କିଛି ଘଣ୍ଟା</string>
+    <string name="ob_crack_days">~ଭାଙ୍ଗିବାକୁ %1$d ଦିନ</string>
+    <string name="ob_crack_years">~ଭାଙ୍ଗିବାକୁ %1$d ବର୍ଷ</string>
+    <string name="ob_crack_centuries">~ଭାଙ୍ଗିବାକୁ %1$d ଶତାବ୍ଦୀ</string>
+    <string name="ob_crack_forever">ସୂର୍ଯ୍ୟଙ୍କ ଠାରୁ ବି ଅଧିକ ସମୟ</string>
+    <string name="ob_kit_working">କାମ ଚାଲିଛି…</string>
+    <string name="ob_kit_regenerate">ନୂଆ ତିଆରି କରନ୍ତୁ</string>
+    <string name="ob_kit_head_lead">"ଗୋଟିଏ ଚାବି. "</string>
+    <string name="ob_kit_head_emph">କାଗଜ ଉପରେ।</string>
+    <string name="ob_kit_head_tail">" କେବେ ଅନଲାଇନ୍ ନୁହେଁ।"</string>
+    <string name="ob_kit_subhead">ଏହି ଫୋନରେ ହିଁ ତିଆରି, ଥରେ ମାତ୍ର ଦେଖାଯିବ। ପାସ୍‌ଫ୍ରେଜ୍ ଭୁଲିଗଲେ ଭିତରକୁ ଫେରିବାର ଏହା ହିଁ ଏକମାତ୍ର ରାସ୍ତା।</string>
+    <string name="ob_kit_saved">ମୁଁ ମୋ କିଟ୍ ସଞ୍ଚୟ କରିନେଲି</string>
+    <string name="ob_kit_footer">ଏହି ଚାବି ଥରେ ମାତ୍ର ଦେଖାଯାଏ ଆଉ କେବେ ଖୋଲା ରୂପରେ ରଖାଯାଏ ନାହିଁ।</string>
+    <string name="ob_kit_save_pdf">PDF ସଞ୍ଚୟ କରନ୍ତୁ</string>
+    <string name="ob_kit_save_pdf_note">ଗୋଟିଏ ପୃଷ୍ଠାର ଛପାଯୋଗ୍ୟ କିଟ୍</string>
+    <string name="ob_kit_qr">QR ଛବି</string>
+    <string name="ob_kit_qr_note">ଅଫଲାଇନ୍ ଗ୍ୟାଲେରୀକୁ</string>
+    <string name="ob_kit_offline_title">ଏହାକୁ ଇଣ୍ଟରନେଟଠାରୁ ଦୂରରେ ରଖନ୍ତୁ</string>
+    <string name="ob_kit_offline_body">Gmail ନୁହେଁ, WhatsApp ନୁହେଁ, ସ୍କ୍ରିନସଟ୍ ନୁହେଁ। ସିନ୍ଦୁକ, ବ୍ୟାଙ୍କ ଲକର, କିମ୍ବା ଇସ୍ପାତ ପ୍ଲେଟ୍।</string>
+    <string name="ob_kit_confirm_emph">"ମୁଁ ଏହାକୁ ଅଫଲାଇନ୍ ରଖିଛି। "</string>
+    <string name="ob_kit_confirm_body">କେହି ବି — Zerokosh ବି — ଏହାକୁ ମୋ ପାଇଁ ଫେରାଇ ଆଣିପାରିବେ ନାହିଁ।</string>
+    <string name="ob_kit_card_label">ZEROKOSH ରିକଭରି</string>
+    <string name="ob_kit_qr_cd">ରିକଭରି ଚାବିର QR କୋଡ୍</string>
+    <string name="ob_kit_card_note">ସ୍କାନ୍ କରନ୍ତୁ କିମ୍ବା ଟାଇପ୍ କରନ୍ତୁ। ପୁଣି ଇନଷ୍ଟଲ୍, ଫ୍ୟାକ୍ଟରୀ ରିସେଟ୍, କିମ୍ବା ଫୋନ୍ ହଜିଲା ପରେ ବି କାମ କରିବ।</string>
+    <string name="ob_quick_head_lead">"ଗୋଟିଏ ସ୍ପର୍ଶରେ ଖୋଲିଯିବ। "</string>
+    <string name="ob_quick_head_emph">କ୍ଲାଉଡ୍ ବିନା।</string>
+    <string name="ob_quick_subhead">ଭିତରକୁ ଫେରିବାର ଶୀଘ୍ର ରାସ୍ତା ବାଛନ୍ତୁ। ସିନ୍ଦୁକର ପାହରା ପାସ୍‌ଫ୍ରେଜ୍ ହିଁ କରୁଥିବ; ଏହା କେବଳ ଏହି ଫୋନରେ ଚାବି ଖୋଲେ।</string>
+    <string name="ob_quick_opening">ଆପଣଙ୍କ ସିନ୍ଦୁକ ଖୋଲୁଛି…</string>
+    <string name="ob_quick_enable">ଶୀଘ୍ର ଅନ୍‌ଲକ୍ ଚାଲୁ କରନ୍ତୁ</string>
+    <string name="ob_quick_continue_pass">ପାସ୍‌ଫ୍ରେଜ୍ ସହ ଆଗକୁ ଯାଆନ୍ତୁ</string>
+    <string name="ob_quick_refused">ଶୀଘ୍ର ଅନ୍‌ଲକ୍ ସେଟ୍ ହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ, କିମ୍ବା କେବଳ ପାସ୍‌ଫ୍ରେଜ୍ ସହ ଆଗକୁ ଯାଆନ୍ତୁ।</string>
+    <string name="ob_quick_skip">ଏବେ ରହୁ — ମୁଁ ପାସ୍‌ଫ୍ରେଜ୍ ଲେଖିବି</string>
+    <string name="ob_quick_fingerprint">ଆଙ୍ଗୁଠି ଚିହ୍ନ</string>
+    <string name="ob_quick_fingerprint_body">ଦ୍ରୁତ, ହାର୍ଡୱେର୍ ସୁରକ୍ଷିତ ଅନ୍‌ଲକ୍।</string>
+    <string name="ob_quick_no_sensor">ଏହି ଫୋନରେ ହାର୍ଡୱେର୍ ସେନସର୍ ନାହିଁ।</string>
+    <string name="ob_quick_pass_only">କେବଳ ପାସ୍‌ଫ୍ରେଜ୍</string>
+    <string name="ob_quick_pass_only_body">ପ୍ରତି ଥର ଲେଖନ୍ତୁ। ସବୁଠାରୁ ସୁରକ୍ଷିତ।</string>
+    <string name="ob_quick_hw_title">ହାର୍ଡୱେର୍ ସୁରକ୍ଷିତ</string>
+    <string name="ob_quick_hw_body">Android Keystore / StrongBox. କୌଣସି ବାୟୋମେଟ୍ରିକ୍ ସୂଚନା Zerokosh ପର୍ଯ୍ୟନ୍ତ କେବେ ପହଞ୍ଚେ ନାହିଁ।</string>
+    <string name="ob_quick_touch_title">ସେନସର୍ ଛୁଅଁନ୍ତୁ</string>
+    <string name="ob_quick_touch_body">ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ଚିହ୍ନ ଫୋନର ସୁରକ୍ଷା ଚିପ୍ ଭିତରେ ରହେ। ତାହା ଏହି ଫୋନରୁ କେବେ ବାହାରକୁ ଯାଏ ନାହିଁ।</string>
+
+    <!-- Settings screen. -->
+    <string name="st_folder_fallback">ଫୋଲ୍ଡର</string>
+    <string name="st_toast_folder_backed">ବ୍ୟାକଅପ୍ ଫୋଲ୍ଡର ଯୋଡ଼ାଗଲା ଆଉ ସିନ୍ଦୁକ %1$s ରେ ସଞ୍ଚିତ ହେଲା!</string>
+    <string name="st_toast_folder_connected">ବ୍ୟାକଅପ୍ ଫୋଲ୍ଡର ଯୋଡ଼ାଗଲା: %1$s</string>
+    <string name="st_toast_folder_failed">ଫୋଲ୍ଡର ଯୋଡ଼ିହେଲା ନାହିଁ: %1$s</string>
+    <string name="st_toast_exported">ଏନ୍‌କ୍ରିପ୍ଟ ସିନ୍ଦୁକ ରପ୍ତାନୀ ହେଲା</string>
+    <string name="st_toast_export_failed">ରପ୍ତାନୀ ହେଲା ନାହିଁ</string>
+    <string name="st_subtitle">ଆପଣଙ୍କ ନିୟମ।</string>
+    <string name="st_group_security">ସୁରକ୍ଷା</string>
+    <string name="st_vault_review">ସିନ୍ଦୁକ ଯାଞ୍ଚ</string>
+    <string name="st_vault_review_detail">ପୁଣି ବ୍ୟବହାର ହୋଇଥିବା, ଦୁର୍ବଳ, ସରିଯାଉଥିବା</string>
+    <string name="st_recently_deleted">ନିକଟରେ ହଟାଯାଇଥିବା</string>
+    <string name="st_group_sync">ସିଙ୍କ</string>
+    <string name="st_active_folder">ଚାଲୁ ଫୋଲ୍ଡର</string>
+    <string name="st_active_value">ଚାଲୁ · %1$s</string>
+    <string name="st_group_appearance">ରୂପ</string>
+    <string name="st_theme">ଥିମ୍</string>
+    <string name="st_theme_system">ସିଷ୍ଟମ୍</string>
+    <string name="st_theme_light">ହାଲୁକା</string>
+    <string name="st_theme_dark">ଗାଢ଼</string>
+    <string name="st_group_about">ପରିଚୟ</string>
+    <string name="st_license">ଲାଇସେନ୍ସ</string>
+    <string name="st_logos_by">ଲୋଗୋ ଦେଇଥିବା</string>
+    <string name="st_export_kosh">ଏନ୍‌କ୍ରିପ୍ଟ .kosh ରପ୍ତାନୀ</string>
+    <string name="st_import_kosh">.kosh ବ୍ୟାକଅପ୍ ଆମଦାନୀ</string>
+    <string name="st_import_other">ଅନ୍ୟ ପାସୱାର୍ଡ ମ୍ୟାନେଜରରୁ ଆମଦାନୀ</string>
+    <string name="st_import_other_detail">Chrome · Google · Bitwarden · LastPass · KeePass</string>
+    <string name="st_toast_backed_up">ସିନ୍ଦୁକ %1$s ରେ ସଞ୍ଚିତ ହେଲା!</string>
+    <string name="st_toast_backup_failed">ବ୍ୟାକଅପ୍ ହେଲା ନାହିଁ — ଫୋଲ୍ଡରର ଅନୁମତି ଦେଖନ୍ତୁ</string>
+    <string name="st_toast_disconnected">ବ୍ୟାକଅପ୍ ଫୋଲ୍ଡର ହଟାଗଲା</string>
+    <string name="st_confirm_new_passphrase">ନୂଆ ପାସ୍‌ଫ୍ରେଜ୍ ପୁଣି ଲେଖନ୍ତୁ</string>
+    <string name="st_new_recovery_body">ନୂଆ ରିକଭରି ଚାବି ତିଆରି କରିବାକୁ ଆପଣଙ୍କ ପାସ୍‌ଫ୍ରେଜ୍ ଦିଅନ୍ତୁ। ପୁରୁଣା ଚାବି କାମ କରିବା ବନ୍ଦ କରିଦେବ।</string>
+    <string name="st_new_recovery_result">ଆପଣଙ୍କ ନୂଆ ରିକଭରି ଚାବି:</string>
+    <string name="st_new_recovery_note">ଏହାକୁ ଅଫଲାଇନ୍ ରଖନ୍ତୁ। ପୁରୁଣା ରିକଭରି ଚାବି ଆଉ ବୈଧ ନୁହେଁ।</string>
+    <string name="st_generate">ତିଆରି କରନ୍ତୁ</string>
+    <string name="st_done">ହୋଇଗଲା</string>
+    <string name="st_backup_sheet_title">ବ୍ୟାକଅପ୍ ଓ ସିଙ୍କ ଫୋଲ୍ଡର</string>
+    <string name="st_connected_folder">ଯୋଡ଼ାଯାଇଥିବା ଫୋଲ୍ଡର: %1$s</string>
+    <string name="st_backup_sheet_body">ଆପଣଙ୍କ ଏନ୍‌କ୍ରିପ୍ଟ .kosh ଫାଇଲ୍ ସିଧା ଏହି ଫୋଲ୍ଡରରେ ହିଁ ସଞ୍ଚିତ ହୁଏ। ଅନେକ ଡିଭାଇସରେ ଆପେ ଆପେ ବ୍ୟାକଅପ୍ ପାଇଁ ଏହି ଫୋଲ୍ଡରକୁ Google Drive, Syncthing, Nextcloud କିମ୍ବା SD କାର୍ଡ ସହ ସିଙ୍କ କରନ୍ତୁ।</string>
+    <string name="st_backing_up">ସିନ୍ଦୁକର ବ୍ୟାକଅପ୍ ହେଉଛି…</string>
+    <string name="st_backup_now">ଏବେ ବ୍ୟାକଅପ୍ ନିଅନ୍ତୁ</string>
+    <string name="st_change_folder">ଫୋଲ୍ଡର ବଦଳାନ୍ତୁ</string>
+    <string name="st_disconnect">ହଟାନ୍ତୁ</string>
+
+    <!-- Home and Welcome. -->
+    <string name="hm_search_hint">HDFC, priya@upi, PAN… ଖୋଜନ୍ତୁ</string>
+    <string name="hm_pinned">ପିନ୍ କରାଯାଇଥିବା</string>
+    <string name="hm_count_one">"%1$d ସୂଚନା, "</string>
+    <string name="hm_count_many">"%1$d ସୂଚନା, "</string>
+    <string name="hm_all_offline">ସବୁ ଅଫଲାଇନ୍।</string>
+    <string name="hm_lock_immediate">ଖୋଲା ଅଛି · ଛାଡ଼ିବା ମାତ୍ରେ ତାଲା</string>
+    <string name="hm_lock_one">ଖୋଲା ଅଛି · ଛାଡ଼ିବାର 1 ମିନିଟ୍ ପରେ ତାଲା</string>
+    <string name="hm_lock_many">ଖୋଲା ଅଛି · ଛାଡ଼ିବାର %1$d ମିନିଟ୍ ପରେ ତାଲା</string>
+    <string name="hm_inst_one">%1$d ସଂସ୍ଥା</string>
+    <string name="hm_inst_many">%1$d ସଂସ୍ଥା</string>
+    <string name="hm_close_search">ଖୋଜା ବନ୍ଦ କରନ୍ତୁ</string>
+    <string name="hm_no_match">“%1$s” ରେ କିଛି ମିଳିଲା ନାହିଁ</string>
+    <string name="hm_no_match_hint">କୌଣସି ସଂସ୍ଥା, UPI ହ୍ୟାଣ୍ଡଲ୍, କିମ୍ବା ଶେଷ ଚାରି ଅଙ୍କ ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="hm_empty_head_lead">"ଆପଣଙ୍କ ସିନ୍ଦୁକ "</string>
+    <string name="hm_empty_head_emph">ଅପେକ୍ଷା କରୁଛି।</string>
+    <string name="hm_empty_blank">ଖାଲି ସିନ୍ଦୁକ, ପ୍ରସ୍ତୁତ।</string>
+    <string name="hm_empty_body">ଯାହା ସବୁଠାରୁ ବେଶୀ କାମରେ ଆସେ ସେହି ଗୋଟିଏ ସୂଚନାରୁ ଆରମ୍ଭ କରନ୍ତୁ। ନୋଟ୍ସ ଆପ୍‌ରେ ପଡ଼ିଥିବା ବାରଟି ପାସୱାର୍ଡଠାରୁ ସଞ୍ଚିତ ଗୋଟିଏ ପାସୱାର୍ଡ ବି ଅଧିକ ସୁରକ୍ଷିତ।</string>
+    <string name="hm_add_first">ଆପଣଙ୍କ ପ୍ରଥମ ରେକର୍ଡ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="hm_start_template">ଟେମ୍ପ୍ଲେଟ୍‌ରୁ ଆରମ୍ଭ କରନ୍ତୁ</string>
+    <string name="hm_import_backup">ଏନ୍‌କ୍ରିପ୍ଟ ବ୍ୟାକଅପ୍ ଆମଦାନୀ</string>
+    <string name="hm_import_backup_note">ଏହି ଫୋନରୁ .kosh ଫାଇଲ୍ ଖୋଲନ୍ତୁ</string>
+    <string name="hm_reassurance">ଏହି ଫୋନରୁ କେବେ ବାହାରକୁ ଯାଏ ନାହିଁ। ସଞ୍ଚୟ ସମୟରେ ଏନ୍‌କ୍ରିପ୍ଟ।</string>
+    <string name="wl_body">ଭାରତୀୟ ବ୍ୟାଙ୍କ, UPI, କାର୍ଡ, ଡିମ୍ୟାଟ୍, EPF ଆଉ ଆପଣ ପ୍ରକୃତରେ ବ୍ୟବହାର କରୁଥିବା OTP ଆପ୍ — ଏ ସବୁ ପାଇଁ ଫୋନରେ ହିଁ ରହୁଥିବା ସିନ୍ଦୁକ।</string>
+    <string name="wl_create">ନୂଆ ସିନ୍ଦୁକ ତିଆରି କରନ୍ତୁ</string>
+    <string name="wl_restore">ରିକଭରି କିଟ୍‌ରୁ ଫେରାଇ ଆଣନ୍ତୁ</string>
+    <string name="wl_footer">ଇମେଲ୍ ନାହିଁ · ଖାତା ନାହିଁ · କିଛି ଏହି ଫୋନ ବାହାରକୁ ଯାଏ ନାହିଁ</string>
+
+    <!-- Categories, relative time, vault review. -->
+    <string name="cat_banks">ବ୍ୟାଙ୍କ ଓ UPI</string>
+    <string name="cat_cards">କାର୍ଡ</string>
+    <string name="cat_investments">ନିବେଶ</string>
+    <string name="cat_govid">ସରକାରୀ ଓ ପରିଚୟ</string>
+    <string name="cat_utilities">ବିଲ୍ ଓ ସଂଯୋଗ</string>
+    <string name="cat_apps">ଆପ୍ ଓ ଲଗଇନ୍</string>
+    <string name="time_just_now">ଏବେ ହିଁ</string>
+    <string name="time_minutes">%1$d ମି ପୂର୍ବେ</string>
+    <string name="time_hours">%1$d ଘ ପୂର୍ବେ</string>
+    <string name="time_days">%1$d ଦି ପୂର୍ବେ</string>
+    <string name="time_months">%1$d ମାସ ପୂର୍ବେ</string>
+    <string name="time_years">%1$d ବର୍ଷ ପୂର୍ବେ</string>
+    <string name="vh_nothing">ଠିକ୍ କରିବାକୁ କିଛି ନାହିଁ।</string>
+    <string name="vh_count_one">%1$d କଥା ଦେଖିବା ଯୋଗ୍ୟ।</string>
+    <string name="vh_count_many">%1$d କଥା ଦେଖିବା ଯୋଗ୍ୟ।</string>
+    <string name="vh_checked_one">ଏହି ଫୋନରେ ହିଁ %1$d ରେକର୍ଡ ସହ ମିଳାଯାଇଛି। କିଛି କେଉଁଠାକୁ ପଠାଯାଇ ନାହିଁ।</string>
+    <string name="vh_checked_many">ଏହି ଫୋନରେ ହିଁ %1$d ରେକର୍ଡ ସହ ମିଳାଯାଇଛି। କିଛି କେଉଁଠାକୁ ପଠାଯାଇ ନାହିଁ।</string>
+    <string name="vh_empty">ପୁଣି ବ୍ୟବହାର ହୋଇଥିବା, ଦୁର୍ବଳ କିମ୍ବା ସରିଯାଉଥିବା ସୂଚନା ନାହିଁ।</string>
+    <string name="vh_kind_reused">ପୁଣି ବ୍ୟବହାର ହୋଇଥିବା ପାସୱାର୍ଡ</string>
+    <string name="vh_kind_common">ସହଜରେ ଅନୁମାନ କରାଯାଉଥିବା</string>
+    <string name="vh_kind_weak">ଦୁର୍ବଳ</string>
+    <string name="vh_kind_expiring">ସରିଯାଉଛି</string>
+
+    <!-- Trash and record detail. -->
+    <string name="tr_ttl_note">ହଟାଯାଇଥିବା ରେକର୍ଡ ଏଠାରେ %1$d ଦିନ ରହେ।</string>
+    <string name="tr_ttl_warn">ତା ପରେ ସେଗୁଡ଼ିକ ସବୁଦିନ ପାଇଁ ଚାଲିଯାଏ — ଆଉ କେଉଁଠି ନକଲ ନାହିଁ।</string>
+    <string name="tr_empty">କିଛି ହଟାଯାଇ ନାହିଁ।</string>
+    <string name="tr_delete_all">ସବୁକିଛି ସବୁଦିନ ପାଇଁ ହଟାନ୍ତୁ</string>
+    <string name="tr_delete_all_title">ଆବର୍ଜନା ପାତ୍ରର ସବୁକିଛି ହଟାଇଦେବେ?</string>
+    <string name="tr_delete_all_one">%1$d ରେକର୍ଡ ସବୁଦିନ ପାଇଁ ଚାଲିଯିବ। ଏହା ଫେରାଇ ଅଣାଯାଇପାରିବ ନାହିଁ ଆଉ ପୁନଃସ୍ଥାପନ ପାଇଁ ବ୍ୟାକଅପ୍ ବି ନାହିଁ।</string>
+    <string name="tr_delete_all_many">%1$d ରେକର୍ଡ ସବୁଦିନ ପାଇଁ ଚାଲିଯିବ। ଏହା ଫେରାଇ ଅଣାଯାଇପାରିବ ନାହିଁ ଆଉ ପୁନଃସ୍ଥାପନ ପାଇଁ ବ୍ୟାକଅପ୍ ବି ନାହିଁ।</string>
+    <string name="tr_delete_one_title">“%1$s” କୁ ସବୁଦିନ ପାଇଁ ହଟାଇଦେବେ?</string>
+    <string name="tr_cannot_undo">ଏହା ଫେରାଇ ଅଣାଯାଇପାରିବ ନାହିଁ।</string>
+    <string name="tr_gone_today">ଆଜି ଚାଲିଯିବ</string>
+    <string name="tr_days_one">%1$d ଦିନ ବାକି</string>
+    <string name="tr_days_many">%1$d ଦିନ ବାକି</string>
+    <string name="tr_restore">ଫେରାଇ ଆଣନ୍ତୁ</string>
+    <string name="tr_delete_now">ଏବେ ହଟାନ୍ତୁ</string>
+    <string name="rd_last_edit">ଶେଷ ପରିବର୍ତ୍ତନ %1$s</string>
+    <string name="rd_history_hide">ଲୁଚାନ୍ତୁ</string>
+    <string name="rd_history_show">%1$d ଦେଖାନ୍ତୁ</string>
+    <string name="rd_forget_these">ଏଗୁଡ଼ିକ ଭୁଲିଯାଆନ୍ତୁ</string>
+    <string name="rd_forget_title">ପୂର୍ବ ପାସୱାର୍ଡ ଭୁଲିଯିବେ?</string>
+    <string name="rd_forget_body">ଏହି ରେକର୍ଡ ପାଇଁ ମନେ ରଖାଯାଇଥିବା %1$d ମୂଲ୍ୟ ହଟାଇଦିଆଯିବ। ଏହା ଫେରାଇ ଅଣାଯାଇପାରିବ ନାହିଁ।</string>
+    <string name="rd_forget">ଭୁଲିଯାଆନ୍ତୁ</string>
+    <string name="rd_copied">କପି ହେଲା</string>
+    <string name="rd_release_to_hide">ଲୁଚାଇବାକୁ ଛାଡ଼ନ୍ତୁ</string>
+    <string name="rd_hold_to_reveal">ଦେଖିବାକୁ ଦବାଇ ଧରନ୍ତୁ</string>
+
+    <!-- Navigation and the damaged-vault screen. -->
+    <string name="nav_close_menu">ମେନୁ ବନ୍ଦ କରନ୍ତୁ</string>
+    <string name="nav_tap_card">କାର୍ଡ ଟ୍ୟାପ୍ କରନ୍ତୁ</string>
+    <string name="nav_all_templates">ସବୁ ଟେମ୍ପ୍ଲେଟ୍</string>
+    <string name="nav_scan">ସ୍କାନ୍</string>
+    <string name="nav_damaged_kicker">ଖରାପ ଅବସ୍ଥା</string>
+    <string name="nav_damaged_lead">"ଆପଣଙ୍କ "</string>
+    <string name="nav_damaged_emph">ସିନ୍ଦୁକ ଫାଇଲରେ</string>
+    <string name="nav_damaged_tail">" କିଛି ଗଡ଼ବଡ଼ ଅଛି।"</string>
+    <string name="nav_integrity_title">ଅଖଣ୍ଡତା ଯାଞ୍ଚ ବିଫଳ</string>
+    <string name="nav_integrity_body">.kosh ଫାଇଲର Poly1305 ପ୍ରମାଣୀକରଣ ଟ୍ୟାଗ୍ ମେଳ ଖାଉନାହିଁ। ଅଧାରୁ ବନ୍ଦ ହୋଇଥିବା ସିଙ୍କ କିମ୍ବା ଖରାପ ଷ୍ଟୋରେଜ୍ ପରେ ଏମିତି ହୋଇପାରେ।</string>
+    <string name="nav_what_next">ଏବେ କଣ କରିବେ</string>
+    <string name="nav_what_next_body">Zerokosh ସିନ୍ଦୁକ ଫାଇଲ ପାଖରେ ଗୋଟିଏ ଚାଲୁ ବ୍ୟାକଅପ୍ ରଖେ। ତାହାକୁ ଆପଣଙ୍କ ସିଙ୍କ ଫୋଲ୍ଡରରୁ ପୁନଃସ୍ଥାପନ କରନ୍ତୁ, କିମ୍ବା ଅନ୍ୟ ଫୋନରେ ରିକଭରି କିଟ୍‌ରେ ସିନ୍ଦୁକ ଖୋଲନ୍ତୁ।</string>
+
+    <!-- NFC card read and CSV import. -->
+    <string name="nfc_no_hardware">ଏହି ଫୋନରେ NFC ନାହିଁ, ତେଣୁ କାର୍ଡ ପଢ଼ିପାରିବ ନାହିଁ।</string>
+    <string name="nfc_disabled">NFC ବନ୍ଦ ଅଛି। ସେଟିଂରେ ଚାଲୁ କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="nfc_read_failed">ସେହି କାର୍ଡ ପଢ଼ିହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="nfc_cannot_read">କାର୍ଡ ପଢ଼ିପାରିବ ନାହିଁ</string>
+    <string name="nfc_reading">ପଢ଼ାଯାଉଛି…</string>
+    <string name="nfc_missed">ଧରାପଡ଼ିଲା ନାହିଁ</string>
+    <string name="nfc_hold_card">କାର୍ଡକୁ ଫୋନରେ ଲଗାନ୍ତୁ</string>
+    <string name="nfc_hint">ପଢ଼ିବା ପର୍ଯ୍ୟନ୍ତ କାର୍ଡକୁ ଫୋନର ପଛପଟେ ସିଧା ଲଗାଇ ରଖନ୍ତୁ। ଏଥିରୁ କାର୍ଡ ନମ୍ବର, ମିଆଦ ଓ ନାମ ମିଳେ — CVV ଚିପ୍‌ରେ ନଥାଏ, ତାହା ଆପଣ ନିଜେ ଲେଖିବେ।</string>
+    <string name="nfc_try_again">ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ</string>
+    <string name="ic_too_large">ଏହି ଫାଇଲ୍ ଏତେ ବଡ଼ ଯେ ପାସୱାର୍ଡ ଏକ୍ସପୋର୍ଟ ହୋଇପାରିବ ନାହିଁ।</string>
+    <string name="ic_unrecognised">ସେହି ଫାଇଲରେ ଚିହ୍ନଟ ଯୋଗ୍ୟ କିଛି ମିଳିଲା ନାହିଁ। Chrome, Google Password Manager, Bitwarden, LastPass ଓ KeePass ର ଏକ୍ସପୋର୍ଟ ବୁଝାଯାଏ।</string>
+    <string name="ic_could_not">ଆମଦାନୀ ହୋଇପାରିଲା ନାହିଁ</string>
+    <string name="ic_imported">ଆମଦାନୀ ହେଲା</string>
+    <string name="ic_result">%1$d ଯୋଡ଼ାଗଲା, %2$d ବଦଳିଲା।</string>
+    <string name="ic_delete_file">ଏବେ ଆପଣ ଆମଦାନୀ କରିଥିବା ଫାଇଲ୍ ହଟାନ୍ତୁ। ତାହା ଆପଣଙ୍କ ପାସୱାର୍ଡର ଖୋଲା ତାଲିକା, ଆଉ ଏବେ ବି ଆପଣଙ୍କ Downloads ରେ ପଡ଼ିଛି।</string>
+    <string name="ic_done">ହୋଇଗଲା</string>
+    <string name="ic_title">%1$s ରୁ ଆମଦାନୀ କରିବେ?</string>
+    <string name="ic_new_one">%1$d ନୂଆ ଲଗଇନ୍।</string>
+    <string name="ic_new_many">%1$d ନୂଆ ଲଗଇନ୍।</string>
+    <string name="ic_update_one">%1$d ବର୍ତ୍ତମାନର ରେକର୍ଡ ବଦଳିବ — ସାଇଟ୍ ଓ ୟୁଜରନେମ୍ ମିଳାଇ। ବଦଳିଥିବା ପାସୱାର୍ଡ ପ୍ରତି ରେକର୍ଡର ଇତିହାସରେ ଫେରି ମିଳିବ।</string>
+    <string name="ic_update_many">%1$d ବର୍ତ୍ତମାନର ରେକର୍ଡ ବଦଳିବ — ସାଇଟ୍ ଓ ୟୁଜରନେମ୍ ମିଳାଇ। ବଦଳିଥିବା ପାସୱାର୍ଡ ପ୍ରତି ରେକର୍ଡର ଇତିହାସରେ ଫେରି ମିଳିବ।</string>
+    <string name="ic_local_only">ସବୁକିଛି କେବଳ ଏହି ଫୋନରେ ଡିକ୍ରିପ୍ଟ ହୁଏ। କିଛି ଅପଲୋଡ୍ ହୁଏ ନାହିଁ, କାରଣ ଏହି ଆପ୍ ନେଟୱାର୍କ ସଂଯୋଗ ଖୋଲି ହିଁ ପାରିବ ନାହିଁ।</string>
+    <string name="ic_importing">ଆମଦାନୀ ହେଉଛି…</string>
+    <string name="ic_import">ଆମଦାନୀ</string>
+
+    <!-- Record edit. -->
+    <string name="re_using_template">%1$s ଟେମ୍ପ୍ଲେଟ୍ ବ୍ୟବହାର କରି</string>
+    <string name="re_add_field">+ ଆଉ ଗୋଟିଏ ଫିଲ୍ଡ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="re_remove">ହଟାନ୍ତୁ</string>
+    <string name="re_add_field_title">ଫିଲ୍ଡ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="re_field_name">ଫିଲ୍ଡର ନାମ</string>
+    <string name="re_treat_secret">ଗୁପ୍ତ ଭାବରେ ଗଣନ୍ତୁ (ଲୁଚି ରହିବ, ଦେଖିବାକୁ ଦବାଇ ଧରନ୍ତୁ)</string>
+    <string name="re_pick_date">ତାରିଖ ବାଛନ୍ତୁ</string>
+    <string name="re_tap_card">କାର୍ଡ ଟ୍ୟାପ୍ କରି ପଢ଼ନ୍ତୁ</string>
+
+    <!-- Authenticator. -->
+    <string name="au_fallback_name">ଅଥେଣ୍ଟିକେଟର୍</string>
+    <string name="au_search_hint">କୋଡ୍, ଜାରିକର୍ତ୍ତା ଖୋଜନ୍ତୁ…</string>
+    <string name="au_rotating">"ବଦଳୁଥିବା "</string>
+    <string name="au_active_one">%1$d ଚାଲୁ କୋଡ୍</string>
+    <string name="au_active_many">%1$d ଚାଲୁ କୋଡ୍</string>
+    <string name="au_tap_to_copy">କପି କରିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ</string>
+    <string name="au_add_another">ଆଉ ଗୋଟିଏ ଅଥେଣ୍ଟିକେଟର୍ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="au_no_match">କୌଣସି କୋଡ୍ ମିଳିଲା ନାହିଁ</string>
+    <string name="au_none_yet">ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି କୋଡ୍ ନାହିଁ।</string>
+    <string name="au_empty_hint">Google, GitHub କିମ୍ବା ଆପଣଙ୍କ ବ୍ରୋକରର QR ସ୍କାନ୍ କରନ୍ତୁ, କିମ୍ବା ସିକ୍ରେଟ୍ କୀ ହାତରେ ଲେଖନ୍ତୁ।</string>
+    <string name="au_scan_qr">QR କୋଡ୍ ସ୍କାନ୍ କରନ୍ତୁ</string>
+    <string name="au_copied">କପି ହେଲା · ଅଳ୍ପ ସମୟରେ ମିଳାଇଯିବ</string>
+    <string name="au_no_qr_found">ବଛାଯାଇଥିବା ଛବିରେ ସଠିକ୍ TOTP QR କୋଡ୍ ମିଳିଲା ନାହିଁ</string>
+    <string name="au_image_failed">ଛବି ପଢ଼ିହେଲା ନାହିଁ</string>
+    <string name="au_camera_needed">QR କୋଡ୍ ସ୍କାନ୍ କରିବାକୁ କ୍ୟାମେରା ଅନୁମତି ଦରକାର</string>
+    <string name="au_grant">ଅନୁମତି ଦିଅନ୍ତୁ</string>
+    <string name="au_close">ବନ୍ଦ କରନ୍ତୁ</string>
+    <string name="au_scan_title">ଅଥେଣ୍ଟିକେଟର୍ QR ସ୍କାନ୍ କରନ୍ତୁ</string>
+    <string name="au_flashlight">ଟର୍ଚ୍ଚ</string>
+    <string name="au_pick_image">ଛବି ବାଛନ୍ତୁ</string>
+    <string name="au_enter_key">କୀ ଲେଖନ୍ତୁ</string>
+    <string name="au_add_secret">ସିକ୍ରେଟ୍ କୀ ଯୋଡ଼ନ୍ତୁ</string>
+    <string name="au_account_name">ଖାତାର ନାମ (ଯଥା Google)</string>
+    <string name="au_secret_label">ସିକ୍ରେଟ୍ କୀ (Base32)</string>
+    <string name="au_secret_example">ଯଥା JBSWY3DPEHPK3PXP</string>
+    <string name="au_invalid_secret">ଭୁଲ୍ Base32 ସିକ୍ରେଟ୍ କୀ (କେବଳ A-Z ଅକ୍ଷର ଓ 2-7 ଅଙ୍କ)</string>
+    <string name="au_save_key">କୀ ସଞ୍ଚୟ କରନ୍ତୁ</string>
+
+    <!-- Chrome: tabs, toggles, quick adds. -->
+    <string name="ui_hide_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ଲୁଚାନ୍ତୁ</string>
+    <string name="ui_show_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ଦେଖାନ୍ତୁ</string>
+    <string name="ui_label_count">%1$s, %2$s</string>
+    <string name="tab_vault">ସିନ୍ଦୁକ</string>
+    <string name="tab_codes">କୋଡ୍</string>
+    <string name="tab_templates">ଟେମ୍ପ୍ଲେଟ୍</string>
+    <string name="tab_settings">ସେଟିଂ</string>
+    <string name="wl_sr_headline">ଆପଣଙ୍କ ଚାବି। ଆପଣଙ୍କ ଫୋନ୍। କୌଣସି ସର୍ଭର ନାହିଁ।</string>
+    <string name="wl_chip_crypto">Argon2id + XChaCha20</string>
+    <string name="wl_chip_offline">ଅଫଲାଇନ୍</string>
+    <string name="wl_chip_open">ଓପନ୍ ସୋର୍ସ</string>
+    <string name="wl_head_1">ଆପଣଙ୍କ ଚାବି।</string>
+    <string name="wl_head_2">ଆପଣଙ୍କ ଫୋନ୍।</string>
+    <string name="wl_head_3">କୌଣସି ସର୍ଭର ନାହିଁ।</string>
+    <string name="qa_bank_account">ବ୍ୟାଙ୍କ ଖାତା</string>
+    <string name="qa_upi_id">UPI ID</string>
+    <string name="qa_aadhaar">ଆଧାର</string>
+    <string name="qa_pan">PAN</string>
+    <string name="qa_totp">TOTP</string>
+
+    <!-- Save failure dialog. -->
+    <string name="se_title">ସଞ୍ଚିତ ହେଲା ନାହିଁ</string>
+    <string name="se_lead">ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ସଞ୍ଚିତ ହେଲା ନାହିଁ, ତେଣୁ ସିନ୍ଦୁକରେ ଆଗରୁ ଯାହା ଥିଲା ସେଥିରୁ କିଛି ହଜିନାହିଁ।</string>
+    <string name="se_body">ସିନ୍ଦୁକ ଫାଇଲ୍ ଲେଖିହେଲା ନାହିଁ। ଆପଣ ବ୍ୟାକଅପ୍ ଓ ସିଙ୍କ ଫୋଲ୍ଡର ସେଟ୍ କରିଥିଲେ, ହୁଏତ Android ତାହାର ଅନୁମତି ଫେରାଇ ନେଇଛି — ସେଟିଂ ଖୋଲନ୍ତୁ, ଫୋଲ୍ଡର ପୁଣି ବାଛନ୍ତୁ, ଆଉ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+
+    <!-- Screen kickers. -->
+    <string name="kicker_locked">ତାଲା ପଡ଼ିଛି</string>
+
+    <!-- Lock screen. -->
+    <string name="lk_welcome_lead">ପୁଣି ସ୍ୱାଗତ।</string>
+    <string name="lk_welcome_emph">ଆପଣଙ୍କ ସିନ୍ଦୁକରେ ତାଲା ପଡ଼ିଛି।</string>
+    <string name="lk_crypto_note">Argon2id · XChaCha20-Poly1305 · କିଛି ଏହି ଫୋନ ବାହାରକୁ ଯାଇନାହିଁ</string>
+    <string name="lk_touch_unlock">ଖୋଲିବାକୁ ଛୁଅଁନ୍ତୁ</string>
+
+    <!-- Template gallery. -->
+    <string name="gl_head_lead">"ଆମେ କଣ "</string>
+    <string name="gl_head_emph">ସଞ୍ଚୟ କରୁଛୁ?</string>
+    <string name="gl_search">%1$d ଭାରତୀୟ ସେବାରେ ଖୋଜନ୍ତୁ…</string>
+    <string name="gl_suggested">ଆପଣଙ୍କ ପାଇଁ ପରାମର୍ଶ</string>
+    <string name="gl_most_used">ସବୁଠାରୁ ବେଶୀ ବ୍ୟବହୃତ ଆଗେ</string>
+    <string name="gl_matches">%1$d ମିଳିଲା</string>
+    <string name="gl_not_found">ସେବା ମିଳୁନାହିଁ?</string>
+    <string name="gl_not_found_body">ଖାଲିରୁ ଆରମ୍ଭ କରି ନିଜ ଫିଲ୍ଡକୁ ନିଜେ ନାମ ଦିଅନ୍ତୁ — ଟେମ୍ପ୍ଲେଟ୍ କେବଳ ଲେବଲ୍ ଭରେ, ତଥ୍ୟ କେବେ ନୁହେଁ।</string>
+    <string name="gl_blank">ଖାଲି ଟେମ୍ପ୍ଲେଟ୍</string>
+    <string name="gl_cat_popular">ଲୋକପ୍ରିୟ</string>
+    <string name="gl_cat_banks">ବ୍ୟାଙ୍କ</string>
+    <string name="gl_cat_upi">UPI</string>
+    <string name="gl_cat_cards">କାର୍ଡ</string>
+    <string name="gl_cat_demat">ଡିମ୍ୟାଟ୍</string>
+    <string name="gl_cat_govid">ସରକାରୀ ପରିଚୟ</string>
+    <string name="gl_cat_shopping">କିଣାକିଣି</string>
+    <string name="gl_cat_travel">ଯାତ୍ରା</string>
+    <string name="gl_cat_utilities">ବିଲ୍</string>
+    <string name="gl_cat_apps">ଆପ୍</string>
+    <string name="au_rotating_emph">କୋଡ୍।</string>
+</resources>

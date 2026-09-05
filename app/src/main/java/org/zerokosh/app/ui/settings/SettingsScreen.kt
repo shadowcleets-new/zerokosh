@@ -18,6 +18,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
@@ -29,44 +30,44 @@ import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.*
-import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import org.zerokosh.app.autofill.AutofillSetup
-import org.zerokosh.app.ui.common.RevealToggle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.Dispatchers
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import org.zerokosh.app.ZerokoshApp
-import org.zerokosh.app.ui.common.Kicker
-import org.zerokosh.app.ui.common.SectionLabel
-import org.zerokosh.app.ui.common.WhiteCard
-import org.zerokosh.app.ui.backup.rememberImportBackup
-import org.zerokosh.app.ui.backup.rememberImportCsv
-import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
+import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.autofill.AutofillSetup
 import org.zerokosh.app.quickunlock.QuickUnlockManager
+import org.zerokosh.app.ui.backup.rememberImportBackup
+import org.zerokosh.app.ui.backup.rememberImportCsv
+import org.zerokosh.app.ui.common.Kicker
+import org.zerokosh.app.ui.common.RevealToggle
+import org.zerokosh.app.ui.common.SectionLabel
+import org.zerokosh.app.ui.common.WhiteCard
+import org.zerokosh.app.ui.onboarding.Languages
 import org.zerokosh.app.ui.onboarding.passphraseScore
 import org.zerokosh.app.ui.record.DropdownSelector
+import org.zerokosh.app.ui.theme.VaultTheme
 // #endregion
 
 // #region Screen list
@@ -379,7 +380,13 @@ fun SettingsScreen(
                 }
                 SettingsDivider()
                 Box {
-                    val currentLang = if (app.prefs.languageTag == "hi") "हिन्दी" else "English"
+                    // Same catalogue the onboarding picker uses, so a language
+                    // cannot be offered in one place and missing from the other.
+                    val offered = Languages.filter { it.available }
+                    val currentLang = offered
+                        .firstOrNull { it.tag == app.prefs.languageTag }
+                        ?.native
+                        ?: offered.first().native
                     SettingsRow(
                         title = stringResource(R.string.scr_settings_language),
                         value = currentLang,
@@ -389,11 +396,13 @@ fun SettingsScreen(
                         expanded = showLanguageDropdown,
                         onDismissRequest = { showLanguageDropdown = false }
                     ) {
-                        listOf("English" to "en", "हिन्दी" to "hi").forEach { (label, tag) ->
+                        offered.forEach { lang ->
                             DropdownMenuItem(
-                                text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+                                text = {
+                                    Text(lang.native, style = MaterialTheme.typography.bodyMedium)
+                                },
                                 onClick = {
-                                    app.prefs.languageTag = tag
+                                    app.prefs.languageTag = lang.tag
                                     showLanguageDropdown = false
                                     (context as? Activity)?.recreate()
                                 }

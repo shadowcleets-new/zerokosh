@@ -437,15 +437,16 @@ internal data class Language(
 internal val Languages = listOf(
     Language("en", "Aa", "English", "English", true),
     Language("hi", "अ", "हिन्दी", "Hindi", true),
-    Language("ta", "அ", "தமிழ்", "Tamil", true),
-    Language("te", "అ", "తెలుగు", "Telugu", true),
+    Language("bn", "অ", "বাংলা", "Bengali", true),
     Language("mr", "म", "मराठी", "Marathi", true),
-    Language("bn", "অ", "বাংলা", "Bengali", false),
-    Language("kn", "ಅ", "ಕನ್ನಡ", "Kannada", true),
+    Language("te", "అ", "తెలుగు", "Telugu", true),
+    Language("ta", "அ", "தமிழ்", "Tamil", true),
     Language("gu", "અ", "ગુજરાતી", "Gujarati", true),
-    Language("ml", "മ", "മലയാളം", "Malayalam", false),
+    Language("kn", "ಅ", "ಕನ್ನಡ", "Kannada", true),
+    Language("ml", "മ", "മലയാളം", "Malayalam", true),
     Language("or", "ଓ", "ଓଡ଼ିଆ", "Odia", true),
-    Language("pa", "ਪ", "ਪੰਜਾਬੀ", "Punjabi", false),
+    Language("pa", "ਪ", "ਪੰਜਾਬੀ", "Punjabi", true),
+    Language("as", "অ", "অসমীয়া", "Assamese", true),
 )
 
 @Composable

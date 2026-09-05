@@ -320,6 +320,25 @@ val verifyTemplates by tasks.registering {
                 }.toList()
             }
 
+        // An unescaped apostrophe makes aapt fail with "Can not extract resource
+        // from ParsedResource@<hash>" and nothing else — no file, no line, no key.
+        // It is not only an English contraction problem: Assamese writes হ'ল and
+        // Punjabi writes 'ਤੇ, so a whole locale can fail on ordinary words.
+        val apostropheProblems = localePairs.flatMap { listOf(it.first, it.second) }
+            .filter { it.exists() }
+            .flatMap { f ->
+                spaceRe.findAll(f.readText()).mapNotNull { m ->
+                    val value = m.groupValues[2]
+                    val bare = Regex("""(?<!\\)'""").containsMatchIn(value)
+                    if (bare && !(value.startsWith("\"") && value.endsWith("\""))) {
+                        "${f.parentFile.name}/${m.groupValues[1]} has an unescaped apostrophe " +
+                            "— write \' or aapt fails with an unreadable error"
+                    } else {
+                        null
+                    }
+                }.toList()
+            }
+
         @Suppress("UNCHECKED_CAST")
         val catalogue = groovy.json.JsonSlurper().parse(jsonFile) as Map<String, Any>
         val templates = catalogue["templates"] as List<Map<String, Any>>
@@ -333,6 +352,7 @@ val verifyTemplates by tasks.registering {
         val problems = mutableListOf<String>()
         problems += localeProblems
         problems += whitespaceProblems
+        problems += apostropheProblems
         val ids = templates.map { it["id"] as String }.toSet()
 
         (referenced - ids).forEach { problems += "gallery points at unknown template: $it" }

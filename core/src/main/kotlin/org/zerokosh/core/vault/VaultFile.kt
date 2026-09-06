@@ -301,6 +301,47 @@ object VaultOperations {
     ): ByteArray? {
         val result = unlockWithPassphrase(fileBytes, currentPassphrase, crypto)
         if (result !is UnlockResult.Success) return null
+        return rewrapForNewPassphrase(result, newPassphrase, deviceId, nowMs, crypto)
+    }
+
+    /**
+     * The same re-wrap, reached with the MasterKey the Keystore released rather
+     * than a passphrase the user can no longer produce.
+     *
+     * Quick unlock means someone can go months opening the vault with a
+     * fingerprint and never typing the passphrase — and the moment they notice
+     * they have forgotten it is the moment [changePassphrase] stops being
+     * available to them, because it wants the very thing they have lost. This
+     * is the way out of that, and it needs no Recovery Key.
+     *
+     * It grants no read access that the caller did not already have: reaching
+     * here at all means the Keystore has already released the MasterKey behind
+     * a biometric prompt, and anything that unwraps the vault can already
+     * export every record in it. What it does grant is the power to lock the
+     * owner out, so the caller must gate it on a fresh authentication rather
+     * than on a session unlocked minutes ago.
+     */
+    fun changePassphraseWithMasterKey(
+        fileBytes: ByteArray,
+        masterKey: ByteArray,
+        newPassphrase: ByteArray,
+        deviceId: String,
+        nowMs: Long,
+        crypto: CryptoProvider,
+    ): ByteArray? {
+        val result = unlockWithMasterKey(fileBytes, masterKey, crypto)
+        if (result !is UnlockResult.Success) return null
+        return rewrapForNewPassphrase(result, newPassphrase, deviceId, nowMs, crypto)
+    }
+
+    /** Re-derives MK from [newPassphrase] under a fresh salt and re-wraps only wrap_mk. */
+    private fun rewrapForNewPassphrase(
+        result: UnlockResult.Success,
+        newPassphrase: ByteArray,
+        deviceId: String,
+        nowMs: Long,
+        crypto: CryptoProvider,
+    ): ByteArray {
         val saltMk = crypto.randomBytes(CryptoProvider.SALT_BYTES)
         val mk = KeyHierarchy.deriveKey(newPassphrase, saltMk, result.envelope.header.ops, result.envelope.header.mem, crypto)
         val header = result.envelope.header.copy(

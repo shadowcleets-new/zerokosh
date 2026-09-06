@@ -58,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -114,6 +115,7 @@ fun HomeScreen(
     onOpen: (String) -> Unit,
     onAdd: () -> Unit,
     onQuickAdd: (templateId: String, preset: String?, brand: String?) -> Unit,
+    onSaveKit: () -> Unit = {},
 ) {
     val c = VaultTheme.colors
     val importBackup = rememberImportBackup(app)
@@ -162,6 +164,8 @@ fun HomeScreen(
             }
         }
 
+        PassphraseCheckHost(app, records.isNotEmpty(), onSaveKit)
+
         if (records.isEmpty()) {
             EmptyVault(
                 onAdd = onAdd,
@@ -200,6 +204,10 @@ fun HomeScreen(
         // context, and recordSection writes into it.
         val pinnedLabel = stringResource(R.string.hm_pinned)
         val categoryLabels = RecordCategory.entries.associateWith { stringResource(it.labelRes) }
+        // Snoozing has to move a state key, or dismissing the banner leaves it
+        // on screen until something else happens to recompose the list.
+        var kitSnoozeTick by remember { mutableIntStateOf(0) }
+        val showKitBanner = remember(records.size, kitSnoozeTick) { kitBannerDue(app, records.size) }
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -211,6 +219,19 @@ fun HomeScreen(
                     total = records.size,
                     institutions = records.map { it.institution }.filter { it.isNotBlank() }.distinct().size,
                     autoLockMinutes = app.prefs.autoLockMinutes,
+                )
+            }
+            // Above the records, because it is about all of them at once. The
+            // onboarding ask lands when the vault is empty and the stakes feel
+            // hypothetical; this one lands once there is something to lose,
+            // which is when people actually act.
+            item {
+                // The composable decides; keeping the branch out of the list
+                // builder is what holds HomeScreen at its baseline complexity.
+                NoKitBanner(
+                    visible = showKitBanner,
+                    onSave = onSaveKit,
+                    onSnooze = { snoozeKitBanner(app); kitSnoozeTick++ },
                 )
             }
             item {
@@ -379,6 +400,77 @@ private fun ActiveSearchBar(
     }
     androidx.compose.runtime.LaunchedEffect(Unit) { focus.requestFocus() }
 }
+
+/**
+ * A week of quiet, then ask again — but only once there is something to lose.
+ *
+ * The onboarding step asks at the worst possible moment: the vault is empty,
+ * the risk is hypothetical, and the fastest route to using the app is to agree
+ * that yes, obviously, the kit is saved. This one waits until real records
+ * exist, which is when the question stops being paperwork and starts being
+ * about something.
+ */
+@Composable
+private fun NoKitBanner(visible: Boolean, onSave: () -> Unit, onSnooze: () -> Unit) {
+    if (!visible) return
+    val c = VaultTheme.colors
+    Column(
+        Modifier
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 8.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerGroup))
+            .background(c.primary.copy(alpha = 0.08f))
+            .border(1.dp, c.primary.copy(alpha = 0.35f), RoundedCornerShape(CornerGroup))
+            .padding(16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.Shield, contentDescription = null, tint = c.primary, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.size(8.dp))
+            Text(
+                stringResource(R.string.hm_kit_banner_title),
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Medium,
+                color = c.ink,
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            stringResource(R.string.hm_kit_banner_body),
+            fontSize = 12.sp,
+            lineHeight = 17.sp,
+            color = c.ink(0.7f),
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(R.string.hm_kit_banner_action),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = c.primary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onSave)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+            Text(
+                stringResource(R.string.hm_kit_banner_dismiss),
+                fontSize = 13.sp,
+                color = c.ink(0.55f),
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onSnooze)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+        }
+    }
+}
+
+/** Seven days: long enough not to nag, short enough to catch a real loss. */
+internal const val KIT_SNOOZE_MS = 7L * 24 * 60 * 60 * 1000
+
+
+
 // #endregion
 
 // #region Grouped record list

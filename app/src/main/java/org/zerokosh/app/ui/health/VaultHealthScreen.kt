@@ -38,6 +38,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.app.ui.common.NoticeCard
+import org.zerokosh.app.ui.common.NoticeTone
 import org.zerokosh.app.ui.common.OnboardingTopBar
 import org.zerokosh.app.ui.common.fieldLabel
 import org.zerokosh.app.ui.theme.VaultTheme
@@ -97,7 +101,9 @@ fun VaultHealthScreen(app: ZerokoshApp, onBack: () -> Unit, onOpen: (String) -> 
 
         Column(Modifier.padding(horizontal = 24.dp)) {
             Text(
-                healthHeadline(findings.size),
+                // A missing kit counts, or the page reads "Nothing to fix."
+                // directly above a warning saying otherwise.
+                healthHeadline(findings.size + if (app.prefs.recoveryKitSaved) 0 else 1),
                 style = MaterialTheme.typography.titleMedium,
                 color = c.ink,
             )
@@ -113,9 +119,28 @@ fun VaultHealthScreen(app: ZerokoshApp, onBack: () -> Unit, onOpen: (String) -> 
         }
         Spacer(Modifier.height(16.dp))
 
+        // Pinned above the record findings rather than folded into them: a
+        // missing Recovery Kit is a fact about the vault, not about any one
+        // record, and HealthFinding is keyed by record uuid. Forcing it in
+        // would mean inventing a record that does not exist — and it belongs at
+        // the top anyway, because it is the only item here that can cost
+        // somebody everything rather than weaken one login.
+        if (!app.prefs.recoveryKitSaved) {
+            NoticeCard(
+                title = stringResource(R.string.vh_no_kit_title),
+                body = stringResource(R.string.vh_no_kit_body),
+                icon = Icons.Outlined.WarningAmber,
+                tone = NoticeTone.Warn,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+
         if (findings.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.vh_empty), color = c.ink(0.45f))
+            if (app.prefs.recoveryKitSaved) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.vh_empty), color = c.ink(0.45f))
+                }
             }
             return@Column
         }

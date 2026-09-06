@@ -112,6 +112,19 @@ private val LockError = VaultErrorDark
 // #endregion
 
 // #region Screen + unlock logic
+/**
+ * The clock behind the periodic "do you still remember it?" check.
+ *
+ * Only a typed passphrase resets it. A biometric unlock deliberately does not,
+ * because unlocking without typing is exactly how the passphrase slips away
+ * unnoticed — counting it would defeat the check entirely.
+ */
+private fun recordPassphraseUse(app: ZerokoshApp, recoveryMode: Boolean, outcome: UnlockOutcome) {
+    if (!recoveryMode && outcome == UnlockOutcome.SUCCESS) {
+        app.prefs.lastPassphraseUseMs = System.currentTimeMillis()
+    }
+}
+
 @Composable
 fun LockScreen(app: ZerokoshApp) {
     var passphrase by remember { mutableStateOf("") }
@@ -183,6 +196,7 @@ fun LockScreen(app: ZerokoshApp) {
                 app.repository.unlockWithPassphrase(passphrase.toByteArray())
             }
             busy = false
+            recordPassphraseUse(app, recoveryMode, outcome)
             handleOutcome(outcome)
         }
     }

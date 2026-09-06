@@ -84,6 +84,63 @@ class VaultRoundTripTest {
     }
 
     @Test
+    fun `reset passphrase via MasterKey - old fails - new works - recovery still works`() {
+        // The quick-unlock path: the Keystore hands back the MasterKey, and the
+        // forgotten passphrase is never needed. Same guarantees as the ordinary
+        // change, reached without the thing the user has lost.
+        val created = createFixtureFile()
+        val masterKey = VaultOperations.deriveMasterKey(
+            created.fileBytes, FixtureVault.PASSPHRASE.toByteArray(), crypto,
+        )
+        val newFile = VaultOperations.changePassphraseWithMasterKey(
+            created.fileBytes, masterKey, "reset-passphrase-4321".toByteArray(),
+            FixtureVault.DEVICE_ID, FixtureVault.TS + 3000, crypto,
+        )!!
+        assertIs<UnlockResult.WrongCredential>(
+            VaultOperations.unlockWithPassphrase(newFile, FixtureVault.PASSPHRASE.toByteArray(), crypto),
+        )
+        assertIs<UnlockResult.Success>(
+            VaultOperations.unlockWithPassphrase(newFile, "reset-passphrase-4321".toByteArray(), crypto),
+        )
+        // The Recovery Key is wrapped separately, so resetting the passphrase
+        // must not invalidate a kit the user saved months ago.
+        assertIs<UnlockResult.Success>(
+            VaultOperations.unlockWithRecoveryKey(newFile, created.recoveryKeyFormatted, crypto),
+        )
+    }
+
+    @Test
+    fun `reset passphrase rejects the wrong MasterKey`() {
+        val created = createFixtureFile()
+        val wrong = ByteArray(32) { 7 }
+        assertEquals(
+            null,
+            VaultOperations.changePassphraseWithMasterKey(
+                created.fileBytes, wrong, "irrelevant-passphrase".toByteArray(),
+                FixtureVault.DEVICE_ID, FixtureVault.TS + 4000, crypto,
+            ),
+        )
+    }
+
+    @Test
+    fun `reset passphrase leaves the old MasterKey stale`() {
+        // Why the caller must re-enrol quick unlock afterwards: the blob in the
+        // Keystore still holds the pre-reset MasterKey, which no longer unwraps
+        // anything. Silently leaving it would lock the user out on next launch.
+        val created = createFixtureFile()
+        val masterKey = VaultOperations.deriveMasterKey(
+            created.fileBytes, FixtureVault.PASSPHRASE.toByteArray(), crypto,
+        )
+        val newFile = VaultOperations.changePassphraseWithMasterKey(
+            created.fileBytes, masterKey, "another-passphrase-8888".toByteArray(),
+            FixtureVault.DEVICE_ID, FixtureVault.TS + 5000, crypto,
+        )!!
+        assertIs<UnlockResult.WrongCredential>(
+            VaultOperations.unlockWithMasterKey(newFile, masterKey, crypto),
+        )
+    }
+
+    @Test
     fun `header params are honored by readers`() {
         // create at 32 MiB, reopen — reader must use header params, not defaults
         val created = createFixtureFile()

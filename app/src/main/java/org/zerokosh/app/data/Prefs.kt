@@ -109,6 +109,44 @@ class Prefs(context: Context) : VaultPrefs {
         get() = prefs.getString(KEY_SYNC_URI, "") ?: ""
         set(v) = prefs.edit().putString(KEY_SYNC_URI, v).apply()
 
+    /**
+     * Whether the user got a Recovery Kit out of the app and proved it.
+     *
+     * Set only by the confirmation challenge, never by the Save button alone —
+     * tapping Save and then cancelling the file picker is the ordinary way to
+     * end up with nothing, and that is exactly the case this flag exists to
+     * catch. False is not a failure state; it is a standing item in Vault
+     * Review until the user deals with it.
+     */
+    var recoveryKitSaved: Boolean
+        get() = prefs.getBoolean(KEY_KIT_SAVED, false)
+        set(v) = prefs.edit().putBoolean(KEY_KIT_SAVED, v).apply()
+
+    /** Dismissing the home banner hides it until the next reminder falls due. */
+    var kitBannerSnoozedUntilMs: Long
+        get() = prefs.getLong(KEY_KIT_SNOOZE, 0)
+        set(v) = prefs.edit().putLong(KEY_KIT_SNOOZE, v).apply()
+
+    /**
+     * When the passphrase was last actually typed, rather than stood in for by
+     * a fingerprint. Quick unlock means this can otherwise be months ago
+     * without anybody noticing, which is how a vault becomes unopenable while
+     * appearing to work perfectly.
+     */
+    var lastPassphraseUseMs: Long
+        get() = prefs.getLong(KEY_LAST_PASS_USE, 0)
+        set(v) = prefs.edit().putLong(KEY_LAST_PASS_USE, v).apply()
+
+    /** How many kit nudges have gone out, so day 7 and day 30 fire once each. */
+    var kitRemindersSent: Int
+        get() = prefs.getInt(KEY_KIT_REMINDERS, 0)
+        set(v) = prefs.edit().putInt(KEY_KIT_REMINDERS, v).apply()
+
+    /** Set when the vault is created, so day-7 and day-30 nudges have an origin. */
+    var vaultCreatedMs: Long
+        get() = prefs.getLong(KEY_VAULT_CREATED, 0)
+        set(v) = prefs.edit().putLong(KEY_VAULT_CREATED, v).apply()
+
     private companion object {
         const val KEY_DEVICE_ID = "device_id"
         const val KEY_KDF_OPS = "kdf_ops"
@@ -124,5 +162,10 @@ class Prefs(context: Context) : VaultPrefs {
         const val KEY_SYNC_URI = "sync_folder_uri"
         const val KEY_NOTIF_ASKED = "notification_asked"
         const val KEY_THEME = "theme_option"
+        const val KEY_KIT_SAVED = "recovery_kit_saved"
+        const val KEY_KIT_SNOOZE = "kit_banner_snoozed_until_ms"
+        const val KEY_LAST_PASS_USE = "last_passphrase_use_ms"
+        const val KEY_VAULT_CREATED = "vault_created_ms"
+        const val KEY_KIT_REMINDERS = "kit_reminders_sent"
     }
 }

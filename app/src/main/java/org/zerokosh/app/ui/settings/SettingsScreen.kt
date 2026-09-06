@@ -14,6 +14,7 @@
 package org.zerokosh.app.ui.settings
 
 // #region Imports
+import androidx.annotation.StringRes
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -92,6 +93,7 @@ fun SettingsScreen(
     val activity = context as FragmentActivity
     val scope = rememberCoroutineScope()
     var showChangePass by remember { mutableStateOf(false) }
+    var showResetPass by remember { mutableStateOf(false) }
     var showNewRecovery by remember { mutableStateOf(false) }
     var quickUnlockOn by remember { mutableStateOf(app.prefs.quickUnlockEnabled) }
     var allowShots by remember { mutableStateOf(app.prefs.allowScreenshots) }
@@ -306,6 +308,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.scr_settings_change_passphrase),
                     onClick = { showChangePass = true }
                 )
+                ForgotPassphraseRow(app) { showResetPass = true }
                 SettingsDivider()
                 SettingsRow(
                     title = stringResource(R.string.scr_settings_new_recovery),
@@ -513,6 +516,9 @@ fun SettingsScreen(
         }
     }
 
+    if (showResetPass) {
+        ResetPassphraseDialog(app = app, onDismiss = { showResetPass = false })
+    }
     if (showChangePass) {
         ChangePassphraseDialog(app = app, onDismiss = { showChangePass = false })
     }
@@ -750,6 +756,106 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) }
         }
+    )
+}
+// #endregion
+
+// #region Forgot-passphrase reset (Tier 3)
+/**
+ * Offered only with quick unlock enrolled, because the fingerprint is what
+ * stands in for the forgotten passphrase. Its own function so the branch does
+ * not land in SettingsScreen, which is already at its complexity ceiling.
+ */
+@Composable
+private fun ForgotPassphraseRow(app: ZerokoshApp, onClick: () -> Unit) {
+    if (!app.prefs.quickUnlockEnabled) return
+    SettingsDivider()
+    SettingsRow(
+        title = stringResource(R.string.st_forgot_passphrase),
+        value = stringResource(R.string.st_forgot_passphrase_detail),
+        onClick = onClick,
+    )
+}
+
+/** A masked field with its own reveal toggle, so callers carry no show-state. */
+@Composable
+private fun SecretField(
+    @StringRes labelRes: Int,
+    value: String,
+    isError: Boolean = false,
+    onValueChange: (String) -> Unit,
+) {
+    var visible by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(labelRes)) },
+        visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = { RevealToggle(visible = visible, onToggle = { visible = !visible }) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        singleLine = true,
+        isError = isError,
+    )
+}
+/**
+ * Sets a new passphrase for someone who cannot supply the old one.
+ *
+ * Offered only when quick unlock is enrolled, because the fingerprint is what
+ * stands in for the forgotten secret. Without it there is nothing here to
+ * authenticate against and the Recovery Kit really is the only way back.
+ */
+@Composable
+private fun ResetPassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
+    val doneMessage = stringResource(R.string.pc_reset_done)
+    val failedMessage = stringResource(R.string.pc_reset_failed)
+    var newPass by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+
+    val valid = newPass.length >= 10 && newPass == confirm && activity != null
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.pc_reset_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.pc_reset_body), style = MaterialTheme.typography.bodyMedium)
+                SecretField(R.string.scr_settings_new_passphrase, newPass) { newPass = it }
+                SecretField(
+                    labelRes = R.string.st_confirm_new_passphrase,
+                    value = confirm,
+                    isError = confirm.isNotEmpty() && confirm != newPass,
+                    onValueChange = { confirm = it },
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = valid && !busy,
+                onClick = {
+                    val host = activity ?: return@Button
+                    busy = true
+                    scope.launch {
+                        val ok = QuickUnlockManager.resetPassphrase(host, app, newPass.toByteArray())
+                        busy = false
+                        Toast.makeText(context, if (ok) doneMessage else failedMessage, Toast.LENGTH_LONG).show()
+                        if (ok) {
+                            app.prefs.lastPassphraseUseMs = System.currentTimeMillis()
+                            onDismiss()
+                        }
+                    }
+                },
+            ) {
+                if (busy) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.pc_reset_action))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.msg_cancel)) }
+        },
     )
 }
 // #endregion

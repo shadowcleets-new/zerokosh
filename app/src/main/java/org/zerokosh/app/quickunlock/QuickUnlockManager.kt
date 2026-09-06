@@ -118,6 +118,68 @@ object QuickUnlockManager {
     }
     // #endregion
 
+    // #region Passphrase reset (forgotten passphrase, phone still in hand)
+    /**
+     * Sets a new passphrase using the Keystore's MasterKey, for the user who
+     * has been unlocking with a fingerprint for months and can no longer
+     * remember what they typed on the first day.
+     *
+     * Settings → Change passphrase cannot help them: it asks for the current
+     * one, which is precisely what is gone. Without this the only way back in
+     * is the Recovery Kit, and the person who never saved it has already lost
+     * the vault while the app was still opening happily every morning.
+     *
+     * The biometric prompt here is a fresh one, deliberately. Reaching this
+     * code grants no reading that a quick unlock did not already grant — the
+     * same Keystore key opens the same vault — but it does let the holder lock
+     * the owner out, so it should cost an authentication of its own rather
+     * than riding on a session unlocked an hour ago.
+     *
+     * Re-enrolment at the end is not optional: the stored blob still holds the
+     * pre-reset MasterKey, which no longer unwraps anything. Leaving it would
+     * turn tomorrow's fingerprint into a locked door.
+     */
+    suspend fun resetPassphrase(
+        activity: FragmentActivity,
+        app: ZerokoshApp,
+        newPassphrase: ByteArray,
+    ): Boolean {
+        val prefs = rawPrefs(activity)
+        val blob = prefs.getString(PREF_BLOB, null) ?: return false
+        val iv = prefs.getString(PREF_IV, null) ?: return false
+        val cipher = try {
+            Cipher.getInstance("AES/GCM/NoPadding").apply {
+                init(
+                    Cipher.DECRYPT_MODE,
+                    loadKey() ?: throw KeyPermanentlyInvalidatedException(),
+                    GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)),
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "passphrase reset: keystore key unusable", e)
+            disable(activity, app)
+            return false
+        }
+        val authed = authenticate(activity, cipher) ?: return false
+        var masterKey: ByteArray? = null
+        return try {
+            masterKey = authed.doFinal(Base64.decode(blob, Base64.NO_WRAP))
+            val ok = app.repository.changePassphraseWithMasterKey(masterKey, newPassphrase)
+            if (!ok) return false
+            // The old wrapped copy is stale the instant the re-wrap lands, so
+            // clear it before enrolling again rather than after: a failure in
+            // between must leave quick unlock off, not silently broken.
+            disable(activity, app)
+            enable(activity, app, newPassphrase)
+        } catch (e: Exception) {
+            Log.w(TAG, "passphrase reset failed", e)
+            false
+        } finally {
+            masterKey?.wipe()
+        }
+    }
+    // #endregion
+
     // #region Disable / helpers
     fun disable(context: Context, app: ZerokoshApp) {
         rawPrefs(context).edit().remove(PREF_BLOB).remove(PREF_IV).apply()

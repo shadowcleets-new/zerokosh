@@ -430,6 +430,10 @@ private fun MainScaffold(app: ZerokoshApp) {
                                     onOpen = { uuid -> nav.navigate("detail/$uuid") },
                                     onAdd = openGallery,
                                     onQuickAdd = openEdit,
+                                    // Settings owns the "new recovery key"
+                                    // flow, which already asks for the
+                                    // passphrase and shows a fresh kit.
+                                    onSaveKit = { nav.navigate("settings") },
                                 )
                             }
                         }

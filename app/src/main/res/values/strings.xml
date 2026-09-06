@@ -43,7 +43,7 @@
     <string name="scr_recovery_save_pdf">Save as PDF</string>
     <string name="scr_recovery_confirm_check">I have written it down and kept it somewhere safe</string>
     <string name="scr_recovery_done">Continue</string>
-    <string name="scr_recovery_never_again">You will not see this key again after this screen.</string>
+    <string name="scr_recovery_never_again">This key is shown once. You can create a fresh one from Settings at any time, as long as you can still unlock.</string>
     <string name="scr_recovery_pdf_saved">Recovery Kit PDF saved</string>
     <string name="scr_recovery_pdf_instructions">Keep this page with your property papers or other important documents. Anyone with this key can open your vault — treat it like a key to your locker.</string>
     <string name="scr_recovery_pdf_title">Zerokosh Recovery Kit</string>
@@ -152,6 +152,23 @@
     <string name="scr_settings_current_passphrase">Current passphrase</string>
     <string name="scr_settings_new_passphrase">New passphrase (at least 10 characters)</string>
     <string name="scr_settings_passphrase_changed">Passphrase changed</string>
+    <!-- Tier 3: the way back for someone who unlocked with a fingerprint for
+         months and can no longer remember what they typed on day one. -->
+    <string name="st_forgot_passphrase">Forgotten your passphrase?</string>
+    <string name="st_forgot_passphrase_detail">Set a new one using your fingerprint</string>
+    <string name="pc_reset_title">Set a new passphrase</string>
+    <string name="pc_reset_body">Your fingerprint can open this vault, so it can also set a new passphrase — no Recovery Kit needed. You will be asked for it once more to confirm.</string>
+    <string name="pc_reset_action">Set new passphrase</string>
+    <string name="pc_reset_done">Passphrase changed. Quick unlock has been set up again.</string>
+    <string name="pc_reset_failed">That did not work. Your old passphrase is still the one in use.</string>
+    <!-- The periodic check that catches the drift before it becomes a lockout. -->
+    <string name="pc_title">Do you still remember your passphrase?</string>
+    <string name="pc_body">You have been unlocking with your fingerprint. If your fingerprint ever stops working, this is what gets you in — so it is worth checking you still know it.</string>
+    <string name="pc_confirm">Check</string>
+    <string name="pc_wrong">That is not it. You can set a new one instead.</string>
+    <string name="pc_forgot">I cannot remember it</string>
+    <string name="pc_later">Not now</string>
+    <string name="pc_correct">Still correct. Nothing to do.</string>
 
     <!-- About -->
     <string name="scr_about_version">Version %1$s</string>
@@ -178,6 +195,9 @@
     <string name="scr_reminder_channel">Renewal reminders</string>
     <string name="scr_reminder_title">Zerokosh reminder</string>
     <string name="scr_reminder_body">%1$s is due soon · open Zerokosh</string>
+    <!-- Tier 5: two nudges, a week and a month in, then silence. -->
+    <string name="rem_kit_title">No recovery kit saved</string>
+    <string name="rem_kit_body">Your vault has real data in it now. If you forget your passphrase without a recovery kit, nobody can let you back in — not even us.</string>
 
     <!-- Common -->
     <string name="import_title">Import a backup</string>
@@ -287,7 +307,24 @@
     <string name="ob_kit_head_tail">" Never online."</string>
     <string name="ob_kit_subhead">Generated on this device, shown once. It is the only way back in if the passphrase slips away.</string>
     <string name="ob_kit_saved">I\'ve saved my kit</string>
-    <string name="ob_kit_footer">This key is shown once and never stored in plain text.</string>
+    <string name="ob_kit_footer">Shown once and never stored in plain text. You can create a new one from Settings whenever you can still get in.</string>
+    <!-- Tier 1: deferring the kit is allowed, recorded, and kept visible. -->
+    <string name="ob_kit_skip">I\'ll do this later</string>
+    <string name="ob_kit_skip_note">Your vault still works. Zerokosh will keep reminding you until a kit is saved.</string>
+    <!-- Tier 2: prove the kit exists rather than tick a box. -->
+    <string name="ob_kit_challenge_title">Check you actually have it</string>
+    <string name="ob_kit_challenge_body">Type group %1$d and group %2$d from the kit you just saved.</string>
+    <string name="ob_kit_challenge_locked">Save the kit first, then type group %1$d and group %2$d back.</string>
+    <string name="ob_kit_challenge_hint">Group %1$d</string>
+    <string name="ob_kit_challenge_wrong">That does not match the key above.</string>
+    <!-- Tier 4: printing, and saying where the file went. -->
+    <string name="ob_kit_print">Print</string>
+    <string name="ob_kit_print_note">A printer, or Save as PDF</string>
+    <string name="ob_kit_saved_to">Saved to %1$s</string>
+    <string name="ob_kit_sent_to_printer">Sent to the printer</string>
+    <string name="ob_kit_save_failed">That did not save. Try again, or pick another place.</string>
+    <string name="ob_kit_beside_vault_title">That is beside your vault file</string>
+    <string name="ob_kit_beside_vault_body">You saved the key into the same folder that syncs your encrypted vault. Anyone who gets that folder now gets both halves. Move the key somewhere else — paper, a different account, a drawer.</string>
     <string name="ob_kit_save_pdf">Save PDF</string>
     <string name="ob_kit_save_pdf_note">Printable one-page kit</string>
     <string name="ob_kit_qr">QR image</string>
@@ -364,6 +401,13 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">Search HDFC, priya@upi, PAN…</string>
     <string name="hm_pinned">Pinned</string>
+    <!-- Tier 1: the standing reminder, once the vault has something in it. -->
+    <string name="hm_kit_banner_title">No recovery kit saved</string>
+    <string name="hm_kit_banner_body">If you forget your passphrase, a recovery kit is the only way back in. Nobody can make you another one.</string>
+    <string name="hm_kit_banner_action">Save one now</string>
+    <string name="hm_kit_banner_dismiss">Remind me later</string>
+    <string name="vh_no_kit_title">No recovery kit saved</string>
+    <string name="vh_no_kit_body">Everything else on this page weakens one login. This one can cost you the whole vault. Settings → Get a new recovery key.</string>
     <string name="hm_filter_all">All</string>
     <string name="hm_count_one">"%1$d credential, "</string>
     <string name="hm_count_many">"%1$d credentials, "</string>

@@ -8,9 +8,18 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.PageRange
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
+import android.print.PrintManager
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import org.zerokosh.app.R
+import java.io.FileOutputStream
 import java.io.OutputStream
 // #endregion
 
@@ -61,6 +70,60 @@ object RecoveryKitPdf {
         doc.finishPage(page)
         doc.writeTo(out)
         doc.close()
+    }
+
+    /**
+     * Hands the same page to Android's print spooler.
+     *
+     * Worth the extra path because it reaches the two places a vault key
+     * actually belongs — a sheet of paper in a drawer, and whatever "Save as
+     * PDF" destination the user already trusts — without Zerokosh needing to
+     * know about printers or storage providers at all. It also survives the
+     * phone, which no on-device copy does.
+     *
+     * Returns false when the platform has no print service, so the caller does
+     * not claim a save that never happened.
+     */
+    fun print(context: Context, recoveryKey: String): Boolean {
+        val manager = context.getSystemService(Context.PRINT_SERVICE) as? PrintManager ?: return false
+        val adapter = object : PrintDocumentAdapter() {
+            override fun onLayout(
+                oldAttributes: PrintAttributes?,
+                newAttributes: PrintAttributes?,
+                cancellationSignal: CancellationSignal?,
+                callback: LayoutResultCallback,
+                extras: Bundle?,
+            ) {
+                if (cancellationSignal?.isCanceled == true) {
+                    callback.onLayoutCancelled()
+                    return
+                }
+                callback.onLayoutFinished(
+                    PrintDocumentInfo.Builder("Zerokosh-Recovery-Kit.pdf")
+                        .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                        .setPageCount(1)
+                        .build(),
+                    newAttributes != oldAttributes,
+                )
+            }
+
+            override fun onWrite(
+                pages: Array<out PageRange>?,
+                destination: ParcelFileDescriptor,
+                cancellationSignal: CancellationSignal?,
+                callback: WriteResultCallback,
+            ) {
+                val ok = runCatching {
+                    FileOutputStream(destination.fileDescriptor).use { out ->
+                        write(context, recoveryKey, out)
+                    }
+                }.isSuccess
+                if (ok) callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES)) else callback.onWriteFailed(null)
+            }
+        }
+        return runCatching {
+            manager.print("Zerokosh Recovery Kit", adapter, null)
+        }.isSuccess
     }
 
     private fun drawWrapped(canvas: Canvas, text: String, x: Float, startY: Float, paint: Paint): Float {

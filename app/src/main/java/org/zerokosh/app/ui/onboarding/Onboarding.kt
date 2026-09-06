@@ -21,6 +21,10 @@ package org.zerokosh.app.ui.onboarding
 
 // #region Imports
 import android.app.Activity
+import android.content.Context
+import android.net.Uri
+import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +47,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,6 +71,7 @@ import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.Print
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.QrCode2
 import androidx.compose.material.icons.outlined.Search
@@ -110,11 +116,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1328,32 +1336,37 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
         value = withContext(Dispatchers.Default) { qrImage(key, 320) }
     }
 
+    // Tapping Save is not saving. The file picker can be cancelled, the write
+    // can fail, and the old checkbox counted every one of those as done — which
+    // is how somebody ends up locked out holding a vault they were told was
+    // safe. Nothing below flips until a stream has actually been written.
+    var savedOnce by remember { mutableStateOf(false) }
+    var savedLabel by remember { mutableStateOf<String?>(null) }
+    var saveFailed by remember { mutableStateOf(false) }
+    var savedBesideVault by remember { mutableStateOf(false) }
+
+    val onSaved: (SaveOutcome) -> Unit = { r ->
+        saveFailed = !r.ok
+        if (r.ok) {
+            savedOnce = true
+            savedLabel = r.name
+            savedBesideVault = r.besideVault
+        }
+    }
     val pdfLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/pdf"),
     ) { uri ->
-        if (uri != null) {
-            // BV-09: PDF generation and the stream write are both I/O.
-            scope.launch(Dispatchers.IO) {
-                runCatching {
-                    context.contentResolver.openOutputStream(uri)?.use { out ->
-                        RecoveryKitPdf.write(context, key, out)
-                    }
-                }
-            }
+        // BV-09: PDF generation and the stream write are both I/O.
+        writeKit(scope, context, uri, app.prefs.syncFolderUri, onSaved) { out ->
+            RecoveryKitPdf.write(context, key, out)
         }
     }
     val pngLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("image/png"),
     ) { uri ->
-        if (uri != null) {
-            // BV-09: 1024x1024 is a ~1M-iteration loop plus a PNG encode.
-            scope.launch(Dispatchers.IO) {
-                runCatching {
-                    context.contentResolver.openOutputStream(uri)?.use { out ->
-                        qrBitmap(key, 1024).compress(Bitmap.CompressFormat.PNG, 100, out)
-                    }
-                }
-            }
+        // BV-09: 1024x1024 is a ~1M-iteration loop plus a PNG encode.
+        writeKit(scope, context, uri, app.prefs.syncFolderUri, onSaved) { out ->
+            qrBitmap(key, 1024).compress(Bitmap.CompressFormat.PNG, 100, out)
         }
     }
 
@@ -1383,6 +1396,7 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
             PrimaryPillButton(
                 label = stringResource(R.string.ob_kit_saved),
                 onClick = {
+                    app.prefs.recoveryKitSaved = true
                     onboarding.recoveryKey = null
                     onDone()
                 },
@@ -1415,7 +1429,24 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
                 detail = stringResource(R.string.ob_kit_qr_note),
                 onClick = { pngLauncher.launch("Zerokosh-Recovery-Key.png") },
             )
+            RowDivider()
+            // Print reaches the two places a vault key actually belongs — paper,
+            // and whatever "Save as PDF" target the user already trusts — without
+            // the app needing to know about either.
+            SaveOptionRow(
+                icon = Icons.Outlined.Print,
+                title = stringResource(R.string.ob_kit_print),
+                detail = stringResource(R.string.ob_kit_print_note),
+                onClick = { if (RecoveryKitPdf.print(context, key)) savedOnce = true },
+            )
         }
+        SaveStatus(savedOnce = savedOnce, savedLabel = savedLabel, failed = saveFailed)
+        // The one convenience that would quietly undo the encryption. A vault
+        // is ciphertext plus a key kept somewhere else; putting the Recovery
+        // Key in the folder that syncs the .kosh file puts both in one place,
+        // and whoever gets that folder gets everything. Worth saying loudly at
+        // the moment it happens rather than in documentation nobody reads.
+        BesideVaultWarning(visible = savedBesideVault)
 
         Spacer(Modifier.height(12.dp))
         NoticeCard(
@@ -1427,52 +1458,251 @@ fun RecoveryKitScreen(app: ZerokoshApp, onboarding: OnboardingState, onDone: () 
         )
 
         Spacer(Modifier.height(12.dp))
-        // Confirmation.
-        Row(
+        // Confirmation: prove you have the kit, rather than assert it.
+        KitChallenge(
+            key = key,
+            enabled = savedOnce,
+            onResult = { confirmed = it },
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(CornerGroup))
                 .background(c.surface)
                 .border(1.dp, c.line, RoundedCornerShape(CornerGroup))
-                .clickable { confirmed = !confirmed }
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Box(
-                Modifier
-                    .size(20.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(if (confirmed) c.ink else Color.Transparent)
-                    .then(
-                        if (confirmed) Modifier
-                        else Modifier.border(1.5.dp, c.ink(0.3f), RoundedCornerShape(6.dp)),
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (confirmed) {
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = null,
-                        tint = c.paper,
-                        modifier = Modifier.size(12.dp),
-                    )
-                }
-            }
-            Text(
-                buildAnnotatedString {
-                    append(stringResource(R.string.ob_kit_confirm_emph))
-                    withStyle(SpanStyle(fontWeight = FontWeight.Medium, color = c.ink)) {
-                        append(stringResource(R.string.ob_kit_confirm_body))
-                    }
-                },
-                fontSize = 12.5.sp,
-                lineHeight = 18.sp,
-                color = c.ink(0.75f),
-            )
+        )
+
+        SkipKitFooter {
+            // Deferring is allowed and recorded, not silently forgiven: Vault
+            // Review and the home banner keep asking until a kit exists.
+            // Blocking here only teaches people to lie to the checkbox, which
+            // is the behaviour this screen was rebuilt to stop.
+            app.prefs.recoveryKitSaved = false
+            onboarding.recoveryKey = null
+            onDone()
         }
-        Spacer(Modifier.height(16.dp))
     }
+}
+
+/**
+ * The picker chose the filename; reading it back is what lets the screen say
+ * "Saved to Zerokosh-Recovery-Kit.pdf" rather than a hopeful "Saved". Somebody
+ * who cannot find the file later has not saved anything.
+ */
+private fun displayNameOf(context: Context, uri: Uri): String? =
+    runCatching {
+        context.contentResolver
+            .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+            ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    }.getOrNull() ?: uri.lastPathSegment
+
+/**
+ * Whether a chosen save location sits inside the folder that syncs the vault.
+ *
+ * SAF document uris built by CreateDocument inside a granted tree carry that
+ * tree's id, so a prefix match on the encoded tree segment is enough. It is a
+ * heuristic and errs towards warning: a false warning costs a sentence of
+ * reading, a missed one costs the vault.
+ */
+private fun inSyncFolder(saved: Uri, syncFolderUri: String): Boolean {
+    if (syncFolderUri.isBlank()) return false
+    val tree = runCatching { DocumentsContract.getTreeDocumentId(syncFolderUri.toUri()) }.getOrNull()
+        ?: return false
+    return saved.toString().contains(Uri.encode(tree)) || saved.toString().contains(tree)
+}
+
+/** Groups of the key that are worth asking about — the five full-length ones. */
+private fun challengeGroups(key: String): List<Int> =
+    key.split("-").withIndex()
+        .filter { (i, part) -> i > 0 && part.length == 5 }
+        .map { (i, _) -> i }
+
+/**
+ * Two groups typed back, in place of a checkbox nobody reads.
+ *
+ * A checkbox asks "did you save it?" and accepts the answer without evidence,
+ * which is free to tick while holding nothing at all. Typing two groups back
+ * cannot be done without the kit actually in front of you, which is the only
+ * question worth asking. Deliberately only two of six: enough that guessing is
+ * hopeless, few enough that it stays a check rather than a transcription job.
+ */
+@Composable
+private fun KitChallenge(
+    key: String,
+    enabled: Boolean,
+    onResult: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val c = VaultTheme.colors
+    val parts = remember(key) { key.split("-") }
+    val asked = remember(key) { challengeGroups(key).shuffled().take(2).sorted() }
+    if (asked.size < 2) {
+        // A key shaped unexpectedly should not strand the user on this screen.
+        LaunchedEffect(key) { onResult(true) }
+        return
+    }
+    var first by remember(key) { mutableStateOf("") }
+    var second by remember(key) { mutableStateOf("") }
+
+    val firstOk = first.equals(parts[asked[0]], ignoreCase = true)
+    val secondOk = second.equals(parts[asked[1]], ignoreCase = true)
+    val bothTyped = first.length == 5 && second.length == 5
+    LaunchedEffect(firstOk, secondOk) { onResult(firstOk && secondOk) }
+
+    Column(modifier) {
+        Text(
+            stringResource(R.string.ob_kit_challenge_title),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = c.ink,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(
+                if (enabled) R.string.ob_kit_challenge_body else R.string.ob_kit_challenge_locked,
+                asked[0],
+                asked[1],
+            ),
+            fontSize = 12.sp,
+            lineHeight = 17.sp,
+            color = c.ink(0.65f),
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            GroupField(asked[0], first, enabled, bothTyped && !firstOk) { first = it }
+            GroupField(asked[1], second, enabled, bothTyped && !secondOk) { second = it }
+        }
+        ChallengeError(visible = bothTyped && !(firstOk && secondOk))
+    }
+}
+
+/** What a save attempt turned out to be, once the stream has closed. */
+private data class SaveOutcome(val ok: Boolean, val name: String?, val besideVault: Boolean)
+
+/**
+ * Writes the kit and reports what actually happened, off the main thread.
+ *
+ * Lifted out of RecoveryKitScreen because the screen sits at the complexity
+ * gate, and because "did this save?" is a question worth answering in one
+ * place: a cancelled picker, a failed stream and a successful write all have
+ * to end up distinguishable.
+ */
+private fun writeKit(
+    scope: CoroutineScope,
+    context: Context,
+    uri: Uri?,
+    syncFolderUri: String,
+    onResult: (SaveOutcome) -> Unit,
+    write: (java.io.OutputStream) -> Unit,
+) {
+    if (uri == null) return
+    scope.launch(Dispatchers.IO) {
+        val ok = runCatching {
+            context.contentResolver.openOutputStream(uri)?.use(write) ?: error("no stream")
+        }.isSuccess
+        val outcome = SaveOutcome(
+            ok = ok,
+            name = if (ok) displayNameOf(context, uri) else null,
+            besideVault = ok && inSyncFolder(uri, syncFolderUri),
+        )
+        withContext(Dispatchers.Main) { onResult(outcome) }
+    }
+}
+
+/** "I'll do this later", and the promise that the app will keep asking. */
+@Composable
+private fun SkipKitFooter(onSkip: () -> Unit) {
+    val c = VaultTheme.colors
+    Spacer(Modifier.height(12.dp))
+    Text(
+        stringResource(R.string.ob_kit_skip),
+        fontSize = 12.5.sp,
+        color = c.ink(0.55f),
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(CornerGroup))
+            .clickable(role = Role.Button, onClick = onSkip)
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+    )
+    Spacer(Modifier.height(4.dp))
+    Text(
+        stringResource(R.string.ob_kit_skip_note),
+        fontSize = 11.sp,
+        lineHeight = 15.sp,
+        color = c.ink(0.45f),
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(horizontal = 24.dp),
+    )
+    Spacer(Modifier.height(8.dp))
+}
+
+/**
+ * What actually happened to the file, named rather than implied.
+ *
+ * "Saved" on its own is what the old checkbox amounted to. A filename is
+ * something the user can go and look for.
+ */
+@Composable
+private fun SaveStatus(savedOnce: Boolean, savedLabel: String?, failed: Boolean) {
+    if (!savedOnce && !failed) return
+    val c = VaultTheme.colors
+    Spacer(Modifier.height(8.dp))
+    Text(
+        when {
+            failed -> stringResource(R.string.ob_kit_save_failed)
+            savedLabel != null -> stringResource(R.string.ob_kit_saved_to, savedLabel)
+            else -> stringResource(R.string.ob_kit_sent_to_printer)
+        },
+        fontSize = 12.sp,
+        color = if (failed) MaterialTheme.colorScheme.error else c.primary,
+        modifier = Modifier.padding(horizontal = 20.dp),
+    )
+}
+
+/** The key landing next to the ciphertext it unlocks. */
+@Composable
+private fun BesideVaultWarning(visible: Boolean) {
+    if (!visible) return
+    Spacer(Modifier.height(8.dp))
+    NoticeCard(
+        title = stringResource(R.string.ob_kit_beside_vault_title),
+        body = stringResource(R.string.ob_kit_beside_vault_body),
+        icon = Icons.Outlined.WarningAmber,
+        tone = NoticeTone.Warn,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
+}
+
+/** One five-character group of the key, uppercased as typed. */
+@Composable
+private fun RowScope.GroupField(
+    index: Int,
+    value: String,
+    enabled: Boolean,
+    isError: Boolean,
+    onChange: (String) -> Unit,
+) {
+    FilledSecretField(
+        label = stringResource(R.string.ob_kit_challenge_hint, index),
+        value = value,
+        onValueChange = { if (enabled) onChange(it.uppercase().take(5)) },
+        modifier = Modifier.weight(1f),
+        keyboardType = KeyboardType.Text,
+        visible = true,
+        isError = isError,
+    )
+}
+
+@Composable
+private fun ChallengeError(visible: Boolean) {
+    if (!visible) return
+    Spacer(Modifier.height(6.dp))
+    Text(
+        stringResource(R.string.ob_kit_challenge_wrong),
+        fontSize = 11.5.sp,
+        color = MaterialTheme.colorScheme.error,
+    )
 }
 
 /** The dark recovery card: glow washes, grouped key, and a scannable QR. */
@@ -1665,7 +1895,13 @@ private suspend fun sealOnboarding(
     if (enable && (pass == null || !QuickUnlockManager.enable(activity, app, pass))) return false
     // BV-25: the session is opened here, not in createVault, so S5 and S6 get to
     // render first. Must run before wipe() zeroes the array.
-    if (pass != null) app.repository.completeOnboarding(pass)
+    if (pass != null) {
+        // Starts the thirty-day clock from the one moment we know for certain
+        // the user could type it.
+        app.prefs.lastPassphraseUseMs = System.currentTimeMillis()
+        app.prefs.vaultCreatedMs = System.currentTimeMillis()
+        app.repository.completeOnboarding(pass)
+    }
     onboarding.wipe()
     return true
 }

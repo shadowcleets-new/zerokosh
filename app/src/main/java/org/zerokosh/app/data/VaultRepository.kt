@@ -222,6 +222,35 @@ class VaultRepository(
         }
     }
 
+    /**
+     * §3.3 reset: re-wraps wrap_mk from the Keystore's MasterKey instead of the
+     * current passphrase, for the quick-unlock user who has forgotten it.
+     *
+     * Caller must re-enrol quick unlock afterwards — the stored MasterKey is
+     * stale the moment this returns. [QuickUnlockManager.resetPassphrase] is
+     * the only intended caller and does exactly that.
+     */
+    suspend fun changePassphraseWithMasterKey(
+        masterKey: ByteArray,
+        new: ByteArray,
+    ): Boolean = withContext(Dispatchers.Default) {
+        ioMutex.withLock {
+            val bytes = store.read() ?: return@withLock false
+            val now = System.currentTimeMillis()
+            val out = VaultOperations.changePassphraseWithMasterKey(
+                bytes, masterKey, new, prefs.deviceId, now, crypto,
+            ) ?: return@withLock false
+            if (!backupDoneThisSession) {
+                store.backupCurrent()
+                backupDoneThisSession = true
+            }
+            store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
+            envelope = VaultFileCodec.decode(out)
+            lastSeenModifiedMs = now
+            true
+        }
+    }
+
     /** S4 from Settings: new RecoveryKey; re-wraps wrap_rk only. Returned string is shown ONCE. */
     suspend fun rotateRecoveryKey(passphrase: ByteArray): String? = withContext(Dispatchers.Default) {
         ioMutex.withLock {

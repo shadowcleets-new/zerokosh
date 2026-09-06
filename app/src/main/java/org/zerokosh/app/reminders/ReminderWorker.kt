@@ -95,7 +95,47 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         for (record in body.records) {
             repeat(dueFields(record, today).size) { notifyFor(record, notifId++) }
         }
+        notifyMissingKit(app)
         return Result.success()
+    }
+
+    /**
+     * Two nudges, at a week and at a month, then silence.
+     *
+     * The onboarding step asks when the vault is empty and the risk is
+     * abstract; a week later there is real data in it and the same question
+     * means something. Capped at two because a warning that arrives every day
+     * is one people learn to swipe away without reading, which is worse than
+     * not sending it.
+     */
+    // Same reason as notifyFor above: lint cannot follow the guard into
+    // canNotify(), and duplicating the check here to satisfy flow analysis
+    // would leave two copies to keep in step.
+    @SuppressLint("MissingPermission")
+    private fun notifyMissingKit(app: ZerokoshApp) {
+        if (app.prefs.recoveryKitSaved || !canNotify()) return
+        val created = app.prefs.vaultCreatedMs
+        if (created <= 0L) return
+        val ageDays = (System.currentTimeMillis() - created) / (24 * 60 * 60 * 1000)
+        val sent = app.prefs.kitRemindersSent
+        val due = when {
+            sent == 0 && ageDays >= 7 -> true
+            sent == 1 && ageDays >= 30 -> true
+            else -> false
+        }
+        if (!due) return
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle(applicationContext.getString(R.string.rem_kit_title))
+            .setContentText(applicationContext.getString(R.string.rem_kit_body))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(applicationContext.getString(R.string.rem_kit_body)),
+            )
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(applicationContext).notify(7999, notification)
+        app.prefs.kitRemindersSent = sent + 1
     }
 
     companion object {

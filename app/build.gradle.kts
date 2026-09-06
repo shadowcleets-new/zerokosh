@@ -265,6 +265,9 @@ val verifyTemplates by tasks.registering {
     val jsonFile = templatesJson
     val pickerFile = pickersJson
     val stringsFile = templateStrings
+    // English is generated from, not into, so it never appeared in localePairs
+    // — which is how a bare apostrophe in values/ reached aapt unchecked.
+    val baseFiles = listOf(baseStrings, templateStrings)
     val galleryFile = galleryKt
     val categoryFile = categoryKt
     // Every values-XX directory is held to the same standard. Discovered rather
@@ -324,7 +327,10 @@ val verifyTemplates by tasks.registering {
         // from ParsedResource@<hash>" and nothing else — no file, no line, no key.
         // It is not only an English contraction problem: Assamese writes হ'ল and
         // Punjabi writes 'ਤੇ, so a whole locale can fail on ordinary words.
-        val apostropheProblems = localePairs.flatMap { listOf(it.first, it.second) }
+        // values/ included deliberately: it was excluded, and English is the file
+        // every translation is generated from, so a bare apostrophe there breaks
+        // the build with an error that names neither key nor character.
+        val apostropheProblems = (localePairs.flatMap { listOf(it.first, it.second) } + baseFiles)
             .filter { it.exists() }
             .flatMap { f ->
                 spaceRe.findAll(f.readText()).mapNotNull { m ->

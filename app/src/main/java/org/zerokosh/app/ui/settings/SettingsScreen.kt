@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -87,6 +88,7 @@ fun SettingsScreen(
     onOpenHealth: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val activity = context as FragmentActivity
     val scope = rememberCoroutineScope()
     var showChangePass by remember { mutableStateOf(false) }
@@ -127,17 +129,17 @@ fun SettingsScreen(
                     syncBusy = true
                     val success = runCatching { app.repository.manualBackup(context) }.getOrDefault(false)
                     syncBusy = false
-                    val folderName = runCatching { DocumentFile.fromTreeUri(context, uri)?.name }.getOrNull() ?: context.getString(R.string.st_folder_fallback)
+                    val folderName = runCatching { DocumentFile.fromTreeUri(context, uri)?.name }.getOrNull() ?: resources.getString(R.string.st_folder_fallback)
                     if (success) {
                         Toast.makeText(
                             context,
-                            context.getString(R.string.st_toast_folder_backed, folderName),
+                            resources.getString(R.string.st_toast_folder_backed, folderName),
                             Toast.LENGTH_LONG,
                         ).show()
                     } else {
                         Toast.makeText(
                             context,
-                            context.getString(R.string.st_toast_folder_connected, folderName),
+                            resources.getString(R.string.st_toast_folder_connected, folderName),
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
@@ -145,7 +147,7 @@ fun SettingsScreen(
             }.onFailure { e ->
                 Toast.makeText(
                     context,
-                    context.getString(R.string.st_toast_folder_failed, e.localizedMessage.orEmpty()),
+                    resources.getString(R.string.st_toast_folder_failed, e.localizedMessage.orEmpty()),
                     Toast.LENGTH_LONG,
                 ).show()
             }
@@ -171,7 +173,7 @@ fun SettingsScreen(
                 }
                 Toast.makeText(
                     context,
-                    context.getString(
+                    resources.getString(
                         if (ok) R.string.st_toast_exported else R.string.st_toast_export_failed,
                     ),
                     Toast.LENGTH_SHORT,
@@ -547,13 +549,13 @@ fun SettingsScreen(
                     if (success) {
                         Toast.makeText(
                             context,
-                            context.getString(R.string.st_toast_backed_up, folderName),
+                            resources.getString(R.string.st_toast_backed_up, folderName),
                             Toast.LENGTH_SHORT,
                         ).show()
                     } else {
                         Toast.makeText(
                             context,
-                            context.getString(R.string.st_toast_backup_failed),
+                            resources.getString(R.string.st_toast_backup_failed),
                             Toast.LENGTH_LONG,
                         ).show()
                     }
@@ -569,7 +571,7 @@ fun SettingsScreen(
                 showSyncSheet = false
                 Toast.makeText(
                     context,
-                    context.getString(R.string.st_toast_disconnected),
+                    resources.getString(R.string.st_toast_disconnected),
                     Toast.LENGTH_SHORT,
                 ).show()
             },

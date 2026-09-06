@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC، priya@upi، PAN… تلاش کریں</string>
     <string name="hm_pinned">پن کیے گئے</string>
+    <string name="hm_filter_all">سب</string>
     <string name="hm_count_one">"%1$d چیز، "</string>
     <string name="hm_count_many">"%1$d چیزیں، "</string>
     <string name="hm_all_offline">سب آف لائن۔</string>

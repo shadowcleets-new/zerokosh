@@ -364,6 +364,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">Search HDFC, priya@upi, PAN…</string>
     <string name="hm_pinned">Pinned</string>
+    <string name="hm_filter_all">All</string>
     <string name="hm_count_one">"%1$d credential, "</string>
     <string name="hm_count_many">"%1$d credentials, "</string>
     <string name="hm_all_offline">all offline.</string>

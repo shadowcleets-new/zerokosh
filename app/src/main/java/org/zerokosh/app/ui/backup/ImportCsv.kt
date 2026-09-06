@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +70,7 @@ private class Pending(
 @Composable
 fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     var pending by remember { mutableStateOf<Pending?>(null) }
@@ -86,13 +88,13 @@ fun rememberImportCsv(app: ZerokoshApp): () -> Unit {
         scope.launch {
             val text = withContext(Dispatchers.IO) { readBounded(context, uri) }
             if (text == null) {
-                error = context.getString(R.string.ic_too_large)
+                error = resources.getString(R.string.ic_too_large)
                 return@launch
             }
             val preview = runCatching { CsvImport.parseAuto(text, app.prefs.deviceId, System.currentTimeMillis()) }
                 .getOrNull()
             if (preview == null || preview.records.isEmpty()) {
-                error = context.getString(R.string.ic_unrecognised)
+                error = resources.getString(R.string.ic_unrecognised)
                 return@launch
             }
             val existing = app.repository.body.value?.records.orEmpty()

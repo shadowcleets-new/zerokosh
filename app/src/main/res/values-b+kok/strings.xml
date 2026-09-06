@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, PAN… सोदात</string>
     <string name="hm_pinned">पिन केल्लीं</string>
+    <string name="hm_filter_all">सगळें</string>
     <string name="hm_count_one">"%1$d वस्त, "</string>
     <string name="hm_count_many">"%1$d वस्तू, "</string>
     <string name="hm_all_offline">सगळें ऑफलायन.</string>

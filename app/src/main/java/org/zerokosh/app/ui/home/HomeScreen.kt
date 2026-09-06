@@ -309,7 +309,7 @@ private fun FilterChipRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         VaultFilterChip(
-            label = "All",
+            label = stringResource(R.string.hm_filter_all),
             selected = selected == null,
             count = records.size,
             onClick = { onSelect(null) },

@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, PAN… বিচাৰক</string>
     <string name="hm_pinned">পিন কৰা</string>
+    <string name="hm_filter_all">সকলো</string>
     <string name="hm_count_one">"%1$d টা বস্তু, "</string>
     <string name="hm_count_many">"%1$d টা বস্তু, "</string>
     <string name="hm_all_offline">সকলো অফলাইন।</string>

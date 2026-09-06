@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -623,6 +624,7 @@ fun TotpRow(field: TemplateField, secret: String, templateId: String) {
     }
     val remaining = Totp.secondsRemaining(params, nowMs)
     val context = LocalContext.current
+    val resources = LocalResources.current
     val label = fieldLabel(templateId, field.k)
 
     Row(
@@ -634,7 +636,7 @@ fun TotpRow(field: TemplateField, secret: String, templateId: String) {
             .padding(16.dp)
             .clickable {
                 ClipboardHelper.copySensitive(context, code)
-                Toast.makeText(context, context.getString(R.string.rd_copied), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, resources.getString(R.string.rd_copied), Toast.LENGTH_SHORT).show()
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {

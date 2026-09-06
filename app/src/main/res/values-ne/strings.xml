@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, PAN… खोज्नुहोस्</string>
     <string name="hm_pinned">पिन गरिएका</string>
+    <string name="hm_filter_all">सबै</string>
     <string name="hm_count_one">"%1$d कुरा, "</string>
     <string name="hm_count_many">"%1$d कुरा, "</string>
     <string name="hm_all_offline">सबै अफलाइन।</string>

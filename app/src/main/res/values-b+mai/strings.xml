@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, PAN… ताकू</string>
     <string name="hm_pinned">पिन कएल</string>
+    <string name="hm_filter_all">सभटा</string>
     <string name="hm_count_one">"%1$d वस्तु, "</string>
     <string name="hm_count_many">"%1$d वस्तु, "</string>
     <string name="hm_all_offline">सभटा ऑफलाइन।</string>

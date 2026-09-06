@@ -38,8 +38,8 @@ android {
         applicationId = "com.zerokosh.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2 // fixed per release — reproducible builds (§6.8)
-        versionName = "0.1.0"
+        versionCode = 3 // fixed per release — reproducible builds (§6.8)
+        versionName = "0.2.0" // 17 languages: +bn, ml, pa, as, ur, ne, kok, mai, doi
 
         // JNA's aar still carries armeabi, mips and mips64. Android dropped
         // MIPS at NDK r17 and armeabi at r16; no device Play can reach runs

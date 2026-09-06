@@ -25,6 +25,7 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.service.autofill.Dataset
 import android.service.autofill.FillResponse
 import android.service.autofill.InlinePresentation
@@ -101,7 +102,13 @@ object AutofillFill {
         targets.passwordId?.let { builder.setValue(it, AutofillValue.forText(passwordOf(record))) }
         // Both presentations on one dataset: the platform draws the chip where the
         // IME has a strip and falls back to the dropdown where it does not.
-        inline?.let { builder.setInlinePresentation(it) }
+        //
+        // inlineFor() already returns null below API 30, so this is never reached
+        // on an older device. The check is repeated here because that guard sits
+        // in another file, where neither lint nor the next reader can see it.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            inline?.let { builder.setInlinePresentation(it) }
+        }
         return builder.build()
     }
 

@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -394,6 +395,7 @@ private fun EmptyCodes(onScan: () -> Unit, hasQuery: Boolean) {
 private fun TotpCard(entry: TotpEntry, accented: Boolean) {
     val c = VaultTheme.colors
     val context = LocalContext.current
+    val resources = LocalResources.current
     var secondsLeft by remember { mutableIntStateOf(Totp.secondsRemaining(entry.params, System.currentTimeMillis())) }
     var code by remember { mutableStateOf(Totp.code(entry.params, System.currentTimeMillis())) }
 
@@ -427,7 +429,7 @@ private fun TotpCard(entry: TotpEntry, accented: Boolean) {
             .clickable {
                 if (code.isNotBlank()) {
                     ClipboardHelper.copySensitive(context, code)
-                    Toast.makeText(context, context.getString(R.string.au_copied), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, resources.getString(R.string.au_copied), Toast.LENGTH_SHORT).show()
                 }
             }
             .padding(20.dp),
@@ -522,6 +524,7 @@ fun QrScannerScreen(
     onManualClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
         PackageManager.PERMISSION_GRANTED
@@ -557,11 +560,11 @@ fun QrScannerScreen(
                     if (result != null && (result.text.startsWith("otpauth://", ignoreCase = true) || result.text.matches(Regex("^[A-Z2-7=]+$", RegexOption.IGNORE_CASE)))) {
                         onSecret(result.text)
                     } else {
-                        Toast.makeText(context, context.getString(R.string.au_no_qr_found), Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, resources.getString(R.string.au_no_qr_found), Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, context.getString(R.string.au_image_failed), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, resources.getString(R.string.au_image_failed), Toast.LENGTH_SHORT).show()
             }
         }
     }

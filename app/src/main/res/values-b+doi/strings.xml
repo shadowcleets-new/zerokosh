@@ -362,6 +362,7 @@
     <!-- Home and Welcome. -->
     <string name="hm_search_hint">HDFC, priya@upi, PAN… तोपो</string>
     <string name="hm_pinned">पिन कीते दे</string>
+    <string name="hm_filter_all">सारे</string>
     <string name="hm_count_one">"%1$d चीज, "</string>
     <string name="hm_count_many">"%1$d चीजां, "</string>
     <string name="hm_all_offline">सारा कुछ ऑफलाइन।</string>

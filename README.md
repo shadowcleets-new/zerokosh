@@ -48,7 +48,13 @@ Signing certificate SHA-256 fingerprint: *published with the first signed releas
 
 ## License
 
-[GPL-3.0](LICENSE). Free forever for individuals — there is nothing to host, so there is nothing to charge for.
+[GPL-3.0-or-later](LICENSE). Free forever for individuals — there is nothing to host, so there is nothing to charge for.
+
+Zerokosh is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. The `or later` matters: it is what lets this code move to a future GPL
+without every past contributor having to be found and asked.
 
 ## Contributing & security reports
 

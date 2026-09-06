@@ -442,11 +442,16 @@ internal val Languages = listOf(
     Language("te", "అ", "తెలుగు", "Telugu", true),
     Language("ta", "அ", "தமிழ்", "Tamil", true),
     Language("gu", "અ", "ગુજરાતી", "Gujarati", true),
+    Language("ur", "ا", "اردو", "Urdu", true),
     Language("kn", "ಅ", "ಕನ್ನಡ", "Kannada", true),
-    Language("ml", "മ", "മലയാളം", "Malayalam", true),
     Language("or", "ଓ", "ଓଡ଼ିଆ", "Odia", true),
+    Language("ml", "മ", "മലയാളം", "Malayalam", true),
     Language("pa", "ਪ", "ਪੰਜਾਬੀ", "Punjabi", true),
     Language("as", "অ", "অসমীয়া", "Assamese", true),
+    Language("mai", "म", "मैथिली", "Maithili", true),
+    Language("ne", "न", "नेपाली", "Nepali", true),
+    Language("kok", "क", "कोंकणी", "Konkani", true),
+    Language("doi", "ड", "डोगरी", "Dogri", true),
 )
 
 @Composable

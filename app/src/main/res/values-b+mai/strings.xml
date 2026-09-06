@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Maithili. Generated from values/ by genloc.py; key order matches. -->
+<resources>
+    <string name="app_name">Zerokosh</string>
+
+    <!-- S1 Language picker -->
+    <string name="scr_language_title">अपन भाषा चुनू</string>
+    <string name="scr_language_subtitle">Choose your language</string>
+    <string name="scr_language_continue">आगू बढ़ू</string>
+
+    <!-- S2 Trust explainer -->
+    <string name="scr_trust_card1_title">अहाँक डेटा एहि फोनेमे रहैत अछि</string>
+    <string name="scr_trust_card1_body">अहाँ जे किछु सहेजैत छी, से अहाँक फोनक एकटा बन्न फाइलमे रहैत अछि। से कहियो हमरा लग नहि अबैत अछि — ओकरा राखबाक जगहे हमरा लग नहि अछि।</string>
+    <string name="scr_trust_card2_title">हमर सर्वर नहि अछि — ने हैक करबाक किछु, ने बेचबाक</string>
+    <string name="scr_trust_card2_body">Zerokosh खाता नहि, क्लाउड नहि, साइन-अप नहि। एकरा खाली अहीं खोलि सकैत छी। हमहूँ नहि।</string>
+    <string name="scr_trust_card3_title">सदिखन मुफ्त, ओपन सोर्स</string>
+    <string name="scr_trust_card3_body">ने सदस्यता, ने विज्ञापन। केओ हमर कोड पढ़ि क हमर एक-एक बात परखि सकैत अछि।</string>
+    <string name="scr_trust_continue">आगू बढ़ू</string>
+
+    <!-- S3 Create passphrase -->
+    <string name="scr_create_title">अपन पासफ्रेज बनाबू</string>
+    <string name="scr_create_body">एहि एकटा पासफ्रेजे सभटा बन्न रखैत अछि। एकटा नमगर वाक्य चुनू जे खाली अहाँ जनैत छी।</string>
+    <string name="scr_create_hint">पासफ्रेज (कम सँ कम 10 अक्षर)</string>
+    <string name="scr_create_confirm_hint">फेर लिखू</string>
+    <string name="scr_create_mismatch">दुनू एक्के रंग नहि अछि</string>
+    <string name="scr_create_too_short">कम सँ कम 10 अक्षर चाही — जतेक नमगर, ततेक मजगूत</string>
+    <string name="scr_create_strength_weak">कमजोर</string>
+    <string name="scr_create_strength_fair">ठीके</string>
+    <string name="scr_create_strength_good">नीक</string>
+    <string name="scr_create_strength_strong">मजगूत</string>
+    <string name="scr_create_pin_option">एकर बदला 6 अंकक पिन राखू</string>
+    <string name="scr_create_pin_hint">6 अंकक पिन</string>
+    <string name="scr_create_pin_why">पिनक अनुमति एहि दुआरे अछि जे ई फोन ओकरा अपन सुरक्षा चिप आ अहाँक आङुर वा मुँह सँ बचबैत अछि।</string>
+    <string name="scr_create_pin_unavailable">पिनक लेल आङुर वा मुँह अनलॉक बला फोन चाही। कृपया पासफ्रेज चुनू।</string>
+    <string name="scr_create_button">बन्न क दिअ</string>
+    <string name="scr_create_working">अहाँक भण्डार तैयार भ रहल अछि…</string>
+
+    <!-- S4 Recovery kit -->
+    <string name="scr_recovery_title">अहाँक रिकवरी कुंजी</string>
+    <string name="scr_recovery_body">कहियो पासफ्रेज बिसरि गेलहुँ, तँ भीतर घुरि आयबाक एहे एकटा बाट अछि। हम ओकरा रिसेट नहि क सकैत छी — केओ नहि क सकैत अछि।</string>
+    <string name="scr_recovery_save_pdf">PDF रूपमे सहेजू</string>
+    <string name="scr_recovery_confirm_check">हम एकरा लिखि क सुरक्षित जगह राखि लेलहुँ</string>
+    <string name="scr_recovery_done">आगू बढ़ू</string>
+    <string name="scr_recovery_never_again">एहि परदाक बाद ई कुंजी फेर नहि देखाएत।</string>
+    <string name="scr_recovery_pdf_saved">रिकवरी किट PDF सहेजल गेल</string>
+    <string name="scr_recovery_pdf_instructions">ई कागज अपन जमीन-जायदादक कागज वा आन जरूरी कागजातक संग राखू। जकरा लग ई कुंजी अछि, ओ अहाँक भण्डार खोलि सकैत अछि — एकरा लॉकरक चाभी जकाँ सम्हारू।</string>
+    <string name="scr_recovery_pdf_title">Zerokosh रिकवरी किट</string>
+
+    <!-- S5 Quick unlock opt-in -->
+    <string name="scr_quickunlock_title">आङुर वा मुँह सँ खोलू</string>
+    <string name="scr_quickunlock_body">जेना अहाँ फोन खोलैत छी, तहिना भण्डारो। पासफ्रेज सदिखन काज करैत रहत।</string>
+    <string name="scr_quickunlock_enable">चालू करू</string>
+    <string name="scr_quickunlock_skip">आब नहि</string>
+    <string name="scr_quickunlock_backup_footer">आबे बैकअप फोल्डर लगा लिअ</string>
+
+    <!-- S6 Home -->
+    <string name="scr_home_title">घर</string>
+    <string name="scr_home_search_hint">अपन भण्डारमे ताकू</string>
+    <string name="scr_home_tab_home">घर</string>
+    <string name="scr_home_tab_authenticator">कोड</string>
+    <string name="scr_home_tab_settings">सेटिंग</string>
+    <string name="scr_home_add">जोड़ू</string>
+    <string name="scr_home_empty_sample_bank">अहाँक बैंक खाता एहन देखाएत</string>
+    <string name="scr_home_empty_sample_card">अहाँक कार्ड, UPI, एप लॉगिन — सभटा एतहि</string>
+    <string name="scr_home_no_results">अहाँक ताकबसँ किछु नहि भेटल</string>
+    <string name="scr_home_group_other">आन</string>
+
+    <!-- §10.5 rotating safety tips -->
+    <string name="msg_safety_tip_1">बैंक कहियो अहाँक OTP नहि मंगैत अछि। जे मंगय, से ठक अछि।</string>
+    <string name="msg_safety_tip_2">कोनो बैंक अधिकारी अहाँकेँ स्क्रीन साझा करबला एप लगाबय लेल नहि कहत।</string>
+    <string name="msg_safety_tip_3">अहाँक UPI पिन खाली UPI एपक कीपैडक लेल अछि — फोन पर ककरो नहि कहू।</string>
+    <string name="msg_safety_tip_4">KYC एक्के दिनमे नहि खतम होइत अछि। “आइ KYC खतम” बला संदेश ठकी अछि।</string>
+    <string name="msg_safety_tip_5">पाइ पाबय लेल ने पिन देबय पड़ैत अछि, ने QR स्कैन करय पड़ैत अछि।</string>
+    <string name="msg_safety_tip_6">बिजली कटबाक SMS आ ओहिमे ककरो निजी नम्बर? से ठकी अछि।</string>
+
+    <!-- S8 Template gallery -->
+    <string name="scr_gallery_title">हम की सहेजि रहल छी?</string>
+    <string name="scr_gallery_quick_add">जल्दी जोड़ू</string>
+
+    <!-- S9 Record detail -->
+    <string name="scr_detail_copy">कॉपी करू</string>
+    <string name="scr_detail_reveal">देखाबू</string>
+    <string name="scr_detail_hide">नुकाबू</string>
+    <string name="scr_detail_copied">कॉपी भ गेल · 30 सेकेण्डमे मेटा जाएत</string>
+    <string name="scr_detail_edit">बदलू</string>
+    <string name="scr_detail_delete">हटाबू</string>
+    <string name="scr_detail_favorite">मनपसन्द</string>
+    <string name="scr_detail_delete_confirm_title">ई प्रविष्टि हटा देल जाए?</string>
+    <string name="scr_detail_delete_confirm_body">ई 30 दिन “हालेमे हटाओल गेल”मे रहत, आ अहाँक आन फोनक संग सिंक भेला पर चलि जाएत।</string>
+    <string name="scr_detail_delete_confirm_yes">हटाबू</string>
+    <string name="scr_detail_hidden">नुकाएल</string>
+    <string name="scr_detail_shown">देखा रहल अछि</string>
+
+    <!-- S10 Record edit -->
+    <string name="scr_edit_title_new">नव</string>
+    <string name="scr_edit_title_hint">नाम</string>
+    <string name="scr_edit_institution_hint">बैंक / कम्पनी (एक्के ठाम राखय लेल)</string>
+    <string name="scr_edit_save">सहेजू</string>
+    <string name="scr_edit_cancel">रद्द</string>
+    <string name="scr_edit_invalid">ई ठीक नहि लागि रहल — एक बेर देखि लिअ</string>
+    <string name="scr_edit_picker_other">आन…</string>
+    <string name="scr_edit_picker_other_hint">अपन लिखू</string>
+    <string name="scr_edit_generate">बनाबू</string>
+    <string name="scr_edit_luhn_warning">ई कार्ड नम्बर सामान्य जाँचमे पास नहि होइत अछि — ठीक अछि तँ सहेजि लिअ</string>
+    <string name="scr_edit_link_none">किछु नहि</string>
+    <string name="scr_edit_totp_hint">सिक्रेट वा otpauth:// लिंक साटू</string>
+    <string name="scr_edit_required_title">पहिने एकरा एकटा नाम दिअ</string>
+
+    <!-- S13 Lock screen -->
+    <string name="scr_lock_title">भण्डार बन्न अछि</string>
+    <string name="scr_lock_hint">पासफ्रेज</string>
+    <string name="scr_lock_unlock">खोलू</string>
+    <string name="scr_lock_wrong">पासफ्रेज गलत अछि</string>
+    <string name="scr_lock_cooldown">बहुत बेर गलत कोशिश भेल। %1$d सेकेण्ड ठहरू।</string>
+    <string name="scr_lock_use_recovery">रिकवरी कुंजी प्रयोग करू</string>
+    <string name="scr_lock_use_passphrase">पासफ्रेज प्रयोग करू</string>
+    <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_invalid">ई रिकवरी कुंजी ठीक नहि — एक-एक अक्षर मिला क देखू</string>
+    <string name="scr_lock_biometric_title">Zerokosh खोलू</string>
+    <string name="scr_lock_biometric_subtitle">अपन आङुर वा मुँह प्रयोग करू</string>
+    <string name="scr_lock_use_passphrase_once">कृपया एक बेर पासफ्रेज सँ खोलू</string>
+    <string name="msg_file_damaged">फाइल बिगड़ल छल — बैकअप सँ ठीक क देल गेल</string>
+
+    <!-- S12 Settings (M2 scaffold) -->
+    <string name="scr_settings_title">सेटिंग</string>
+    <string name="scr_settings_autolock">एप छोड़ितहि बन्न करू</string>
+    <string name="scr_settings_autolock_immediately">तुरन्त</string>
+    <string name="scr_settings_autolock_1min">1 मिनटक बाद</string>
+    <string name="scr_settings_autolock_5min">5 मिनटक बाद</string>
+    <string name="scr_settings_autolock_15min">15 मिनटक बाद</string>
+    <string name="scr_settings_quick_unlock">आङुर / मुँह अनलॉक</string>
+    <string name="scr_settings_change_passphrase">पासफ्रेज बदलू</string>
+    <string name="scr_settings_new_recovery">नव रिकवरी कुंजी लिअ</string>
+    <string name="scr_settings_sync_folder">बैकअप आ सिंक फोल्डर</string>
+    <string name="scr_settings_sync_not_set">बैकअप नहि</string>
+    <string name="scr_settings_import">पासवर्ड आयात करू</string>
+    <string name="scr_settings_export">निर्यात करू</string>
+    <string name="scr_settings_language">भाषा</string>
+    <string name="scr_settings_about">बारेमे</string>
+    <string name="scr_settings_security_info">अहाँक डेटा कोना सुरक्षित अछि</string>
+    <string name="scr_settings_allow_screenshots">स्क्रीनशॉट लेबय दिअ</string>
+    <string name="scr_settings_autofill">ऑटोफिल सेवा</string>
+    <string name="scr_autofill_save_failed">Zerokosh ओ लॉगिन नहि सहेजि सकल।</string>
+    <string name="scr_detail_history_title">पुरान पासवर्ड</string>
+    <string name="scr_detail_history_empty">एखन धरि किछु नहि बदलल।</string>
+    <string name="scr_settings_autofill_on">Zerokosh</string>
+    <string name="scr_settings_autofill_off">लगाओल नहि गेल</string>
+    <string name="scr_settings_autofill_unsupported">उपलब्ध नहि</string>
+    <string name="scr_settings_allow_screenshots_warning">भण्डारक स्क्रीनशॉट क्लाउड फोटो बैकअप धरि पहुँचि सकैत अछि। बहुत जरूरी होयत तखने चालू करू।</string>
+    <string name="scr_settings_current_passphrase">एखनुक पासफ्रेज</string>
+    <string name="scr_settings_new_passphrase">नव पासफ्रेज (कम सँ कम 10 अक्षर)</string>
+    <string name="scr_settings_passphrase_changed">पासफ्रेज बदलि गेल</string>
+
+    <!-- About -->
+    <string name="scr_about_version">संस्करण %1$s</string>
+    <string name="scr_about_license">लाइसेंस: GPL-3.0 — सदिखन मुफ्त</string>
+    <string name="scr_about_source">सोर्स कोड</string>
+    <string name="scr_about_body">Zerokosh मुफ्त आ ओपन सोर्स अछि, आ एकर कोनो सर्वर नहि अछि। अहाँक भण्डार खाली अहीं खोलि सकैत छी। हमहूँ नहि।</string>
+
+    <!-- S11 Authenticator -->
+    <string name="scr_auth_add_qr">QR सँ जोड़ू</string>
+    <string name="scr_auth_empty">अहाँक एप आ ब्रोकरक कोड एतय देखाएत</string>
+    <string name="scr_auth_scan_title">कैमरा QR कोडक ऊपर राखू</string>
+    <string name="scr_auth_camera_denied">कैमराक अनुमति खाली QR कोड स्कैन करय लेल चाही। प्रविष्टि जोड़ैत काल सिक्रेट हाथेँ सेहो साटि सकैत छी।</string>
+
+    <!-- §6.7 Autofill -->
+    <string name="scr_autofill_unlock_first">भरय लेल Zerokosh खोलू</string>
+
+    <!-- §6.7 Login helper (copy-mode fallback) -->
+    <string name="scr_login_helper_channel">लॉगिन सहायक</string>
+    <string name="scr_login_helper_channel_desc">ओहि बैंक एप सभक लेल जे ऑटोफिल नहि होमय दैत अछि — बटन दबा क लॉगिनक विवरण एक-एक क कॉपी करू</string>
+    <string name="scr_login_helper_title">%1$s मे लॉगिन भ रहल अछि</string>
+    <string name="scr_login_helper_body">कॉपी करय लेल बटन दबाबू · 30 सेकेण्डमे मेटा जाएत</string>
+
+    <!-- §5.7 Reminders -->
+    <string name="scr_reminder_channel">नवीकरणक इयाद</string>
+    <string name="scr_reminder_title">Zerokosh इयाद करा रहल अछि</string>
+    <string name="scr_reminder_body">%1$s क तारीख लगीच अछि · Zerokosh खोलू</string>
+
+    <!-- Common -->
+    <string name="import_title">बैकअप आयात करू</string>
+    <string name="import_passphrase_hint">ओ पासफ्रेज दिअ जे एहि बैकअप फाइलकेँ खोलैत अछि। से अहाँक एखनुका सँ भिन्न भ सकैत अछि।</string>
+    <string name="import_passphrase_label">बैकअपक पासफ्रेज</string>
+    <string name="import_action">आयात</string>
+    <string name="import_merged">%1$d जोड़ल गेल, %2$d बदलल गेल। किछु मेटाओल नहि गेल।</string>
+    <string name="import_nothing_new">ओहि बैकअपमे जे छल, से सभटा पहिनहि एतय छल।</string>
+    <string name="import_conflicts">%1$d प्रविष्टि दुनू दिस बदलल छल। दुनू रूप सहेजल गेल — “(conflict copy)” ताकू।</string>
+    <string name="import_not_a_vault">ओ फाइल Zerokosh भण्डारक रूपमे नहि पढ़ल जा सकल।</string>
+    <string name="import_locked">आयात करबा सँ पहिने अपन भण्डार खोलू।</string>
+    <string name="scr_edit_month">मास</string>
+    <string name="scr_edit_year">बरख</string>
+    <string name="msg_ok">ठीक अछि</string>
+    <string name="msg_cancel">रद्द</string>
+    <string name="msg_back">पाछू</string>
+    <string name="msg_saved">सहेजल गेल</string>
+    <string name="msg_auth_needed">देखय लेल पक्का करू जे ई अहीं छी</string>
+    <string name="cd_mask_hidden">नुकाएल</string>
+    <string name="cd_shield_high_sensitivity">बेसी संवेदनशील जानकारी</string>
+
+    <!-- Onboarding (S1-S6). Extracted from composable literals so the flow
+         a Hindi user meets first is not English. -->
+    <string name="ob_step_label">चरण %1$d / 6</string>
+    <string name="ob_recommended">अनुशंसा</string>
+    <string name="ob_soon">जल्दिये</string>
+    <string name="ob_reveal_show">देखाबू</string>
+    <string name="ob_reveal_hide">नुकाबू</string>
+    <string name="ob_lang_head_lead">"अपन "</string>
+    <string name="ob_lang_head_emph">भाषा चुनू।</string>
+    <string name="ob_lang_subhead">भण्डारक लेबल, टेम्पलेट आ चेतावनी तुरन्त बदलि जाएत। सेटिंगमे कहियो बदलि सकैत छी।</string>
+    <string name="ob_lang_search">%1$d भाषामे ताकू</string>
+    <string name="ob_lang_continue">%1$s मे आगू बढ़ू</string>
+    <string name="ob_trust_head_lead">"हमरा साँचेमे की "</string>
+    <string name="ob_trust_head_emph">नहि बुझल</string>
+    <string name="ob_trust_head_tail">।</string>
+    <string name="ob_trust_subhead">ई एक बेर पढ़ि लिअ। पूरा सुरक्षा व्यवस्था इहे अछि, सोझ शब्दमे।</string>
+    <string name="ob_trust_continue">बुझलहुँ · आगू बढ़ू</string>
+    <string name="ob_trust_stat_servers">सर्वर सँ सम्पर्क</string>
+    <string name="ob_trust_stat_trackers">ट्रैकर वा SDK</string>
+    <string name="ob_trust_stat_files">फोन पर .kosh फाइल</string>
+    <string name="ob_trust_keys_emph">"कुंजी अहाँक लग। "</string>
+    <string name="ob_trust_keys_body">पासफ्रेज बिसरि क रिकवरी किटो हेरा गेल, तँ भण्डार बन्ने रहत — अहाँक लेल, हमर लेल, सभक लेल।</string>
+    <string name="ob_trust_tag_audited">ऑडिट कएल बिल्ड</string>
+    <string name="ob_trust_tag_reproducible">फेर बनाओल जा सकय बला APK</string>
+    <string name="ob_fact_encryption_title">एन्क्रिप्शन</string>
+    <string name="ob_fact_encryption_value">XChaCha20-Poly1305</string>
+    <string name="ob_fact_encryption_note">प्रमाणित, हरेक भण्डारक लेल अलग नॉन्स</string>
+    <string name="ob_fact_kdf_title">कुंजी स्ट्रेचिंग</string>
+    <string name="ob_fact_kdf_value">Argon2id · 64 MB · t=3</string>
+    <string name="ob_fact_kdf_note">सेटअपक समय अहाँक फोन पर नापल गेल</string>
+    <string name="ob_fact_quick_title">जल्दी अनलॉक</string>
+    <string name="ob_fact_quick_value">हार्डवेयर कीस्टोर</string>
+    <string name="ob_fact_quick_note">बायोमेट्रिक सुरक्षा चिप सँ बाहर कहियो नहि जाइत अछि</string>
+    <string name="ob_fact_network_title">नेटवर्कक अनुमति</string>
+    <string name="ob_fact_network_value">कहियो मंगले नहि गेल</string>
+    <string name="ob_fact_network_note">ई एप कतहु सम्पर्क नहि क सकैत अछि</string>
+    <string name="ob_fact_lost_title">जँ कुंजी हेरा जाय</string>
+    <string name="ob_fact_lost_value">केओ घुरा नहि सकैत अछि</string>
+    <string name="ob_fact_lost_note">रिसेट लिंक नहि। सपोर्टक पछुआ दरबज्जो नहि।</string>
+    <string name="ob_pass_head_lead">"एकेटा गुप्त बात, "</string>
+    <string name="ob_pass_head_emph">खाली अहाँक लग</string>
+    <string name="ob_pass_head_tail">।</string>
+    <string name="ob_pass_subhead">बिनु मेल बला तीन-चारि शब्द एकटा चतुर शब्द सँ नीक होइत अछि। एहि परदा सँ किछु बाहर नहि जाइत अछि।</string>
+    <string name="ob_pass_sealing">बन्न क रहल छी…</string>
+    <string name="ob_pass_seal">भण्डार बन्न करू</string>
+    <string name="ob_pass_footer">ई हम कहियो नहि देखैत छी। कोनो रिसेट लिंक नहि।</string>
+    <string name="ob_pass_tab_passphrase">पासफ्रेज</string>
+    <string name="ob_pass_tab_pin">6 अंकक पिन</string>
+    <string name="ob_pass_confirm">फेर लिखू</string>
+    <string name="ob_pass_no_match">मेल नहि खाइत अछि</string>
+    <string name="ob_pass_counter">%1$d / %2$d</string>
+    <string name="ob_strength_pin_short">बहुत छोट · 6 अंक चाही</string>
+    <string name="ob_strength_pin_weak">कमजोर · इहे पिन सभ सँ पहिने आजमाओल जाइत अछि</string>
+    <string name="ob_strength_pin_fair">ठीके · %1$d बिट — पिन एहि सँ बेसी मजगूत नहि भ सकैत अछि</string>
+    <string name="ob_strength_pass_short">बहुत छोट · 10 अक्षर चाही</string>
+    <string name="ob_strength_pass_weak">कमजोर · %1$d बिट एन्ट्रोपी</string>
+    <string name="ob_strength_pass_good">नीक · %1$d बिट एन्ट्रोपी</string>
+    <string name="ob_strength_pass_strong">मजगूत · %1$d बिट एन्ट्रोपी</string>
+    <string name="ob_strength_pin_empty">छह अंक जे अहाँक जिनगी देखि क केओ अन्दाज नहि लगा सकय</string>
+    <string name="ob_strength_pass_empty">एहन किछु चुनू जे खाली अहीं कहैत छी</string>
+    <string name="ob_check_pin_digits">छहो अंक भरल</string>
+    <string name="ob_check_pin_pattern">ने लगातार अंक, ने दोहराओल</string>
+    <string name="ob_check_pin_birthday">ने जन्मदिन, ने सालगिरह</string>
+    <string name="ob_check_pass_length">10 वा बेसी अक्षर</string>
+    <string name="ob_check_pass_dictionary">शब्दकोशक एकोटा शब्द नहि</string>
+    <string name="ob_check_pass_reuse">आन एप सँ फेर प्रयोग कएल नहि</string>
+    <string name="ob_try_label">आजमाबू</string>
+    <string name="ob_argon_title">Argon2id कठोरता</string>
+    <string name="ob_argon_measuring">ई फोन नापि रहल छी…</string>
+    <string name="ob_argon_detail">%1$d MB · t=%2$d · एहि फोने पर नापल गेल</string>
+    <string name="ob_argon_faster">जल्दी खुजत</string>
+    <string name="ob_argon_harder">तोड़नाइ कठिन</string>
+    <string name="ob_seal_title">एहि फोने सँ बान्हू</string>
+    <string name="ob_seal_body">लपेटय बला कुंजी हार्डवेयर कीस्टोरमे रहत। बायोमेट्रिक अगिला चरणमे।</string>
+    <string name="ob_seal_unavailable">एहि फोनमे हार्डवेयर बायोमेट्रिक नहि अछि।</string>
+    <string name="ob_crack_seconds">~तोड़य लेल किछु सेकेण्ड</string>
+    <string name="ob_crack_hours">~तोड़य लेल किछु घण्टा</string>
+    <string name="ob_crack_days">~तोड़य लेल %1$d दिन</string>
+    <string name="ob_crack_years">~तोड़य लेल %1$d बरख</string>
+    <string name="ob_crack_centuries">~तोड़य लेल %1$d सदी</string>
+    <string name="ob_crack_forever">सूर्य सँ सेहो बेसी समय</string>
+    <string name="ob_kit_working">काज चलि रहल अछि…</string>
+    <string name="ob_kit_regenerate">नव बनाबू</string>
+    <string name="ob_kit_head_lead">"एकटा कुंजी। "</string>
+    <string name="ob_kit_head_emph">कागज पर।</string>
+    <string name="ob_kit_head_tail">" कहियो ऑनलाइन नहि।"</string>
+    <string name="ob_kit_subhead">एहि फोने पर बनल, खाली एक बेर देखाएत। पासफ्रेज बिसरला पर भीतर घुरि आयबाक एहे एकटा बाट अछि।</string>
+    <string name="ob_kit_saved">हम अपन किट सहेजि लेलहुँ</string>
+    <string name="ob_kit_footer">ई कुंजी खाली एक बेर देखाइत अछि, आ कहियो खुजल रूपमे नहि सहेजल जाइत अछि।</string>
+    <string name="ob_kit_save_pdf">PDF सहेजू</string>
+    <string name="ob_kit_save_pdf_note">एक पन्नाक छापय जोग किट</string>
+    <string name="ob_kit_qr">QR चित्र</string>
+    <string name="ob_kit_qr_note">ऑफलाइन गैलरीमे</string>
+    <string name="ob_kit_offline_title">एकरा इंटरनेट सँ दूर राखू</string>
+    <string name="ob_kit_offline_body">ने Gmail, ने WhatsApp, ने स्क्रीनशॉट। आलमारी, बैंक लॉकर, वा स्टीलक पत्तर।</string>
+    <string name="ob_kit_confirm_emph">"हम एकरा ऑफलाइन राखि लेलहुँ। "</string>
+    <string name="ob_kit_confirm_body">केओ — Zerokosh सेहो — एकरा हमरा लेल घुरा नहि सकैत अछि।</string>
+    <string name="ob_kit_card_label">ZEROKOSH रिकवरी</string>
+    <string name="ob_kit_qr_cd">रिकवरी कुंजीक QR कोड</string>
+    <string name="ob_kit_card_note">स्कैन करू वा लिखू। फेर इंस्टॉल, फैक्ट्री रिसेट, वा फोन हेरेला पर सेहो काज करैत अछि।</string>
+    <string name="ob_quick_head_lead">"एक छुअब पर खुजत। "</string>
+    <string name="ob_quick_head_emph">बिनु क्लाउडक।</string>
+    <string name="ob_quick_subhead">भीतर घुरि आयबाक जल्दी बाट चुनू। भण्डारक रखबारी पासफ्रेजे करैत अछि; ई खाली एहि फोने पर कुंजी खोलैत अछि।</string>
+    <string name="ob_quick_opening">अहाँक भण्डार खुजि रहल अछि…</string>
+    <string name="ob_quick_enable">जल्दी अनलॉक चालू करू</string>
+    <string name="ob_quick_continue_pass">पासफ्रेजक संग आगू बढ़ू</string>
+    <string name="ob_quick_refused">जल्दी अनलॉक नहि लगल। फेर कोशिश करू, वा पासफ्रेजक संगहि आगू बढ़ू।</string>
+    <string name="ob_quick_skip">आब नहि — हम पासफ्रेज लिखब</string>
+    <string name="ob_quick_fingerprint">आङुरक छाप</string>
+    <string name="ob_quick_fingerprint_body">तेज, हार्डवेयर सँ सुरक्षित अनलॉक।</string>
+    <string name="ob_quick_no_sensor">एहि फोनमे हार्डवेयर सेंसर नहि अछि।</string>
+    <string name="ob_quick_pass_only">खाली पासफ्रेज</string>
+    <string name="ob_quick_pass_only_body">हर बेर लिखू। सभ सँ सुरक्षित।</string>
+    <string name="ob_quick_hw_title">हार्डवेयर सँ सुरक्षित</string>
+    <string name="ob_quick_hw_body">Android Keystore / StrongBox। कोनो बायोमेट्रिक जानकारी कहियो Zerokosh धरि नहि पहुँचैत अछि।</string>
+    <string name="ob_quick_touch_title">सेंसर छुबू</string>
+    <string name="ob_quick_touch_body">अहाँक आङुरक छाप फोनक सुरक्षा चिपक भीतरे रहैत अछि। से एहि फोन सँ कहियो बाहर नहि जाइत अछि।</string>
+
+    <!-- Settings screen. -->
+    <string name="st_folder_fallback">फोल्डर</string>
+    <string name="st_toast_folder_backed">बैकअप फोल्डर जुड़ि गेल, आ भण्डार %1$s मे सहेजल गेल!</string>
+    <string name="st_toast_folder_connected">बैकअप फोल्डर जुड़ि गेल: %1$s</string>
+    <string name="st_toast_folder_failed">फोल्डर नहि जुड़ि सकल: %1$s</string>
+    <string name="st_toast_exported">एन्क्रिप्ट कएल भण्डार निर्यात भ गेल</string>
+    <string name="st_toast_export_failed">निर्यात नहि भेल</string>
+    <string name="st_subtitle">अहाँक नियम।</string>
+    <string name="st_group_security">सुरक्षा</string>
+    <string name="st_vault_review">भण्डारक जाँच</string>
+    <string name="st_vault_review_detail">फेर प्रयोग कएल, कमजोर, मियाद खतम होइत</string>
+    <string name="st_recently_deleted">हालेमे हटाओल गेल</string>
+    <string name="st_group_sync">सिंक</string>
+    <string name="st_active_folder">सक्रिय फोल्डर</string>
+    <string name="st_active_value">सक्रिय · %1$s</string>
+    <string name="st_group_appearance">रूप</string>
+    <string name="st_theme">थीम</string>
+    <string name="st_theme_system">सिस्टम</string>
+    <string name="st_theme_light">इजोत</string>
+    <string name="st_theme_dark">अन्हार</string>
+    <string name="st_group_about">बारेमे</string>
+    <string name="st_license">लाइसेंस</string>
+    <string name="st_logos_by">लोगो देनिहार</string>
+    <string name="st_export_kosh">एन्क्रिप्ट कएल .kosh निर्यात</string>
+    <string name="st_import_kosh">.kosh बैकअप आयात</string>
+    <string name="st_import_other">आन पासवर्ड मैनेजर सँ आयात</string>
+    <string name="st_import_other_detail">Chrome · Google · Bitwarden · LastPass · KeePass</string>
+    <string name="st_toast_backed_up">भण्डार %1$s मे सहेजल गेल!</string>
+    <string name="st_toast_backup_failed">बैकअप नहि भेल — फोल्डरक अनुमति देखू</string>
+    <string name="st_toast_disconnected">बैकअप फोल्डर हटा देल गेल</string>
+    <string name="st_confirm_new_passphrase">नव पासफ्रेज फेर लिखू</string>
+    <string name="st_new_recovery_body">नव रिकवरी कुंजी बनबय लेल अपन पासफ्रेज दिअ। पुरान कुंजी काज करब बन्न क देत।</string>
+    <string name="st_new_recovery_result">अहाँक नव रिकवरी कुंजी:</string>
+    <string name="st_new_recovery_note">एकरा ऑफलाइन राखू। पुरान रिकवरी कुंजी आब काज नहि करत।</string>
+    <string name="st_generate">बनाबू</string>
+    <string name="st_done">भ गेल</string>
+    <string name="st_backup_sheet_title">बैकअप आ सिंक फोल्डर</string>
+    <string name="st_connected_folder">जुड़ल फोल्डर: %1$s</string>
+    <string name="st_backup_sheet_body">अहाँक एन्क्रिप्ट कएल .kosh फाइल सोझे एहि फोल्डरेमे सहेजल जाइत अछि। बहुत उपकरण पर अपने-आप बैकअप होबय लेल एहि फोल्डरकेँ Google Drive, Syncthing, Nextcloud वा SD कार्डक संग सिंक करू।</string>
+    <string name="st_backing_up">भण्डारक बैकअप लेल जा रहल अछि…</string>
+    <string name="st_backup_now">आबे बैकअप लिअ</string>
+    <string name="st_change_folder">फोल्डर बदलू</string>
+    <string name="st_disconnect">हटाबू</string>
+
+    <!-- Home and Welcome. -->
+    <string name="hm_search_hint">HDFC, priya@upi, PAN… ताकू</string>
+    <string name="hm_pinned">पिन कएल</string>
+    <string name="hm_count_one">"%1$d वस्तु, "</string>
+    <string name="hm_count_many">"%1$d वस्तु, "</string>
+    <string name="hm_all_offline">सभटा ऑफलाइन।</string>
+    <string name="hm_lock_immediate">खुजल अछि · छोड़ितहि बन्न भ जाएत</string>
+    <string name="hm_lock_one">खुजल अछि · छोड़लाक 1 मिनट बाद बन्न</string>
+    <string name="hm_lock_many">खुजल अछि · छोड़लाक %1$d मिनट बाद बन्न</string>
+    <string name="hm_inst_one">%1$d संस्था</string>
+    <string name="hm_inst_many">%1$d संस्था</string>
+    <string name="hm_close_search">ताकब बन्न करू</string>
+    <string name="hm_no_match">“%1$s” लेल किछु नहि भेटल</string>
+    <string name="hm_no_match_hint">कोनो संस्था, UPI हैंडल, वा अंतिम चारि अंक आजमाबू।</string>
+    <string name="hm_empty_head_lead">"अहाँक भण्डार "</string>
+    <string name="hm_empty_head_emph">बाट तकैत अछि।</string>
+    <string name="hm_empty_blank">खाली भण्डार, तैयार।</string>
+    <string name="hm_empty_body">जे एकटा वस्तु सभ सँ बेसी काज आबय, ओहि सँ शुरू करू। नोट्स एपमे पड़ल बारहटा पासवर्ड सँ सहेजल एकटा पासवर्ड बेसी सुरक्षित अछि।</string>
+    <string name="hm_add_first">अपन पहिल प्रविष्टि जोड़ू</string>
+    <string name="hm_start_template">टेम्पलेट सँ शुरू करू</string>
+    <string name="hm_import_backup">एन्क्रिप्ट कएल बैकअप आयात</string>
+    <string name="hm_import_backup_note">एहि फोने सँ .kosh फाइल खोलू</string>
+    <string name="hm_reassurance">एहि फोन सँ कहियो बाहर नहि जाइत अछि। सहेजैत काल एन्क्रिप्ट कएल जाइत अछि।</string>
+    <string name="wl_body">भारतीय बैंक, UPI, कार्ड, डीमैट, EPF, आ जे OTP एप अहाँ साँचेमे प्रयोग करैत छी — ओहि सभक लेल फोनेमे रहय बला भण्डार।</string>
+    <string name="wl_create">नव भण्डार बनाबू</string>
+    <string name="wl_restore">रिकवरी किट सँ घुरा आनू</string>
+    <string name="wl_footer">ने ईमेल · ने खाता · किछु एहि फोन सँ बाहर नहि जाइत अछि</string>
+
+    <!-- Categories, relative time, vault review. -->
+    <string name="cat_banks">बैंक आ UPI</string>
+    <string name="cat_cards">कार्ड</string>
+    <string name="cat_investments">निवेश</string>
+    <string name="cat_govid">सरकारी आ पहिचान</string>
+    <string name="cat_utilities">बिल आ कनेक्शन</string>
+    <string name="cat_apps">एप आ लॉगिन</string>
+    <string name="time_just_now">एखने</string>
+    <string name="time_minutes">%1$d मिनट पहिने</string>
+    <string name="time_hours">%1$d घण्टा पहिने</string>
+    <string name="time_days">%1$d दिन पहिने</string>
+    <string name="time_months">%1$d मास पहिने</string>
+    <string name="time_years">%1$d बरख पहिने</string>
+    <string name="vh_nothing">ठीक करबाक किछु नहि।</string>
+    <string name="vh_count_one">%1$d बात पर ध्यान देनाइ चाही।</string>
+    <string name="vh_count_many">%1$d बात पर ध्यान देनाइ चाही।</string>
+    <string name="vh_checked_one">एहि फोने पर %1$d प्रविष्टि सँ मिलाओल गेल। किछु कतहु नहि पठाओल गेल।</string>
+    <string name="vh_checked_many">एहि फोने पर %1$d प्रविष्टि सँ मिलाओल गेल। किछु कतहु नहि पठाओल गेल।</string>
+    <string name="vh_empty">ने फेर प्रयोग कएल, ने कमजोर, ने मियाद खतम होइत किछु अछि।</string>
+    <string name="vh_kind_reused">फेर प्रयोग कएल पासवर्ड</string>
+    <string name="vh_kind_common">आसानी सँ अन्दाज लागय बला</string>
+    <string name="vh_kind_weak">कमजोर</string>
+    <string name="vh_kind_expiring">मियाद खतम भ रहल</string>
+
+    <!-- Trash and record detail. -->
+    <string name="tr_ttl_note">हटाओल प्रविष्टि एतय %1$d दिन रहैत अछि।</string>
+    <string name="tr_ttl_warn">ओकर बाद ओ सदा लेल चलि जाइत अछि — आन कतहु प्रति नहि।</string>
+    <string name="tr_empty">किछु नहि हटाओल गेल।</string>
+    <string name="tr_delete_all">सभटा सदा लेल हटाबू</string>
+    <string name="tr_delete_all_title">कूड़ाक सभटा हटा देल जाए?</string>
+    <string name="tr_delete_all_one">%1$d प्रविष्टि सदा लेल चलि जाएत। ई वापस नहि भ सकैत अछि, आ घुरा आनय लेल कोनो बैकअपो नहि।</string>
+    <string name="tr_delete_all_many">%1$d प्रविष्टि सदा लेल चलि जाएत। ई वापस नहि भ सकैत अछि, आ घुरा आनय लेल कोनो बैकअपो नहि।</string>
+    <string name="tr_delete_one_title">“%1$s” सदा लेल हटा देल जाए?</string>
+    <string name="tr_cannot_undo">ई वापस नहि भ सकैत अछि।</string>
+    <string name="tr_gone_today">आइ चलि जाएत</string>
+    <string name="tr_days_one">%1$d दिन बाँकी</string>
+    <string name="tr_days_many">%1$d दिन बाँकी</string>
+    <string name="tr_restore">घुरा आनू</string>
+    <string name="tr_delete_now">आबे हटाबू</string>
+    <string name="rd_last_edit">अंतिम बेर %1$s बदलल</string>
+    <string name="rd_history_hide">नुकाबू</string>
+    <string name="rd_history_show">%1$d देखाबू</string>
+    <string name="rd_forget_these">ई सभ बिसरि जाउ</string>
+    <string name="rd_forget_title">पुरान पासवर्ड बिसरि जाउ?</string>
+    <string name="rd_forget_body">एहि प्रविष्टिक लेल इयाद राखल %1$d मान हटाओल जाएत। ई वापस नहि भ सकैत अछि।</string>
+    <string name="rd_forget">बिसरि जाउ</string>
+    <string name="rd_copied">कॉपी भ गेल</string>
+    <string name="rd_release_to_hide">नुकाबय लेल छोड़ू</string>
+    <string name="rd_hold_to_reveal">देखय लेल दाबि क राखू</string>
+
+    <!-- Navigation and the damaged-vault screen. -->
+    <string name="nav_close_menu">मेनू बन्न करू</string>
+    <string name="nav_tap_card">कार्ड टैप करू</string>
+    <string name="nav_all_templates">सभटा टेम्पलेट</string>
+    <string name="nav_scan">स्कैन</string>
+    <string name="nav_damaged_kicker">बिगड़ल हालत</string>
+    <string name="nav_damaged_lead">"अहाँक "</string>
+    <string name="nav_damaged_emph">भण्डार फाइलमे</string>
+    <string name="nav_damaged_tail">" किछु गड़बड़ी अछि।"</string>
+    <string name="nav_integrity_title">अखण्डताक जाँच विफल भेल</string>
+    <string name="nav_integrity_body">.kosh फाइलक Poly1305 प्रमाणीकरण टैग मेल नहि खाइत अछि। बीचहिमे रुकल सिंक वा खराब स्टोरेजक बाद एहन भ सकैत अछि।</string>
+    <string name="nav_what_next">आब आगू की</string>
+    <string name="nav_what_next_body">Zerokosh भण्डार फाइलक कातेमे एकटा चलैत बैकअप राखैत अछि। ओकरा अपन सिंक फोल्डर सँ घुरा आनू, वा आन फोन पर रिकवरी किट सँ भण्डार खोलू।</string>
+
+    <!-- NFC card read and CSV import. -->
+    <string name="nfc_no_hardware">एहि फोनमे NFC नहि अछि, तेँ कार्ड नहि पढ़ल जा सकैत अछि।</string>
+    <string name="nfc_disabled">NFC बन्न अछि। सेटिंगमे चालू क क फेर कोशिश करू।</string>
+    <string name="nfc_read_failed">ओ कार्ड नहि पढ़ल जा सकल। फेर कोशिश करू।</string>
+    <string name="nfc_cannot_read">कार्ड नहि पढ़ल जा सकैत अछि</string>
+    <string name="nfc_reading">पढ़ि रहल छी…</string>
+    <string name="nfc_missed">पकड़मे नहि आयल</string>
+    <string name="nfc_hold_card">कार्ड फोनमे सटा क राखू</string>
+    <string name="nfc_hint">जा धरि नहि पढ़ाय, कार्ड फोनक पाछू सोझे सटा क राखू। एहि सँ कार्ड नम्बर, मियाद आ नाम भेटैत अछि — CVV चिपमे नहि होइत अछि, से अहाँकेँ अपने लिखय पड़त।</string>
+    <string name="nfc_try_again">फेर कोशिश करू</string>
+    <string name="ic_too_large">ई फाइल पासवर्ड निर्यात होबय लेल बहुत पैघ अछि।</string>
+    <string name="ic_unrecognised">ओहि फाइलमे चिन्हय जोग किछु नहि भेटल। Chrome, Google Password Manager, Bitwarden, LastPass आ KeePass क निर्यात बुझल जाइत अछि।</string>
+    <string name="ic_could_not">आयात नहि भ सकल</string>
+    <string name="ic_imported">आयात भ गेल</string>
+    <string name="ic_result">%1$d जोड़ल गेल, %2$d बदलल गेल।</string>
+    <string name="ic_delete_file">आब ओ फाइल हटा दिअ जकरा अहाँ आयात कएने रही। से अहाँक पासवर्डक खुजल सूची अछि, आ एखनहु अहाँक Downloads मे पड़ल अछि।</string>
+    <string name="ic_done">भ गेल</string>
+    <string name="ic_title">%1$s सँ आयात कएल जाए?</string>
+    <string name="ic_new_one">%1$d नव लॉगिन।</string>
+    <string name="ic_new_many">%1$d नव लॉगिन।</string>
+    <string name="ic_update_one">%1$d एखनुका प्रविष्टि बदलत — साइट आ यूजरनेम मिला क। बदलल पासवर्ड हरेक प्रविष्टिक इतिहासमे भेटत।</string>
+    <string name="ic_update_many">%1$d एखनुका प्रविष्टि बदलत — साइट आ यूजरनेम मिला क। बदलल पासवर्ड हरेक प्रविष्टिक इतिहासमे भेटत।</string>
+    <string name="ic_local_only">सभटा खाली एहि फोने पर डिक्रिप्ट होइत अछि। किछु अपलोड नहि होइत अछि, कारण ई एप नेटवर्क कनेक्शन खोलिये नहि सकैत अछि।</string>
+    <string name="ic_importing">आयात भ रहल अछि…</string>
+    <string name="ic_import">आयात</string>
+
+    <!-- Record edit. -->
+    <string name="re_using_template">%1$s टेम्पलेट प्रयोग क क</string>
+    <string name="re_add_field">+ आर एकटा खाना जोड़ू</string>
+    <string name="re_remove">हटाबू</string>
+    <string name="re_add_field_title">खाना जोड़ू</string>
+    <string name="re_field_name">खानाक नाम</string>
+    <string name="re_treat_secret">गुप्त मानू (नुकाएल रहत, देखय लेल दाबि क राखू)</string>
+    <string name="re_pick_date">तारीख चुनू</string>
+    <string name="re_tap_card">पढ़य लेल कार्ड टैप करू</string>
+
+    <!-- Authenticator. -->
+    <string name="au_fallback_name">प्रमाणक</string>
+    <string name="au_search_hint">कोड वा देनिहार ताकू…</string>
+    <string name="au_rotating">"बदलैत रहय बला "</string>
+    <string name="au_active_one">%1$d सक्रिय कोड</string>
+    <string name="au_active_many">%1$d सक्रिय कोड</string>
+    <string name="au_tap_to_copy">कॉपी करय लेल टैप करू</string>
+    <string name="au_add_another">आर एकटा प्रमाणक जोड़ू</string>
+    <string name="au_no_match">कोनो कोड नहि भेटल</string>
+    <string name="au_none_yet">एखन धरि कोनो कोड नहि।</string>
+    <string name="au_empty_hint">Google, GitHub वा अपन ब्रोकरक QR स्कैन करू, वा सिक्रेट कुंजी हाथेँ लिखू।</string>
+    <string name="au_scan_qr">QR कोड स्कैन करू</string>
+    <string name="au_copied">कॉपी भ गेल · थोड़बे कालमे मेटा जाएत</string>
+    <string name="au_no_qr_found">चुनल चित्रमे सही TOTP QR कोड नहि भेटल</string>
+    <string name="au_image_failed">चित्र नहि पढ़ल जा सकल</string>
+    <string name="au_camera_needed">QR कोड स्कैन करय लेल कैमराक अनुमति चाही</string>
+    <string name="au_grant">अनुमति दिअ</string>
+    <string name="au_close">बन्न करू</string>
+    <string name="au_scan_title">प्रमाणकक QR स्कैन करू</string>
+    <string name="au_flashlight">टॉर्च</string>
+    <string name="au_pick_image">चित्र चुनू</string>
+    <string name="au_enter_key">कुंजी लिखू</string>
+    <string name="au_add_secret">सिक्रेट कुंजी जोड़ू</string>
+    <string name="au_account_name">खाताक नाम (जेना Google)</string>
+    <string name="au_secret_label">सिक्रेट कुंजी (Base32)</string>
+    <string name="au_secret_example">जेना JBSWY3DPEHPK3PXP</string>
+    <string name="au_invalid_secret">गलत Base32 सिक्रेट कुंजी (खाली A-Z अक्षर आ 2-7 अंक)</string>
+    <string name="au_save_key">कुंजी सहेजू</string>
+
+    <!-- Chrome: tabs, toggles, quick adds. -->
+    <string name="ui_hide_passphrase">पासफ्रेज नुकाबू</string>
+    <string name="ui_show_passphrase">पासफ्रेज देखाबू</string>
+    <string name="ui_label_count">%1$s, %2$s</string>
+    <string name="tab_vault">भण्डार</string>
+    <string name="tab_codes">कोड</string>
+    <string name="tab_templates">टेम्पलेट</string>
+    <string name="tab_settings">सेटिंग</string>
+    <string name="wl_sr_headline">अहाँक कुंजी। अहाँक फोन। सर्वर नहि।</string>
+    <string name="wl_chip_crypto">Argon2id + XChaCha20</string>
+    <string name="wl_chip_offline">ऑफलाइन</string>
+    <string name="wl_chip_open">ओपन सोर्स</string>
+    <string name="wl_head_1">अहाँक कुंजी।</string>
+    <string name="wl_head_2">अहाँक फोन।</string>
+    <string name="wl_head_3">सर्वर नहि।</string>
+    <string name="qa_bank_account">बैंक खाता</string>
+    <string name="qa_upi_id">UPI ID</string>
+    <string name="qa_aadhaar">आधार</string>
+    <string name="qa_pan">PAN</string>
+    <string name="qa_totp">TOTP</string>
+
+    <!-- Save failure dialog. -->
+    <string name="se_title">सहेजल नहि गेल</string>
+    <string name="se_lead">अहाँक बदलाव सहेजल नहि गेल, तेँ भण्डारमे जे पहिने छल ओहिमे सँ किछु नहि हेरायल।</string>
+    <string name="se_body">भण्डार फाइल लिखल नहि जा सकल। जँ अहाँ बैकअप आ सिंक फोल्डर लगौने छी, तँ भ सकैत अछि Android ओकर अनुमति वापस लेने होअय — सेटिंग खोलू, फोल्डर फेर चुनू, आ फेर कोशिश करू।</string>
+
+    <!-- Screen kickers. -->
+    <string name="kicker_locked">बन्न अछि</string>
+
+    <!-- Lock screen. -->
+    <string name="lk_welcome_lead">फेर स्वागत अछि।</string>
+    <string name="lk_welcome_emph">अहाँक भण्डार बन्न अछि।</string>
+    <string name="lk_crypto_note">Argon2id · XChaCha20-Poly1305 · किछु एहि फोन सँ बाहर नहि गेल</string>
+    <string name="lk_touch_unlock">खोलय लेल छुबू</string>
+
+    <!-- Template gallery. -->
+    <string name="gl_head_lead">"हम की "</string>
+    <string name="gl_head_emph">सहेजि रहल छी?</string>
+    <string name="gl_search">%1$d भारतीय सेवामे ताकू…</string>
+    <string name="gl_suggested">अहाँक लेल सुझाव</string>
+    <string name="gl_most_used">सभ सँ बेसी प्रयोग होबय बला पहिने</string>
+    <string name="gl_matches">%1$d भेटल</string>
+    <string name="gl_not_found">सेवा नहि भेटि रहल?</string>
+    <string name="gl_not_found_body">खाली सँ शुरू क क अपन खानाक नाम अपने राखू — टेम्पलेट खाली लेबल भरैत अछि, डेटा कहियो नहि।</string>
+    <string name="gl_blank">खाली टेम्पलेट</string>
+    <string name="gl_cat_popular">लोकप्रिय</string>
+    <string name="gl_cat_banks">बैंक</string>
+    <string name="gl_cat_upi">UPI</string>
+    <string name="gl_cat_cards">कार्ड</string>
+    <string name="gl_cat_demat">डीमैट</string>
+    <string name="gl_cat_govid">सरकारी पहिचान</string>
+    <string name="gl_cat_shopping">खरीददारी</string>
+    <string name="gl_cat_travel">यात्रा</string>
+    <string name="gl_cat_utilities">बिल</string>
+    <string name="gl_cat_apps">एप</string>
+    <string name="au_rotating_emph">कोड।</string>
+</resources>

@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Urdu. Generated from values/ by genloc.py; key order matches. -->
+<resources>
+    <string name="app_name">Zerokosh</string>
+
+    <!-- S1 Language picker -->
+    <string name="scr_language_title">اپنی زبان چنیں</string>
+    <string name="scr_language_subtitle">Choose your language</string>
+    <string name="scr_language_continue">آگے بڑھیں</string>
+
+    <!-- S2 Trust explainer -->
+    <string name="scr_trust_card1_title">آپ کا ڈیٹا اسی فون میں رہتا ہے</string>
+    <string name="scr_trust_card1_body">آپ جو کچھ محفوظ کرتے ہیں وہ آپ کے فون کی ایک بند فائل میں رہتا ہے۔ وہ کبھی ہم تک نہیں آتا — اسے رکھنے کی ہمارے پاس جگہ ہی نہیں۔</string>
+    <string name="scr_trust_card2_title">ہمارے سرور نہیں — نہ ہیک کرنے کو کچھ، نہ بیچنے کو</string>
+    <string name="scr_trust_card2_body">نہ کوئی Zerokosh اکاؤنٹ، نہ کلاؤڈ، نہ سائن اپ۔ اسے صرف آپ کھول سکتے ہیں۔ ہم بھی نہیں۔</string>
+    <string name="scr_trust_card3_title">ہمیشہ مفت، اوپن سورس</string>
+    <string name="scr_trust_card3_body">نہ سبسکرپشن، نہ اشتہار۔ کوئی بھی ہمارا کوڈ پڑھ کر ہماری ہر بات پرکھ سکتا ہے۔</string>
+    <string name="scr_trust_continue">آگے بڑھیں</string>
+
+    <!-- S3 Create passphrase -->
+    <string name="scr_create_title">اپنا پاس فریز بنائیں</string>
+    <string name="scr_create_body">یہی ایک پاس فریز سب کچھ بند رکھتا ہے۔ کوئی لمبا سا جملہ چنیں جو صرف آپ جانتے ہوں۔</string>
+    <string name="scr_create_hint">پاس فریز (کم از کم 10 حروف)</string>
+    <string name="scr_create_confirm_hint">دوبارہ لکھیں</string>
+    <string name="scr_create_mismatch">دونوں ایک جیسے نہیں ہیں</string>
+    <string name="scr_create_too_short">کم از کم 10 حروف چاہییں — جتنا لمبا، اتنا مضبوط</string>
+    <string name="scr_create_strength_weak">کمزور</string>
+    <string name="scr_create_strength_fair">ٹھیک ٹھاک</string>
+    <string name="scr_create_strength_good">اچھا</string>
+    <string name="scr_create_strength_strong">مضبوط</string>
+    <string name="scr_create_pin_option">اس کے بجائے 6 ہندسوں کا پن رکھیں</string>
+    <string name="scr_create_pin_hint">6 ہندسوں کا پن</string>
+    <string name="scr_create_pin_why">پن کی اجازت اس لیے ہے کہ یہ فون اسے اپنی سیکیورٹی چپ اور آپ کی انگلی یا چہرے سے محفوظ رکھتا ہے۔</string>
+    <string name="scr_create_pin_unavailable">پن کے لیے انگلی یا چہرہ ان لاک والا فون چاہیے۔ براہِ کرم پاس فریز چنیں۔</string>
+    <string name="scr_create_button">بند کر دیں</string>
+    <string name="scr_create_working">آپ کی تجوری تیار ہو رہی ہے…</string>
+
+    <!-- S4 Recovery kit -->
+    <string name="scr_recovery_title">آپ کی ریکوری کنجی</string>
+    <string name="scr_recovery_body">اگر کبھی پاس فریز بھول جائیں تو اندر واپس آنے کا یہی ایک راستہ ہے۔ ہم اسے ری سیٹ نہیں کر سکتے — کوئی بھی نہیں کر سکتا۔</string>
+    <string name="scr_recovery_save_pdf">PDF کے طور پر محفوظ کریں</string>
+    <string name="scr_recovery_confirm_check">میں نے اسے لکھ کر محفوظ جگہ رکھ لیا ہے</string>
+    <string name="scr_recovery_done">آگے بڑھیں</string>
+    <string name="scr_recovery_never_again">اس اسکرین کے بعد یہ کنجی دوبارہ نظر نہیں آئے گی۔</string>
+    <string name="scr_recovery_pdf_saved">ریکوری کٹ PDF محفوظ ہو گئی</string>
+    <string name="scr_recovery_pdf_instructions">یہ کاغذ اپنی جائیداد کے کاغذات یا دوسری اہم دستاویزات کے ساتھ رکھیں۔ جس کے پاس یہ کنجی ہے وہ آپ کی تجوری کھول سکتا ہے — اسے لاکر کی چابی کی طرح سنبھالیں۔</string>
+    <string name="scr_recovery_pdf_title">Zerokosh ریکوری کٹ</string>
+
+    <!-- S5 Quick unlock opt-in -->
+    <string name="scr_quickunlock_title">انگلی یا چہرے سے کھولیں</string>
+    <string name="scr_quickunlock_body">جیسے آپ فون کھولتے ہیں، ویسے ہی تجوری۔ پاس فریز ہمیشہ کام کرتا رہے گا۔</string>
+    <string name="scr_quickunlock_enable">چالو کریں</string>
+    <string name="scr_quickunlock_skip">ابھی نہیں</string>
+    <string name="scr_quickunlock_backup_footer">ابھی بیک اپ فولڈر لگا لیں</string>
+
+    <!-- S6 Home -->
+    <string name="scr_home_title">گھر</string>
+    <string name="scr_home_search_hint">اپنی تجوری میں تلاش کریں</string>
+    <string name="scr_home_tab_home">گھر</string>
+    <string name="scr_home_tab_authenticator">کوڈ</string>
+    <string name="scr_home_tab_settings">سیٹنگز</string>
+    <string name="scr_home_add">شامل کریں</string>
+    <string name="scr_home_empty_sample_bank">آپ کا بینک اکاؤنٹ ایسا دکھے گا</string>
+    <string name="scr_home_empty_sample_card">آپ کے کارڈ، UPI، ایپ لاگ اِن — سب یہیں</string>
+    <string name="scr_home_no_results">آپ کی تلاش سے کچھ نہیں ملا</string>
+    <string name="scr_home_group_other">دیگر</string>
+
+    <!-- §10.5 rotating safety tips -->
+    <string name="msg_safety_tip_1">بینک کبھی آپ کا OTP نہیں مانگتے۔ جو مانگے، وہ ٹھگ ہے۔</string>
+    <string name="msg_safety_tip_2">کوئی بینک افسر آپ سے اسکرین شیئر کرنے والی ایپ لگانے کو نہیں کہے گا۔</string>
+    <string name="msg_safety_tip_3">آپ کا UPI پن صرف UPI ایپ کے کی پیڈ کے لیے ہے — فون پر کسی کو نہ بتائیں۔</string>
+    <string name="msg_safety_tip_4">KYC ایک دن میں ختم نہیں ہوتی۔ ”آج KYC ختم“ والے پیغام ٹھگی ہیں۔</string>
+    <string name="msg_safety_tip_5">پیسے لینے کے لیے نہ پن ڈالنا پڑتا ہے، نہ QR اسکین کرنا۔</string>
+    <string name="msg_safety_tip_6">بجلی کٹنے کا SMS اور اس میں کسی کا ذاتی نمبر؟ وہ ٹھگی ہے۔</string>
+
+    <!-- S8 Template gallery -->
+    <string name="scr_gallery_title">ہم کیا محفوظ کر رہے ہیں؟</string>
+    <string name="scr_gallery_quick_add">جلدی شامل کریں</string>
+
+    <!-- S9 Record detail -->
+    <string name="scr_detail_copy">کاپی کریں</string>
+    <string name="scr_detail_reveal">دکھائیں</string>
+    <string name="scr_detail_hide">چھپائیں</string>
+    <string name="scr_detail_copied">کاپی ہو گیا · 30 سیکنڈ میں مٹ جائے گا</string>
+    <string name="scr_detail_edit">بدلیں</string>
+    <string name="scr_detail_delete">ہٹائیں</string>
+    <string name="scr_detail_favorite">پسندیدہ</string>
+    <string name="scr_detail_delete_confirm_title">یہ اندراج ہٹا دیں؟</string>
+    <string name="scr_detail_delete_confirm_body">یہ 30 دن ”حال ہی میں ہٹائے گئے“ میں رہے گا، اور آپ کے دوسرے فونوں سے سنک ہونے پر چلا جائے گا۔</string>
+    <string name="scr_detail_delete_confirm_yes">ہٹائیں</string>
+    <string name="scr_detail_hidden">چھپا ہوا</string>
+    <string name="scr_detail_shown">نظر آ رہا ہے</string>
+
+    <!-- S10 Record edit -->
+    <string name="scr_edit_title_new">نیا</string>
+    <string name="scr_edit_title_hint">نام</string>
+    <string name="scr_edit_institution_hint">بینک / کمپنی (اکٹھا رکھنے کے لیے)</string>
+    <string name="scr_edit_save">محفوظ کریں</string>
+    <string name="scr_edit_cancel">منسوخ</string>
+    <string name="scr_edit_invalid">یہ ٹھیک نہیں لگ رہا — ایک بار دیکھ لیں</string>
+    <string name="scr_edit_picker_other">دیگر…</string>
+    <string name="scr_edit_picker_other_hint">اپنا لکھیں</string>
+    <string name="scr_edit_generate">بنائیں</string>
+    <string name="scr_edit_luhn_warning">یہ کارڈ نمبر عام جانچ میں پاس نہیں ہوتا — اگر ٹھیک ہے تو محفوظ کر لیں</string>
+    <string name="scr_edit_link_none">کچھ نہیں</string>
+    <string name="scr_edit_totp_hint">سیکریٹ یا otpauth:// لنک پیسٹ کریں</string>
+    <string name="scr_edit_required_title">پہلے اسے کوئی نام دیں</string>
+
+    <!-- S13 Lock screen -->
+    <string name="scr_lock_title">تجوری بند ہے</string>
+    <string name="scr_lock_hint">پاس فریز</string>
+    <string name="scr_lock_unlock">کھولیں</string>
+    <string name="scr_lock_wrong">پاس فریز غلط ہے</string>
+    <string name="scr_lock_cooldown">کئی بار غلط کوشش ہوئی۔ %1$d سیکنڈ انتظار کریں۔</string>
+    <string name="scr_lock_use_recovery">ریکوری کنجی استعمال کریں</string>
+    <string name="scr_lock_use_passphrase">پاس فریز استعمال کریں</string>
+    <string name="scr_lock_recovery_hint">KSH-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XX</string>
+    <string name="scr_lock_recovery_invalid">یہ ریکوری کنجی ٹھیک نہیں — ہر حرف ملا کر دیکھیں</string>
+    <string name="scr_lock_biometric_title">Zerokosh کھولیں</string>
+    <string name="scr_lock_biometric_subtitle">اپنی انگلی یا چہرہ استعمال کریں</string>
+    <string name="scr_lock_use_passphrase_once">براہِ کرم ایک بار پاس فریز سے کھولیں</string>
+    <string name="msg_file_damaged">فائل خراب تھی — بیک اپ سے ٹھیک کر دی گئی</string>
+
+    <!-- S12 Settings (M2 scaffold) -->
+    <string name="scr_settings_title">سیٹنگز</string>
+    <string name="scr_settings_autolock">ایپ چھوڑتے ہی بند کریں</string>
+    <string name="scr_settings_autolock_immediately">فوراً</string>
+    <string name="scr_settings_autolock_1min">1 منٹ بعد</string>
+    <string name="scr_settings_autolock_5min">5 منٹ بعد</string>
+    <string name="scr_settings_autolock_15min">15 منٹ بعد</string>
+    <string name="scr_settings_quick_unlock">انگلی / چہرہ ان لاک</string>
+    <string name="scr_settings_change_passphrase">پاس فریز بدلیں</string>
+    <string name="scr_settings_new_recovery">نئی ریکوری کنجی لیں</string>
+    <string name="scr_settings_sync_folder">بیک اپ اور سنک فولڈر</string>
+    <string name="scr_settings_sync_not_set">کوئی بیک اپ نہیں</string>
+    <string name="scr_settings_import">پاس ورڈ درآمد کریں</string>
+    <string name="scr_settings_export">برآمد کریں</string>
+    <string name="scr_settings_language">زبان</string>
+    <string name="scr_settings_about">بارے میں</string>
+    <string name="scr_settings_security_info">آپ کا ڈیٹا کیسے محفوظ ہے</string>
+    <string name="scr_settings_allow_screenshots">اسکرین شاٹ لینے دیں</string>
+    <string name="scr_settings_autofill">آٹو فِل سروس</string>
+    <string name="scr_autofill_save_failed">Zerokosh وہ لاگ اِن محفوظ نہ کر سکا۔</string>
+    <string name="scr_detail_history_title">پرانے پاس ورڈ</string>
+    <string name="scr_detail_history_empty">ابھی تک کچھ نہیں بدلا۔</string>
+    <string name="scr_settings_autofill_on">Zerokosh</string>
+    <string name="scr_settings_autofill_off">لگایا نہیں گیا</string>
+    <string name="scr_settings_autofill_unsupported">دستیاب نہیں</string>
+    <string name="scr_settings_allow_screenshots_warning">تجوری کے اسکرین شاٹ کلاؤڈ فوٹو بیک اپ تک پہنچ سکتے ہیں۔ صرف بہت ضرورت ہو تو چالو کریں۔</string>
+    <string name="scr_settings_current_passphrase">موجودہ پاس فریز</string>
+    <string name="scr_settings_new_passphrase">نیا پاس فریز (کم از کم 10 حروف)</string>
+    <string name="scr_settings_passphrase_changed">پاس فریز بدل گیا</string>
+
+    <!-- About -->
+    <string name="scr_about_version">ورژن %1$s</string>
+    <string name="scr_about_license">لائسنس: GPL-3.0 — ہمیشہ مفت</string>
+    <string name="scr_about_source">سورس کوڈ</string>
+    <string name="scr_about_body">Zerokosh مفت اور اوپن سورس ہے، اور اس کے کوئی سرور نہیں۔ آپ کی تجوری صرف آپ کھول سکتے ہیں۔ ہم بھی نہیں۔</string>
+
+    <!-- S11 Authenticator -->
+    <string name="scr_auth_add_qr">QR سے شامل کریں</string>
+    <string name="scr_auth_empty">آپ کی ایپس اور بروکر کے کوڈ یہاں نظر آئیں گے</string>
+    <string name="scr_auth_scan_title">کیمرہ QR کوڈ کے اوپر رکھیں</string>
+    <string name="scr_auth_camera_denied">کیمرے کی اجازت صرف QR کوڈ اسکین کرنے کے لیے چاہیے۔ اندراج شامل کرتے وقت سیکریٹ ہاتھ سے بھی پیسٹ کر سکتے ہیں۔</string>
+
+    <!-- §6.7 Autofill -->
+    <string name="scr_autofill_unlock_first">بھرنے کے لیے Zerokosh کھولیں</string>
+
+    <!-- §6.7 Login helper (copy-mode fallback) -->
+    <string name="scr_login_helper_channel">لاگ اِن مددگار</string>
+    <string name="scr_login_helper_channel_desc">ان بینک ایپس کے لیے جو آٹو فِل نہیں ہونے دیتیں — بٹن دبا کر لاگ اِن کی تفصیلات ایک ایک کر کے کاپی کریں</string>
+    <string name="scr_login_helper_title">%1$s میں لاگ اِن ہو رہے ہیں</string>
+    <string name="scr_login_helper_body">کاپی کرنے کے لیے بٹن دبائیں · 30 سیکنڈ میں مٹ جائے گا</string>
+
+    <!-- §5.7 Reminders -->
+    <string name="scr_reminder_channel">تجدید کی یاد دہانی</string>
+    <string name="scr_reminder_title">Zerokosh یاد دلا رہا ہے</string>
+    <string name="scr_reminder_body">%1$s کی تاریخ قریب ہے · Zerokosh کھولیں</string>
+
+    <!-- Common -->
+    <string name="import_title">بیک اپ درآمد کریں</string>
+    <string name="import_passphrase_hint">وہ پاس فریز ڈالیں جو اس بیک اپ فائل کو کھولتا ہے۔ وہ آپ کے موجودہ سے مختلف ہو سکتا ہے۔</string>
+    <string name="import_passphrase_label">بیک اپ کا پاس فریز</string>
+    <string name="import_action">درآمد</string>
+    <string name="import_merged">%1$d شامل ہوئے، %2$d بدلے۔ کچھ مٹایا نہیں گیا۔</string>
+    <string name="import_nothing_new">اس بیک اپ میں جو تھا، وہ سب پہلے ہی یہاں تھا۔</string>
+    <string name="import_conflicts">%1$d اندراج دونوں طرف بدلے ہوئے تھے۔ دونوں شکلیں محفوظ کر لی گئیں — ”(conflict copy)“ تلاش کریں۔</string>
+    <string name="import_not_a_vault">وہ فائل Zerokosh تجوری کے طور پر پڑھی نہ جا سکی۔</string>
+    <string name="import_locked">درآمد کرنے سے پہلے اپنی تجوری کھولیں۔</string>
+    <string name="scr_edit_month">مہینہ</string>
+    <string name="scr_edit_year">سال</string>
+    <string name="msg_ok">ٹھیک ہے</string>
+    <string name="msg_cancel">منسوخ</string>
+    <string name="msg_back">پیچھے</string>
+    <string name="msg_saved">محفوظ ہو گیا</string>
+    <string name="msg_auth_needed">دیکھنے کے لیے تصدیق کریں کہ یہ آپ ہی ہیں</string>
+    <string name="cd_mask_hidden">چھپا ہوا</string>
+    <string name="cd_shield_high_sensitivity">زیادہ حساس معلومات</string>
+
+    <!-- Onboarding (S1-S6). Extracted from composable literals so the flow
+         a Hindi user meets first is not English. -->
+    <string name="ob_step_label">مرحلہ %1$d / 6</string>
+    <string name="ob_recommended">تجویز</string>
+    <string name="ob_soon">جلد</string>
+    <string name="ob_reveal_show">دکھائیں</string>
+    <string name="ob_reveal_hide">چھپائیں</string>
+    <string name="ob_lang_head_lead">"اپنی "</string>
+    <string name="ob_lang_head_emph">زبان چنیں۔</string>
+    <string name="ob_lang_subhead">تجوری کے لیبل، ٹیمپلیٹ اور تنبیہات فوراً بدل جائیں گی۔ سیٹنگز میں کبھی بھی بدل سکتے ہیں۔</string>
+    <string name="ob_lang_search">%1$d زبانوں میں تلاش کریں</string>
+    <string name="ob_lang_continue">%1$s میں آگے بڑھیں</string>
+    <string name="ob_trust_head_lead">"ہمیں اصل میں کیا "</string>
+    <string name="ob_trust_head_emph">نہیں معلوم</string>
+    <string name="ob_trust_head_tail">۔</string>
+    <string name="ob_trust_subhead">یہ ایک بار پڑھ لیں۔ پوری سیکیورٹی کا ڈھانچہ یہی ہے، سیدھے الفاظ میں۔</string>
+    <string name="ob_trust_continue">سمجھ گیا · آگے بڑھیں</string>
+    <string name="ob_trust_stat_servers">سرور سے رابطہ</string>
+    <string name="ob_trust_stat_trackers">ٹریکر یا SDK</string>
+    <string name="ob_trust_stat_files">فون پر ‎.kosh‎ فائل</string>
+    <string name="ob_trust_keys_emph">"کنجیاں آپ کے پاس۔ "</string>
+    <string name="ob_trust_keys_body">اگر پاس فریز بھول جائیں اور ریکوری کٹ بھی کھو جائے، تو تجوری بند ہی رہے گی — آپ کے لیے، ہمارے لیے، سب کے لیے۔</string>
+    <string name="ob_trust_tag_audited">آڈٹ شدہ بلڈ</string>
+    <string name="ob_trust_tag_reproducible">دوبارہ بنائی جا سکنے والی APK</string>
+    <string name="ob_fact_encryption_title">انکرپشن</string>
+    <string name="ob_fact_encryption_value">XChaCha20-Poly1305</string>
+    <string name="ob_fact_encryption_note">تصدیق شدہ، ہر تجوری کے لیے الگ نونس</string>
+    <string name="ob_fact_kdf_title">کنجی اسٹریچنگ</string>
+    <string name="ob_fact_kdf_value">Argon2id · 64 MB · t=3</string>
+    <string name="ob_fact_kdf_note">سیٹ اپ کے وقت آپ کے فون پر ناپا گیا</string>
+    <string name="ob_fact_quick_title">جلدی ان لاک</string>
+    <string name="ob_fact_quick_value">ہارڈ ویئر کی اسٹور</string>
+    <string name="ob_fact_quick_note">بایو میٹرک سیکیورٹی چپ سے باہر کبھی نہیں جاتا</string>
+    <string name="ob_fact_network_title">نیٹ ورک کی اجازت</string>
+    <string name="ob_fact_network_value">کبھی مانگی ہی نہیں</string>
+    <string name="ob_fact_network_note">یہ ایپ کہیں بھی رابطہ نہیں کر سکتی</string>
+    <string name="ob_fact_lost_title">اگر کنجیاں کھو جائیں</string>
+    <string name="ob_fact_lost_value">کوئی واپس نہیں لا سکتا</string>
+    <string name="ob_fact_lost_note">نہ ری سیٹ لنک۔ نہ سپورٹ کا پچھلا دروازہ۔</string>
+    <string name="ob_pass_head_lead">"ایک ہی راز، "</string>
+    <string name="ob_pass_head_emph">صرف آپ کے پاس</string>
+    <string name="ob_pass_head_tail">۔</string>
+    <string name="ob_pass_subhead">بے جوڑ تین چار الفاظ ایک چالاک لفظ سے بہتر ہیں۔ اس اسکرین سے کچھ باہر نہیں جاتا۔</string>
+    <string name="ob_pass_sealing">بند کر رہے ہیں…</string>
+    <string name="ob_pass_seal">تجوری بند کریں</string>
+    <string name="ob_pass_footer">یہ ہم کبھی نہیں دیکھتے۔ کوئی ری سیٹ لنک نہیں۔</string>
+    <string name="ob_pass_tab_passphrase">پاس فریز</string>
+    <string name="ob_pass_tab_pin">6 ہندسوں کا پن</string>
+    <string name="ob_pass_confirm">دوبارہ لکھیں</string>
+    <string name="ob_pass_no_match">میل نہیں کھاتا</string>
+    <string name="ob_pass_counter">%1$d / %2$d</string>
+    <string name="ob_strength_pin_short">بہت چھوٹا · 6 ہندسے چاہییں</string>
+    <string name="ob_strength_pin_weak">کمزور · یہی پن سب سے پہلے آزمائے جاتے ہیں</string>
+    <string name="ob_strength_pin_fair">ٹھیک ٹھاک · %1$d بٹ — پن اس سے زیادہ مضبوط نہیں ہو سکتا</string>
+    <string name="ob_strength_pass_short">بہت چھوٹا · 10 حروف چاہییں</string>
+    <string name="ob_strength_pass_weak">کمزور · %1$d بٹ اینٹروپی</string>
+    <string name="ob_strength_pass_good">اچھا · %1$d بٹ اینٹروپی</string>
+    <string name="ob_strength_pass_strong">مضبوط · %1$d بٹ اینٹروپی</string>
+    <string name="ob_strength_pin_empty">چھ ہندسے جو آپ کی زندگی دیکھ کر کوئی اندازہ نہ لگا سکے</string>
+    <string name="ob_strength_pass_empty">کچھ ایسا چنیں جو صرف آپ ہی کہتے ہیں</string>
+    <string name="ob_check_pin_digits">چھ ہندسے پورے بھرے</string>
+    <string name="ob_check_pin_pattern">نہ لگاتار ہندسے، نہ دہرائے ہوئے</string>
+    <string name="ob_check_pin_birthday">نہ سالگرہ، نہ سالانہ تاریخ</string>
+    <string name="ob_check_pass_length">10 یا زیادہ حروف</string>
+    <string name="ob_check_pass_dictionary">لغت کا ایک لفظ بھی نہیں</string>
+    <string name="ob_check_pass_reuse">کسی اور ایپ سے دوبارہ استعمال نہیں کیا</string>
+    <string name="ob_try_label">آزمائیں</string>
+    <string name="ob_argon_title">Argon2id سختی</string>
+    <string name="ob_argon_measuring">یہ فون ناپ رہے ہیں…</string>
+    <string name="ob_argon_detail">%1$d MB · t=%2$d · اسی فون پر ناپا گیا</string>
+    <string name="ob_argon_faster">جلدی کھلے گی</string>
+    <string name="ob_argon_harder">توڑنا مشکل</string>
+    <string name="ob_seal_title">اسی فون سے باندھیں</string>
+    <string name="ob_seal_body">لپیٹنے والی کنجی ہارڈ ویئر کی اسٹور میں رہے گی۔ بایو میٹرک اگلے مرحلے میں۔</string>
+    <string name="ob_seal_unavailable">اس فون میں ہارڈ ویئر بایو میٹرک نہیں ہے۔</string>
+    <string name="ob_crack_seconds">~توڑنے میں چند سیکنڈ</string>
+    <string name="ob_crack_hours">~توڑنے میں چند گھنٹے</string>
+    <string name="ob_crack_days">~توڑنے میں %1$d دن</string>
+    <string name="ob_crack_years">~توڑنے میں %1$d سال</string>
+    <string name="ob_crack_centuries">~توڑنے میں %1$d صدیاں</string>
+    <string name="ob_crack_forever">سورج سے بھی زیادہ عرصہ</string>
+    <string name="ob_kit_working">کام جاری ہے…</string>
+    <string name="ob_kit_regenerate">نئی بنائیں</string>
+    <string name="ob_kit_head_lead">"ایک کنجی۔ "</string>
+    <string name="ob_kit_head_emph">کاغذ پر۔</string>
+    <string name="ob_kit_head_tail">" کبھی آن لائن نہیں۔"</string>
+    <string name="ob_kit_subhead">اسی فون پر بنی، صرف ایک بار نظر آئے گی۔ پاس فریز بھولنے پر اندر واپس آنے کا یہی ایک راستہ ہے۔</string>
+    <string name="ob_kit_saved">میں نے اپنی کٹ محفوظ کر لی ہے</string>
+    <string name="ob_kit_footer">یہ کنجی صرف ایک بار نظر آتی ہے، اور کبھی کھلی شکل میں محفوظ نہیں کی جاتی۔</string>
+    <string name="ob_kit_save_pdf">PDF محفوظ کریں</string>
+    <string name="ob_kit_save_pdf_note">ایک صفحے کی چھپنے کے قابل کٹ</string>
+    <string name="ob_kit_qr">QR تصویر</string>
+    <string name="ob_kit_qr_note">آف لائن گیلری میں</string>
+    <string name="ob_kit_offline_title">اسے انٹرنیٹ سے دور رکھیں</string>
+    <string name="ob_kit_offline_body">نہ Gmail، نہ WhatsApp، نہ اسکرین شاٹ۔ الماری، بینک لاکر، یا اسٹیل کی پلیٹ۔</string>
+    <string name="ob_kit_confirm_emph">"میں نے یہ آف لائن رکھ لی ہے۔ "</string>
+    <string name="ob_kit_confirm_body">کوئی بھی — Zerokosh بھی — یہ میرے لیے واپس نہیں لا سکتا۔</string>
+    <string name="ob_kit_card_label">ZEROKOSH ریکوری</string>
+    <string name="ob_kit_qr_cd">ریکوری کنجی کا QR کوڈ</string>
+    <string name="ob_kit_card_note">اسکین کریں یا لکھیں۔ دوبارہ انسٹال، فیکٹری ری سیٹ، یا فون کھونے کے بعد بھی کام کرتی ہے۔</string>
+    <string name="ob_quick_head_lead">"ایک چھو سے کھلے۔ "</string>
+    <string name="ob_quick_head_emph">بغیر کلاؤڈ کے۔</string>
+    <string name="ob_quick_subhead">اندر واپس آنے کا جلدی راستہ چنیں۔ تجوری کی حفاظت پاس فریز ہی کرتا ہے؛ یہ صرف اسی فون پر کنجی کھولتا ہے۔</string>
+    <string name="ob_quick_opening">آپ کی تجوری کھل رہی ہے…</string>
+    <string name="ob_quick_enable">جلدی ان لاک چالو کریں</string>
+    <string name="ob_quick_continue_pass">پاس فریز کے ساتھ آگے بڑھیں</string>
+    <string name="ob_quick_refused">جلدی ان لاک نہیں لگ سکا۔ دوبارہ کوشش کریں، یا پاس فریز کے ساتھ ہی آگے بڑھیں۔</string>
+    <string name="ob_quick_skip">ابھی نہیں — میں پاس فریز لکھ لوں گا</string>
+    <string name="ob_quick_fingerprint">انگلی کا نشان</string>
+    <string name="ob_quick_fingerprint_body">تیز، ہارڈ ویئر سے محفوظ ان لاک۔</string>
+    <string name="ob_quick_no_sensor">اس فون میں ہارڈ ویئر سینسر نہیں ہے۔</string>
+    <string name="ob_quick_pass_only">صرف پاس فریز</string>
+    <string name="ob_quick_pass_only_body">ہر بار لکھیں۔ سب سے محفوظ۔</string>
+    <string name="ob_quick_hw_title">ہارڈ ویئر سے محفوظ</string>
+    <string name="ob_quick_hw_body">Android Keystore / StrongBox۔ کوئی بایو میٹرک معلومات کبھی Zerokosh تک نہیں پہنچتی۔</string>
+    <string name="ob_quick_touch_title">سینسر کو چھوئیں</string>
+    <string name="ob_quick_touch_body">آپ کی انگلی کا نشان فون کی سیکیورٹی چپ کے اندر رہتا ہے۔ وہ اس فون سے کبھی باہر نہیں جاتا۔</string>
+
+    <!-- Settings screen. -->
+    <string name="st_folder_fallback">فولڈر</string>
+    <string name="st_toast_folder_backed">بیک اپ فولڈر جڑ گیا، اور تجوری %1$s میں محفوظ ہو گئی!</string>
+    <string name="st_toast_folder_connected">بیک اپ فولڈر جڑ گیا: %1$s</string>
+    <string name="st_toast_folder_failed">فولڈر نہ جڑ سکا: %1$s</string>
+    <string name="st_toast_exported">انکرپٹ شدہ تجوری برآمد ہو گئی</string>
+    <string name="st_toast_export_failed">برآمد نہ ہو سکی</string>
+    <string name="st_subtitle">آپ کے اصول۔</string>
+    <string name="st_group_security">سیکیورٹی</string>
+    <string name="st_vault_review">تجوری کی جانچ</string>
+    <string name="st_vault_review_detail">دوبارہ استعمال شدہ، کمزور، میعاد ختم ہوتے</string>
+    <string name="st_recently_deleted">حال ہی میں ہٹائے گئے</string>
+    <string name="st_group_sync">سنک</string>
+    <string name="st_active_folder">فعال فولڈر</string>
+    <string name="st_active_value">فعال · %1$s</string>
+    <string name="st_group_appearance">شکل</string>
+    <string name="st_theme">تھیم</string>
+    <string name="st_theme_system">سسٹم</string>
+    <string name="st_theme_light">ہلکا</string>
+    <string name="st_theme_dark">گہرا</string>
+    <string name="st_group_about">بارے میں</string>
+    <string name="st_license">لائسنس</string>
+    <string name="st_logos_by">لوگو از</string>
+    <string name="st_export_kosh">انکرپٹ شدہ ‎.kosh‎ برآمد</string>
+    <string name="st_import_kosh">‎.kosh‎ بیک اپ درآمد</string>
+    <string name="st_import_other">کسی اور پاس ورڈ مینیجر سے درآمد</string>
+    <string name="st_import_other_detail">Chrome · Google · Bitwarden · LastPass · KeePass</string>
+    <string name="st_toast_backed_up">تجوری %1$s میں محفوظ ہو گئی!</string>
+    <string name="st_toast_backup_failed">بیک اپ نہ ہو سکا — فولڈر کی اجازت دیکھیں</string>
+    <string name="st_toast_disconnected">بیک اپ فولڈر ہٹا دیا گیا</string>
+    <string name="st_confirm_new_passphrase">نیا پاس فریز دوبارہ لکھیں</string>
+    <string name="st_new_recovery_body">نئی ریکوری کنجی بنانے کے لیے اپنا پاس فریز ڈالیں۔ پرانی کنجی کام کرنا بند کر دے گی۔</string>
+    <string name="st_new_recovery_result">آپ کی نئی ریکوری کنجی:</string>
+    <string name="st_new_recovery_note">اسے آف لائن رکھیں۔ پرانی ریکوری کنجی اب کارآمد نہیں۔</string>
+    <string name="st_generate">بنائیں</string>
+    <string name="st_done">ہو گیا</string>
+    <string name="st_backup_sheet_title">بیک اپ اور سنک فولڈر</string>
+    <string name="st_connected_folder">جڑا ہوا فولڈر: %1$s</string>
+    <string name="st_backup_sheet_body">آپ کی انکرپٹ شدہ ‎.kosh‎ فائلیں سیدھے اسی فولڈر میں محفوظ ہوتی ہیں۔ کئی ڈیوائسوں پر خود بخود بیک اپ کے لیے اس فولڈر کو Google Drive، Syncthing، Nextcloud یا SD کارڈ سے سنک کریں۔</string>
+    <string name="st_backing_up">تجوری کا بیک اپ لے رہے ہیں…</string>
+    <string name="st_backup_now">ابھی بیک اپ لیں</string>
+    <string name="st_change_folder">فولڈر بدلیں</string>
+    <string name="st_disconnect">ہٹائیں</string>
+
+    <!-- Home and Welcome. -->
+    <string name="hm_search_hint">HDFC، priya@upi، PAN… تلاش کریں</string>
+    <string name="hm_pinned">پن کیے گئے</string>
+    <string name="hm_count_one">"%1$d چیز، "</string>
+    <string name="hm_count_many">"%1$d چیزیں، "</string>
+    <string name="hm_all_offline">سب آف لائن۔</string>
+    <string name="hm_lock_immediate">کھلی ہے · چھوڑتے ہی بند ہو گی</string>
+    <string name="hm_lock_one">کھلی ہے · چھوڑنے کے 1 منٹ بعد بند</string>
+    <string name="hm_lock_many">کھلی ہے · چھوڑنے کے %1$d منٹ بعد بند</string>
+    <string name="hm_inst_one">%1$d ادارہ</string>
+    <string name="hm_inst_many">%1$d ادارے</string>
+    <string name="hm_close_search">تلاش بند کریں</string>
+    <string name="hm_no_match">”%1$s“ کے لیے کچھ نہیں ملا</string>
+    <string name="hm_no_match_hint">کوئی ادارہ، UPI ہینڈل، یا آخری چار ہندسے آزمائیں۔</string>
+    <string name="hm_empty_head_lead">"آپ کی تجوری "</string>
+    <string name="hm_empty_head_emph">انتظار میں ہے۔</string>
+    <string name="hm_empty_blank">خالی تجوری، تیار۔</string>
+    <string name="hm_empty_body">اس ایک چیز سے شروع کریں جو سب سے زیادہ کام آئے۔ نوٹس ایپ میں پڑے بارہ پاس ورڈوں سے ایک محفوظ کیا ہوا پاس ورڈ زیادہ محفوظ ہے۔</string>
+    <string name="hm_add_first">اپنا پہلا اندراج شامل کریں</string>
+    <string name="hm_start_template">ٹیمپلیٹ سے شروع کریں</string>
+    <string name="hm_import_backup">انکرپٹ شدہ بیک اپ درآمد</string>
+    <string name="hm_import_backup_note">اسی فون سے ‎.kosh‎ فائل کھولیں</string>
+    <string name="hm_reassurance">اس فون سے کبھی باہر نہیں جاتا۔ محفوظ کرتے وقت انکرپٹ کیا جاتا ہے۔</string>
+    <string name="wl_body">بھارتی بینکوں، UPI، کارڈوں، ڈی میٹ، EPF، اور ان OTP ایپس کے لیے جو آپ واقعی استعمال کرتے ہیں — فون میں ہی رہنے والی تجوری۔</string>
+    <string name="wl_create">نئی تجوری بنائیں</string>
+    <string name="wl_restore">ریکوری کٹ سے واپس لائیں</string>
+    <string name="wl_footer">نہ ای میل · نہ اکاؤنٹ · کچھ بھی اس فون سے باہر نہیں جاتا</string>
+
+    <!-- Categories, relative time, vault review. -->
+    <string name="cat_banks">بینک اور UPI</string>
+    <string name="cat_cards">کارڈ</string>
+    <string name="cat_investments">سرمایہ کاری</string>
+    <string name="cat_govid">سرکاری اور شناخت</string>
+    <string name="cat_utilities">بل اور کنکشن</string>
+    <string name="cat_apps">ایپس اور لاگ اِن</string>
+    <string name="time_just_now">ابھی ابھی</string>
+    <string name="time_minutes">%1$d منٹ پہلے</string>
+    <string name="time_hours">%1$d گھنٹے پہلے</string>
+    <string name="time_days">%1$d دن پہلے</string>
+    <string name="time_months">%1$d مہینے پہلے</string>
+    <string name="time_years">%1$d سال پہلے</string>
+    <string name="vh_nothing">ٹھیک کرنے کو کچھ نہیں۔</string>
+    <string name="vh_count_one">%1$d بات پر دھیان دینا چاہیے۔</string>
+    <string name="vh_count_many">%1$d باتوں پر دھیان دینا چاہیے۔</string>
+    <string name="vh_checked_one">اسی فون پر %1$d اندراج سے ملایا گیا۔ کچھ بھی کہیں نہیں بھیجا گیا۔</string>
+    <string name="vh_checked_many">اسی فون پر %1$d اندراجات سے ملایا گیا۔ کچھ بھی کہیں نہیں بھیجا گیا۔</string>
+    <string name="vh_empty">نہ دوبارہ استعمال شدہ، نہ کمزور، نہ میعاد ختم ہوتا کچھ ہے۔</string>
+    <string name="vh_kind_reused">دوبارہ استعمال شدہ پاس ورڈ</string>
+    <string name="vh_kind_common">آسانی سے اندازہ لگ جانے والا</string>
+    <string name="vh_kind_weak">کمزور</string>
+    <string name="vh_kind_expiring">میعاد ختم ہو رہی ہے</string>
+
+    <!-- Trash and record detail. -->
+    <string name="tr_ttl_note">ہٹائے گئے اندراج یہاں %1$d دن رہتے ہیں۔</string>
+    <string name="tr_ttl_warn">اس کے بعد وہ ہمیشہ کے لیے چلے جاتے ہیں — کہیں اور کوئی نقل نہیں۔</string>
+    <string name="tr_empty">کچھ نہیں ہٹایا گیا۔</string>
+    <string name="tr_delete_all">سب ہمیشہ کے لیے ہٹائیں</string>
+    <string name="tr_delete_all_title">ردی کا سب کچھ ہٹا دیں؟</string>
+    <string name="tr_delete_all_one">%1$d اندراج ہمیشہ کے لیے چلا جائے گا۔ یہ واپس نہیں ہو سکتا، اور واپس لانے کے لیے کوئی بیک اپ نہیں۔</string>
+    <string name="tr_delete_all_many">%1$d اندراجات ہمیشہ کے لیے چلے جائیں گے۔ یہ واپس نہیں ہو سکتا، اور واپس لانے کے لیے کوئی بیک اپ نہیں۔</string>
+    <string name="tr_delete_one_title">”%1$s“ ہمیشہ کے لیے ہٹا دیں؟</string>
+    <string name="tr_cannot_undo">یہ واپس نہیں ہو سکتا۔</string>
+    <string name="tr_gone_today">آج چلا جائے گا</string>
+    <string name="tr_days_one">%1$d دن باقی</string>
+    <string name="tr_days_many">%1$d دن باقی</string>
+    <string name="tr_restore">واپس لائیں</string>
+    <string name="tr_delete_now">ابھی ہٹائیں</string>
+    <string name="rd_last_edit">آخری بار %1$s بدلا گیا</string>
+    <string name="rd_history_hide">چھپائیں</string>
+    <string name="rd_history_show">%1$d دکھائیں</string>
+    <string name="rd_forget_these">یہ بھول جائیں</string>
+    <string name="rd_forget_title">پرانے پاس ورڈ بھول جائیں؟</string>
+    <string name="rd_forget_body">اس اندراج کے لیے یاد رکھی گئی %1$d قدریں ہٹا دی جائیں گی۔ یہ واپس نہیں ہو سکتا۔</string>
+    <string name="rd_forget">بھول جائیں</string>
+    <string name="rd_copied">کاپی ہو گیا</string>
+    <string name="rd_release_to_hide">چھپانے کے لیے چھوڑ دیں</string>
+    <string name="rd_hold_to_reveal">دیکھنے کے لیے دبائے رکھیں</string>
+
+    <!-- Navigation and the damaged-vault screen. -->
+    <string name="nav_close_menu">مینو بند کریں</string>
+    <string name="nav_tap_card">کارڈ ٹیپ کریں</string>
+    <string name="nav_all_templates">سارے ٹیمپلیٹ</string>
+    <string name="nav_scan">اسکین</string>
+    <string name="nav_damaged_kicker">خراب حالت</string>
+    <string name="nav_damaged_lead">"آپ کی "</string>
+    <string name="nav_damaged_emph">تجوری فائل میں</string>
+    <string name="nav_damaged_tail">" کچھ گڑبڑ ہے۔"</string>
+    <string name="nav_integrity_title">سالمیت کی جانچ ناکام ہوئی</string>
+    <string name="nav_integrity_body">‎.kosh‎ فائل کا Poly1305 تصدیقی ٹیگ میل نہیں کھاتا۔ یہ بیچ میں رکے سنک یا خراب اسٹوریج کے بعد ہو سکتا ہے۔</string>
+    <string name="nav_what_next">اب آگے کیا</string>
+    <string name="nav_what_next_body">Zerokosh تجوری فائل کے ساتھ ایک چلتا ہوا بیک اپ رکھتا ہے۔ اسے اپنے سنک فولڈر سے واپس لائیں، یا کسی دوسرے فون پر ریکوری کٹ سے تجوری کھولیں۔</string>
+
+    <!-- NFC card read and CSV import. -->
+    <string name="nfc_no_hardware">اس فون میں NFC نہیں ہے، اس لیے کارڈ نہیں پڑھا جا سکتا۔</string>
+    <string name="nfc_disabled">NFC بند ہے۔ سیٹنگز میں چالو کر کے دوبارہ کوشش کریں۔</string>
+    <string name="nfc_read_failed">وہ کارڈ نہ پڑھا جا سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="nfc_cannot_read">کارڈ نہیں پڑھا جا سکتا</string>
+    <string name="nfc_reading">پڑھ رہے ہیں…</string>
+    <string name="nfc_missed">پکڑ میں نہیں آیا</string>
+    <string name="nfc_hold_card">کارڈ فون سے لگا کر رکھیں</string>
+    <string name="nfc_hint">جب تک پڑھا نہ جائے، کارڈ فون کی پشت سے سیدھا لگا کر رکھیں۔ اس سے کارڈ نمبر، میعاد اور نام ملتا ہے — CVV چپ میں نہیں ہوتا، وہ آپ کو خود لکھنا پڑے گا۔</string>
+    <string name="nfc_try_again">دوبارہ کوشش کریں</string>
+    <string name="ic_too_large">یہ فائل پاس ورڈ برآمد ہونے کے لیے بہت بڑی ہے۔</string>
+    <string name="ic_unrecognised">اس فائل میں پہچاننے کے قابل کچھ نہیں ملا۔ Chrome، Google Password Manager، Bitwarden، LastPass اور KeePass کی برآمدات سمجھ آتی ہیں۔</string>
+    <string name="ic_could_not">درآمد نہ ہو سکا</string>
+    <string name="ic_imported">درآمد ہو گیا</string>
+    <string name="ic_result">%1$d شامل ہوئے، %2$d بدلے۔</string>
+    <string name="ic_delete_file">اب وہ فائل ہٹا دیں جو آپ نے درآمد کی تھی۔ وہ آپ کے پاس ورڈوں کی کھلی فہرست ہے، اور اب بھی آپ کے Downloads میں پڑی ہے۔</string>
+    <string name="ic_done">ہو گیا</string>
+    <string name="ic_title">%1$s سے درآمد کریں؟</string>
+    <string name="ic_new_one">%1$d نیا لاگ اِن۔</string>
+    <string name="ic_new_many">%1$d نئے لاگ اِن۔</string>
+    <string name="ic_update_one">%1$d موجودہ اندراج بدلے گا — سائٹ اور یوزر نیم ملا کر۔ بدلے ہوئے پاس ورڈ ہر اندراج کی تاریخ میں مل جائیں گے۔</string>
+    <string name="ic_update_many">%1$d موجودہ اندراجات بدلیں گے — سائٹ اور یوزر نیم ملا کر۔ بدلے ہوئے پاس ورڈ ہر اندراج کی تاریخ میں مل جائیں گے۔</string>
+    <string name="ic_local_only">سب کچھ صرف اسی فون پر ڈی کرپٹ ہوتا ہے۔ کچھ اپ لوڈ نہیں ہوتا، کیونکہ یہ ایپ نیٹ ورک کنکشن کھول ہی نہیں سکتی۔</string>
+    <string name="ic_importing">درآمد ہو رہا ہے…</string>
+    <string name="ic_import">درآمد</string>
+
+    <!-- Record edit. -->
+    <string name="re_using_template">%1$s ٹیمپلیٹ استعمال کر کے</string>
+    <string name="re_add_field">+ ایک اور خانہ شامل کریں</string>
+    <string name="re_remove">ہٹائیں</string>
+    <string name="re_add_field_title">خانہ شامل کریں</string>
+    <string name="re_field_name">خانے کا نام</string>
+    <string name="re_treat_secret">راز سمجھیں (چھپا رہے گا، دیکھنے کے لیے دبائے رکھیں)</string>
+    <string name="re_pick_date">تاریخ چنیں</string>
+    <string name="re_tap_card">پڑھنے کے لیے کارڈ ٹیپ کریں</string>
+
+    <!-- Authenticator. -->
+    <string name="au_fallback_name">تصدیق کار</string>
+    <string name="au_search_hint">کوڈ یا دینے والے تلاش کریں…</string>
+    <string name="au_rotating">"بدلتے رہنے والے "</string>
+    <string name="au_active_one">%1$d فعال کوڈ</string>
+    <string name="au_active_many">%1$d فعال کوڈ</string>
+    <string name="au_tap_to_copy">کاپی کرنے کے لیے ٹیپ کریں</string>
+    <string name="au_add_another">ایک اور تصدیق کار شامل کریں</string>
+    <string name="au_no_match">کوئی کوڈ نہیں ملا</string>
+    <string name="au_none_yet">ابھی کوئی کوڈ نہیں۔</string>
+    <string name="au_empty_hint">Google، GitHub یا اپنے بروکر کا QR اسکین کریں، یا سیکریٹ کنجی ہاتھ سے لکھیں۔</string>
+    <string name="au_scan_qr">QR کوڈ اسکین کریں</string>
+    <string name="au_copied">کاپی ہو گیا · تھوڑی دیر میں مٹ جائے گا</string>
+    <string name="au_no_qr_found">چنی گئی تصویر میں درست TOTP QR کوڈ نہیں ملا</string>
+    <string name="au_image_failed">تصویر نہ پڑھی جا سکی</string>
+    <string name="au_camera_needed">QR کوڈ اسکین کرنے کے لیے کیمرے کی اجازت چاہیے</string>
+    <string name="au_grant">اجازت دیں</string>
+    <string name="au_close">بند کریں</string>
+    <string name="au_scan_title">تصدیق کار کا QR اسکین کریں</string>
+    <string name="au_flashlight">ٹارچ</string>
+    <string name="au_pick_image">تصویر چنیں</string>
+    <string name="au_enter_key">کنجی لکھیں</string>
+    <string name="au_add_secret">سیکریٹ کنجی شامل کریں</string>
+    <string name="au_account_name">اکاؤنٹ کا نام (جیسے Google)</string>
+    <string name="au_secret_label">سیکریٹ کنجی (Base32)</string>
+    <string name="au_secret_example">جیسے JBSWY3DPEHPK3PXP</string>
+    <string name="au_invalid_secret">غلط Base32 سیکریٹ کنجی (صرف A-Z حروف اور 2-7 ہندسے)</string>
+    <string name="au_save_key">کنجی محفوظ کریں</string>
+
+    <!-- Chrome: tabs, toggles, quick adds. -->
+    <string name="ui_hide_passphrase">پاس فریز چھپائیں</string>
+    <string name="ui_show_passphrase">پاس فریز دکھائیں</string>
+    <string name="ui_label_count">%1$s، %2$s</string>
+    <string name="tab_vault">تجوری</string>
+    <string name="tab_codes">کوڈ</string>
+    <string name="tab_templates">ٹیمپلیٹ</string>
+    <string name="tab_settings">سیٹنگز</string>
+    <string name="wl_sr_headline">آپ کی کنجیاں۔ آپ کا فون۔ کوئی سرور نہیں۔</string>
+    <string name="wl_chip_crypto">Argon2id + XChaCha20</string>
+    <string name="wl_chip_offline">آف لائن</string>
+    <string name="wl_chip_open">اوپن سورس</string>
+    <string name="wl_head_1">آپ کی کنجیاں۔</string>
+    <string name="wl_head_2">آپ کا فون۔</string>
+    <string name="wl_head_3">کوئی سرور نہیں۔</string>
+    <string name="qa_bank_account">بینک اکاؤنٹ</string>
+    <string name="qa_upi_id">UPI ID</string>
+    <string name="qa_aadhaar">آدھار</string>
+    <string name="qa_pan">PAN</string>
+    <string name="qa_totp">TOTP</string>
+
+    <!-- Save failure dialog. -->
+    <string name="se_title">محفوظ نہیں ہوا</string>
+    <string name="se_lead">آپ کی تبدیلیاں محفوظ نہیں ہوئیں، اس لیے تجوری میں جو پہلے تھا اس میں سے کچھ نہیں کھویا۔</string>
+    <string name="se_body">تجوری فائل لکھی نہ جا سکی۔ اگر آپ نے بیک اپ اور سنک فولڈر لگایا ہوا ہے، تو ہو سکتا ہے Android نے اس کی اجازت واپس لے لی ہو — سیٹنگز کھولیں، فولڈر دوبارہ چنیں، اور پھر کوشش کریں۔</string>
+
+    <!-- Screen kickers. -->
+    <string name="kicker_locked">بند ہے</string>
+
+    <!-- Lock screen. -->
+    <string name="lk_welcome_lead">خوش آمدید۔</string>
+    <string name="lk_welcome_emph">آپ کی تجوری بند ہے۔</string>
+    <string name="lk_crypto_note">Argon2id · XChaCha20-Poly1305 · کچھ بھی اس فون سے باہر نہیں گیا</string>
+    <string name="lk_touch_unlock">کھولنے کے لیے چھوئیں</string>
+
+    <!-- Template gallery. -->
+    <string name="gl_head_lead">"ہم کیا "</string>
+    <string name="gl_head_emph">محفوظ کر رہے ہیں؟</string>
+    <string name="gl_search">%1$d بھارتی خدمات میں تلاش کریں…</string>
+    <string name="gl_suggested">آپ کے لیے تجویز</string>
+    <string name="gl_most_used">سب سے زیادہ استعمال ہونے والے پہلے</string>
+    <string name="gl_matches">%1$d ملے</string>
+    <string name="gl_not_found">خدمت نہیں مل رہی؟</string>
+    <string name="gl_not_found_body">خالی سے شروع کر کے اپنے خانوں کے نام خود رکھیں — ٹیمپلیٹ صرف لیبل بھرتے ہیں، ڈیٹا کبھی نہیں۔</string>
+    <string name="gl_blank">خالی ٹیمپلیٹ</string>
+    <string name="gl_cat_popular">مقبول</string>
+    <string name="gl_cat_banks">بینک</string>
+    <string name="gl_cat_upi">UPI</string>
+    <string name="gl_cat_cards">کارڈ</string>
+    <string name="gl_cat_demat">ڈی میٹ</string>
+    <string name="gl_cat_govid">سرکاری شناخت</string>
+    <string name="gl_cat_shopping">خریداری</string>
+    <string name="gl_cat_travel">سفر</string>
+    <string name="gl_cat_utilities">بل</string>
+    <string name="gl_cat_apps">ایپس</string>
+    <string name="au_rotating_emph">کوڈ۔</string>
+</resources>

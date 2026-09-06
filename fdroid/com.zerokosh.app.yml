@@ -1,0 +1,40 @@
+## F-Droid build metadata for Zerokosh.
+##
+## This file does not do anything sitting here. F-Droid keeps its metadata in
+## its own repository, so shipping it here is only so the exact submitted
+## content is reviewable alongside the code it builds. To submit, copy it to
+## metadata/com.zerokosh.app.yml in a fork of
+## https://gitlab.com/fdroid/fdroiddata and open a merge request.
+##
+## F-Droid never accepts an uploaded APK. It builds from this source and signs
+## with its own key, which is why the F-Droid build and the Play build are not
+## byte-identical and cannot update one another.
+
+Categories:
+  - Security
+  - Money
+License: GPL-3.0-only
+SourceCode: https://github.com/shadowcleets-new/zerokosh
+IssueTracker: https://github.com/shadowcleets-new/zerokosh/issues
+Changelog: https://github.com/shadowcleets-new/zerokosh/blob/HEAD/CHANGELOG.md
+
+AutoName: Zerokosh
+
+RepoType: git
+Repo: https://github.com/shadowcleets-new/zerokosh.git
+
+Builds:
+  - versionName: 0.2.0
+    versionCode: 3
+    commit: v0.2.0
+    subdir: app
+    gradle:
+      - yes
+    ## No keystore is present in a clean checkout, and app/build.gradle.kts
+    ## leaves signingConfig null when it is absent rather than failing, so the
+    ## build produces an unsigned APK for F-Droid to sign. Nothing to strip.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.2.0
+CurrentVersionCode: 3

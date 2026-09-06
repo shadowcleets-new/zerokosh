@@ -1,0 +1,8 @@
+Nine more Indian languages: Bengali, Malayalam, Punjabi,
+Assamese, Urdu, Nepali, Konkani, Maithili and Dogri. Seventeen in all.
+
+Urdu is the first right-to-left language, and the layout mirrors properly.
+
+Fixes: numbers no longer mix Latin and native digits in the same sentence;
+the passphrase footer and the home filter chip are translated rather than
+stuck in English.

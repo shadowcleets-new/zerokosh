@@ -20,16 +20,16 @@
     <!-- S3 Create passphrase -->
     <string name="scr_create_title">আপনার পাসফ্রেজ তৈরি করুন</string>
     <string name="scr_create_body">এই একটি পাসফ্রেজই সব কিছু তালাবন্ধ রাখে। লম্বা কিছু বেছে নিন, যা কেবল আপনিই জানেন।</string>
-    <string name="scr_create_hint">পাসফ্রেজ (অন্তত ১০টি অক্ষর)</string>
+    <string name="scr_create_hint">পাসফ্রেজ (অন্তত 10টি অক্ষর)</string>
     <string name="scr_create_confirm_hint">আবার লিখুন</string>
     <string name="scr_create_mismatch">দুটো এক নয়</string>
-    <string name="scr_create_too_short">অন্তত ১০টি অক্ষর রাখুন — যত লম্বা, তত শক্ত</string>
+    <string name="scr_create_too_short">অন্তত 10টি অক্ষর রাখুন — যত লম্বা, তত শক্ত</string>
     <string name="scr_create_strength_weak">দুর্বল</string>
     <string name="scr_create_strength_fair">মোটামুটি</string>
     <string name="scr_create_strength_good">ভালো</string>
     <string name="scr_create_strength_strong">শক্ত</string>
-    <string name="scr_create_pin_option">তার বদলে ৬ সংখ্যার পিন রাখুন</string>
-    <string name="scr_create_pin_hint">৬ সংখ্যার পিন</string>
+    <string name="scr_create_pin_option">তার বদলে 6 সংখ্যার পিন রাখুন</string>
+    <string name="scr_create_pin_hint">6 সংখ্যার পিন</string>
     <string name="scr_create_pin_why">পিন চলে কারণ এই ফোন সেটাকে নিজের নিরাপত্তা চিপ আর আপনার আঙুলের ছাপ বা মুখ দিয়ে আগলে রাখে।</string>
     <string name="scr_create_pin_unavailable">পিনের জন্য আঙুলের ছাপ বা মুখ আনলক আছে এমন ফোন দরকার। অনুগ্রহ করে পাসফ্রেজ বেছে নিন।</string>
     <string name="scr_create_button">তালা লাগিয়ে দিন</string>
@@ -81,12 +81,12 @@
     <string name="scr_detail_copy">কপি</string>
     <string name="scr_detail_reveal">দেখান</string>
     <string name="scr_detail_hide">লুকান</string>
-    <string name="scr_detail_copied">কপি হয়েছে · ৩০ সেকেন্ডে মুছে যাবে</string>
+    <string name="scr_detail_copied">কপি হয়েছে · 30 সেকেন্ডে মুছে যাবে</string>
     <string name="scr_detail_edit">বদলান</string>
     <string name="scr_detail_delete">মুছুন</string>
     <string name="scr_detail_favorite">পছন্দের</string>
     <string name="scr_detail_delete_confirm_title">এই রেকর্ড মুছবেন?</string>
-    <string name="scr_detail_delete_confirm_body">সেটা ৩০ দিন “সম্প্রতি মোছা”-য় থাকবে, আর আপনার অন্য ফোনের সঙ্গে সিঙ্ক হলে চলে যাবে।</string>
+    <string name="scr_detail_delete_confirm_body">সেটা 30 দিন “সম্প্রতি মোছা”-য় থাকবে, আর আপনার অন্য ফোনের সঙ্গে সিঙ্ক হলে চলে যাবে।</string>
     <string name="scr_detail_delete_confirm_yes">মুছুন</string>
     <string name="scr_detail_hidden">লুকানো</string>
     <string name="scr_detail_shown">দেখা যাচ্ছে</string>
@@ -125,9 +125,9 @@
     <string name="scr_settings_title">সেটিং</string>
     <string name="scr_settings_autolock">অ্যাপ ছাড়লেই তালা দিন</string>
     <string name="scr_settings_autolock_immediately">সঙ্গে সঙ্গে</string>
-    <string name="scr_settings_autolock_1min">১ মিনিট পরে</string>
-    <string name="scr_settings_autolock_5min">৫ মিনিট পরে</string>
-    <string name="scr_settings_autolock_15min">১৫ মিনিট পরে</string>
+    <string name="scr_settings_autolock_1min">1 মিনিট পরে</string>
+    <string name="scr_settings_autolock_5min">5 মিনিট পরে</string>
+    <string name="scr_settings_autolock_15min">15 মিনিট পরে</string>
     <string name="scr_settings_quick_unlock">আঙুলের ছাপ / মুখ আনলক</string>
     <string name="scr_settings_change_passphrase">পাসফ্রেজ বদলান</string>
     <string name="scr_settings_new_recovery">নতুন রিকভারি চাবি নিন</string>
@@ -148,7 +148,7 @@
     <string name="scr_settings_autofill_unsupported">পাওয়া যাচ্ছে না</string>
     <string name="scr_settings_allow_screenshots_warning">সিন্দুকের স্ক্রিনশট ক্লাউড ফোটো ব্যাকআপে চলে যেতে পারে। সত্যিই দরকার হলে তবেই চালু করুন।</string>
     <string name="scr_settings_current_passphrase">এখনকার পাসফ্রেজ</string>
-    <string name="scr_settings_new_passphrase">নতুন পাসফ্রেজ (অন্তত ১০টি অক্ষর)</string>
+    <string name="scr_settings_new_passphrase">নতুন পাসফ্রেজ (অন্তত 10টি অক্ষর)</string>
     <string name="scr_settings_passphrase_changed">পাসফ্রেজ বদলেছে</string>
 
     <!-- About -->
@@ -170,7 +170,7 @@
     <string name="scr_login_helper_channel">লগইন সহায়ক</string>
     <string name="scr_login_helper_channel_desc">যে ব্যাঙ্ক অ্যাপ অটোফিল চলতে দেয় না তাদের জন্য — বোতাম টিপে লগইনের তথ্য একটি একটি করে কপি করুন</string>
     <string name="scr_login_helper_title">%1$s-এ লগইন হচ্ছে</string>
-    <string name="scr_login_helper_body">কপি করতে বোতাম টিপুন · ৩০ সেকেন্ডে মুছে যাবে</string>
+    <string name="scr_login_helper_body">কপি করতে বোতাম টিপুন · 30 সেকেন্ডে মুছে যাবে</string>
 
     <!-- §5.7 Reminders -->
     <string name="scr_reminder_channel">নবীকরণের মনে করানো</string>
@@ -244,14 +244,14 @@
     <string name="ob_pass_seal">সিন্দুকে তালা লাগান</string>
     <string name="ob_pass_footer">এটা আমরা কখনও দেখি না। কোনও রিসেট লিঙ্ক নেই।</string>
     <string name="ob_pass_tab_passphrase">পাসফ্রেজ</string>
-    <string name="ob_pass_tab_pin">৬ সংখ্যার পিন</string>
+    <string name="ob_pass_tab_pin">6 সংখ্যার পিন</string>
     <string name="ob_pass_confirm">আবার লিখুন</string>
     <string name="ob_pass_no_match">মিলছে না</string>
     <string name="ob_pass_counter">%1$d / %2$d</string>
-    <string name="ob_strength_pin_short">খুব ছোট · ৬টি সংখ্যা চাই</string>
+    <string name="ob_strength_pin_short">খুব ছোট · 6টি সংখ্যা চাই</string>
     <string name="ob_strength_pin_weak">দুর্বল · এই পিনগুলোই সবার আগে চেষ্টা করা হয়</string>
     <string name="ob_strength_pin_fair">মোটামুটি · %1$d বিট — পিন এর চেয়ে শক্ত হতে পারে না</string>
-    <string name="ob_strength_pass_short">খুব ছোট · ১০টি অক্ষর চাই</string>
+    <string name="ob_strength_pass_short">খুব ছোট · 10টি অক্ষর চাই</string>
     <string name="ob_strength_pass_weak">দুর্বল · %1$d বিট এনট্রপি</string>
     <string name="ob_strength_pass_good">ভালো · %1$d বিট এনট্রপি</string>
     <string name="ob_strength_pass_strong">শক্ত · %1$d বিট এনট্রপি</string>
@@ -260,7 +260,7 @@
     <string name="ob_check_pin_digits">ছয়টি সংখ্যাই ভরা হয়েছে</string>
     <string name="ob_check_pin_pattern">পরপর সংখ্যাও নয়, পুনরাবৃত্তিও নয়</string>
     <string name="ob_check_pin_birthday">জন্মদিনও নয়, বিবাহবার্ষিকীও নয়</string>
-    <string name="ob_check_pass_length">১০ বা তার বেশি অক্ষর</string>
+    <string name="ob_check_pass_length">10 বা তার বেশি অক্ষর</string>
     <string name="ob_check_pass_dictionary">অভিধানের একটিও শব্দ নয়</string>
     <string name="ob_check_pass_reuse">অন্য অ্যাপ থেকে আবার ব্যবহার করা নয়</string>
     <string name="ob_try_label">চেষ্টা</string>
@@ -366,7 +366,7 @@
     <string name="hm_count_many">"%1$d তথ্য, "</string>
     <string name="hm_all_offline">সব অফলাইন।</string>
     <string name="hm_lock_immediate">খোলা আছে · ছাড়লেই তালা</string>
-    <string name="hm_lock_one">খোলা আছে · ছাড়ার ১ মিনিট পরে তালা</string>
+    <string name="hm_lock_one">খোলা আছে · ছাড়ার 1 মিনিট পরে তালা</string>
     <string name="hm_lock_many">খোলা আছে · ছাড়ার %1$d মিনিট পরে তালা</string>
     <string name="hm_inst_one">%1$d প্রতিষ্ঠান</string>
     <string name="hm_inst_many">%1$d প্রতিষ্ঠান</string>

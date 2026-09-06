@@ -893,7 +893,7 @@ fun CreatePassphraseScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "We never see this. There is no reset link.",
+                stringResource(R.string.ob_pass_footer),
                 fontSize = 11.sp,
                 color = c.ink(0.45f),
                 textAlign = TextAlign.Center,

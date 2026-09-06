@@ -40,13 +40,19 @@ class MainActivity : FragmentActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
-        // S1 language choice (en/hi in v1) without an extra dependency (§12)
+        // S1 language choice without an extra dependency (§12)
         val tag = Prefs(newBase).languageTag
         if (tag.isEmpty()) {
             super.attachBaseContext(newBase)
             return
         }
-        val locale = Locale.forLanguageTag(tag)
+        // -u-nu-latn pins %d to Latin digits. Bengali, Assamese, Nepali and
+        // Marathi otherwise format it in native digits while every literal in
+        // the same string stays Latin, so "Step 3 of 6" rendered as "৩ / 6".
+        // Latin is also the right choice on its own: this vault shows account
+        // numbers, PINs and OTPs, and every bank and UPI app writes those in
+        // Latin — as do Argon2id, 64 MB and Poly1305 alongside them.
+        val locale = Locale.forLanguageTag("$tag-u-nu-latn")
         Locale.setDefault(locale)
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)

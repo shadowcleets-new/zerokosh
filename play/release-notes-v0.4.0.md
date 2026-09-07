@@ -1,4 +1,4 @@
-# Play "What's new" — v0.2.0 (versionCode 3)
+# Play "What's new" — v0.4.0 (versionCode 4)
 
 Play caps each language's release notes at **500 characters**. Every block
 below is within that; `design/check_listing.py` is not wired to this file, so

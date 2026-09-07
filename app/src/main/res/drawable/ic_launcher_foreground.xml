@@ -7,8 +7,12 @@
   layer: Android tints that flat for themed icons, and an overlay would fill in
   and render the mark as a solid blob.
 
-  Art is authored on a 24-unit grid and scaled 4x into the 108dp adaptive
-  viewport, which lands the body inside the 72dp safe zone with room to spare.
+  Art is authored on a 24-unit grid and scaled 3.2x into the 108dp adaptive
+  viewport. Not 4x, which is what the safe-zone width alone suggests: launchers
+  mask adaptive icons to a circle of radius 36dp, and the *corners* of a
+  rectangular mark are further from the centre than its edges. At 4x the body
+  corner sat 43dp out and the vessel's shoulders came back visibly sliced flat
+  on a Pixel. 3.2x puts the corner at 34.4dp, inside the circle with margin.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -16,10 +20,10 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group
-        android:scaleX="4"
-        android:scaleY="4"
-        android:translateX="6"
-        android:translateY="6">
+        android:scaleX="3.2"
+        android:scaleY="3.2"
+        android:translateX="15.6"
+        android:translateY="15.6">
         <path
             android:fillColor="#FDFAF6"
             android:fillType="evenOdd"

@@ -1,0 +1,10 @@
+The recovery kit is no longer something you can lose by tapping past it.
+
+You can defer it, and the app keeps asking until one is saved. Confirming
+now means typing two groups back from the kit you actually saved, so the
+box cannot be ticked while holding nothing.
+
+If you unlock with a fingerprint and forget your passphrase, you can now
+set a new one with that fingerprint alone — no Recovery Kit needed.
+
+New app icon. Print your kit straight to paper or a PDF.

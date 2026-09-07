@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
+import org.zerokosh.app.BuildConfig
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.ui.common.OutlinedPillButton
@@ -341,7 +342,7 @@ private fun TopBar() {
                 modifier = Modifier.size(14.dp),
             )
             Text(
-                "v1.0",
+                "v" + BuildConfig.VERSION_NAME,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = c.ink(0.7f),

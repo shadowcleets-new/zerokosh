@@ -14,6 +14,7 @@
 package org.zerokosh.app.ui.settings
 
 // #region Imports
+import android.content.Context
 import androidx.annotation.StringRes
 import android.app.Activity
 import android.content.Intent
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -56,6 +58,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.zerokosh.app.MainActivity
+import org.zerokosh.app.BuildConfig
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.autofill.AutofillSetup
@@ -424,8 +427,12 @@ fun SettingsScreen(
             SettingsCard {
                 SettingsRow(
                     title = stringResource(R.string.scr_settings_about),
-                    value = "v0.1.0",
-                    onClick = { }
+                    value = "v" + BuildConfig.VERSION_NAME,
+                    // Opens the store listing, which is where releases are
+                    // announced. This is an Intent handed to the Play app, not
+                    // a network call — Zerokosh still holds no INTERNET
+                    // permission and could not fetch this itself.
+                    onClick = { openReleases(context) },
                 )
                 SettingsDivider()
                 SettingsRow(
@@ -759,6 +766,27 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
     )
 }
 // #endregion
+
+/**
+ * Opens the Play listing, where each release is announced.
+ *
+ * Deliberately an Intent rather than anything Zerokosh fetches: the app holds
+ * no INTERNET permission, so it hands the URL to whatever already has one and
+ * takes no part in the request. Falls back to the browser on a device with no
+ * Play Store, and does nothing at all if neither exists, because a Settings row
+ * should never crash the app.
+ */
+private fun openReleases(context: Context) {
+    val market = Intent(Intent.ACTION_VIEW, "market://details?id=$PLAY_ID".toUri())
+    val web = Intent(
+        Intent.ACTION_VIEW,
+        "https://play.google.com/store/apps/details?id=$PLAY_ID".toUri(),
+    )
+    runCatching { context.startActivity(market) }
+        .recoverCatching { context.startActivity(web) }
+}
+
+private const val PLAY_ID = "com.zerokosh.app"
 
 // #region Forgot-passphrase reset (Tier 3)
 /**

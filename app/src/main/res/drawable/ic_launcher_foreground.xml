@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Simple vault-lock glyph (icon artwork is implementer's choice, R0.3) -->
+<!--
+  The Zerokosh mark: a kosh — a treasury vessel — with a single deposit slot.
+
+  One path, not two. The slot has to be an actual hole via evenOdd rather than a
+  paper-coloured shape laid on top, because this same drawable is the monochrome
+  layer: Android tints that flat for themed icons, and an overlay would fill in
+  and render the mark as a solid blob.
+
+  Art is authored on a 24-unit grid and scaled 4x into the 108dp adaptive
+  viewport, which lands the body inside the 72dp safe zone with room to spare.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group android:translateX="27" android:translateY="27">
+    <group
+        android:scaleX="4"
+        android:scaleY="4"
+        android:translateX="6"
+        android:translateY="6">
         <path
-            android:pathData="M27,4 C19.3,4 13,10.3 13,18 v6 h-3 c-2.2,0 -4,1.8 -4,4 v18 c0,2.2 1.8,4 4,4 h34 c2.2,0 4,-1.8 4,-4 V28 c0,-2.2 -1.8,-4 -4,-4 h-3 v-6 C41,10.3 34.7,4 27,4 Z M27,10 c4.4,0 8,3.6 8,8 v6 H19 v-6 c0,-4.4 3.6,-8 8,-8 Z"
-            android:fillColor="#FFFFFF" />
-        <path
-            android:pathData="M27,33 a4,4 0 0 1 2,7.46 V44 a2,2 0 0 1 -4,0 v-3.54 A4,4 0 0 1 27,33 Z"
-            android:fillColor="#BB4717" />
+            android:fillColor="#FDFAF6"
+            android:fillType="evenOdd"
+            android:pathData="M4.52,6.78 C4.34,5.57 5.18,4.6 6.4,4.6 L17.6,4.6 C18.82,4.6 19.66,5.57 19.48,6.78 L18.1,16.04 C17.82,17.89 16.08,19.4 14.2,19.4 L9.8,19.4 C7.92,19.4 6.18,17.89 5.9,16.04 L4.52,6.78 Z M8.3,10.95 C8.3,10.2 8.9,9.6 9.65,9.6 L14.35,9.6 C15.1,9.6 15.7,10.2 15.7,10.95 C15.7,11.7 15.1,12.3 14.35,12.3 L9.65,12.3 C8.9,12.3 8.3,11.7 8.3,10.95 Z" />
     </group>
 </vector>

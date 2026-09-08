@@ -110,3 +110,59 @@ class AutofillSiteMatchTest {
         assertFalse(AutofillFill.sameSite(here = "hdfcbank.com.attacker.net", saved = "hdfcbank.com"))
     }
 }
+
+/**
+ * Reading a password field out of an input type.
+ *
+ * The email case is the one that matters. InputType variations are values in
+ * a bit field, so the obvious `and` test quietly returns true for them, and a
+ * password manager that thinks the email box is the password box fills the
+ * wrong field and never fills the username.
+ */
+class PasswordInputTypeTest {
+
+    private val text = android.text.InputType.TYPE_CLASS_TEXT
+
+    @Test
+    fun `password variations are passwords`() {
+        assertTrue(AutofillFill.isPasswordInputType(text or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD))
+        assertTrue(AutofillFill.isPasswordInputType(text or android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD))
+        assertTrue(
+            AutofillFill.isPasswordInputType(
+                text or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            ),
+        )
+    }
+
+    @Test
+    fun `an email field is not a password`() {
+        // 0x21. The old `type and WEB_PASSWORD (0xe0)` gave 0x20 — non-zero —
+        // so this was read as the password field on every form.
+        assertFalse(
+            AutofillFill.isPasswordInputType(
+                text or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            ),
+        )
+    }
+
+    @Test
+    fun `ordinary text and web email fields are not passwords`() {
+        assertFalse(AutofillFill.isPasswordInputType(text))
+        assertFalse(
+            AutofillFill.isPasswordInputType(
+                text or android.text.InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            ),
+        )
+        assertFalse(
+            AutofillFill.isPasswordInputType(
+                text or android.text.InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+            ),
+        )
+    }
+
+    @Test
+    fun `a number field is never a password`() {
+        assertFalse(AutofillFill.isPasswordInputType(android.text.InputType.TYPE_CLASS_NUMBER))
+        assertFalse(AutofillFill.isPasswordInputType(android.text.InputType.TYPE_CLASS_PHONE))
+    }
+}

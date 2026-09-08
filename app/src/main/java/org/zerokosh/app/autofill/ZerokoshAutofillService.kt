@@ -59,7 +59,13 @@ class ZerokoshAutofillService : AutofillService() {
             // Response-level auth: MainActivity carries the unlock and hands the
             // finished response back through EXTRA_AUTHENTICATION_RESULT, so the
             // form the user was standing in is filled the moment they are in.
-            callback.onSuccess(AutofillFill.lockedResponse(this, targets))
+            callback.onSuccess(
+                AutofillFill.lockedResponse(
+                    this,
+                    targets,
+                    inlineAt(request, 0, getString(R.string.scr_autofill_unlock_first), null),
+                ),
+            )
             return
         }
         // Same response the post-unlock path builds, plus the keyboard chips.
@@ -67,17 +73,22 @@ class ZerokoshAutofillService : AutofillService() {
         // behind it: the generated-password offer never appeared here, which is
         // every fill request on an already-unlocked vault — the common one.
         callback.onSuccess(
-            AutofillFill.responseFor(this, app, targets) { index, record ->
-                inlineFor(request, index, record)
+            AutofillFill.responseFor(this, app, targets) { index, title, subtitle ->
+                inlineAt(request, index, title, subtitle)
             },
         )
     }
 
-    private fun inlineFor(request: FillRequest, index: Int, record: Record): InlinePresentation? {
+    /** A chip for one row of the response, or null when the IME will not draw one. */
+    private fun inlineAt(
+        request: FillRequest,
+        index: Int,
+        title: String,
+        subtitle: String?,
+    ): InlinePresentation? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
         if (index >= InlineSuggestions.maxSuggestions(request)) return null
-        val username = AutofillFill.usernameOf(record).ifBlank { null }
-        return InlineSuggestions.build(this, request, index, record.title, username)
+        return InlineSuggestions.build(this, request, index, title, subtitle)
     }
 
     /**
@@ -158,9 +169,7 @@ class ZerokoshAutofillService : AutofillService() {
     private fun isPasswordNode(node: AssistStructure.ViewNode, hints: List<String>): Boolean {
         if (hints.any { it.contains("password") }) return true
         if (htmlType(node) == "password") return true
-        val type = node.inputType
-        return (type and android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD) != 0 ||
-            (type and android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) != 0
+        return AutofillFill.isPasswordInputType(node.inputType)
     }
 
     private fun isUsernameNode(node: AssistStructure.ViewNode, hints: List<String>): Boolean {
@@ -181,6 +190,13 @@ class ZerokoshAutofillService : AutofillService() {
         var usernameValue = ""
         var passwordValue = ""
 
+        /** Whether the password already recorded is the one the user is standing in. */
+        var passwordFocused = false
+
+        /** The most recent username field seen, which is the one a password pairs with. */
+        var lastUsernameId: AutofillId? = null
+        var lastUsernameValue = ""
+
         fun toParsed() =
             Parsed(packageName, webDomain, usernameId, passwordId, newPassword, usernameValue, passwordValue)
     }
@@ -193,19 +209,46 @@ class ZerokoshAutofillService : AutofillService() {
     private fun Scan.record(node: AssistStructure.ViewNode, hints: List<String>) {
         val id = node.autofillId ?: return
         val typed = node.autofillValue?.takeIf { it.isText }?.textValue?.toString().orEmpty()
+        val focused = node.isFocused
         if (isPasswordNode(node, hints)) {
-            if (passwordId != null) return
+            if (!claimsPassword(passwordId, passwordFocused, focused)) return
             passwordId = id
+            passwordFocused = focused
             // AUTOFILL_HINT_NEW_PASSWORD, lowercased upstream. Its presence is
-            // the site telling us outright that this is a sign-up.
-            if (hints.any { it == "newpassword" }) newPassword = true
+            // the site telling us outright that this is a sign-up. Assigned
+            // rather than only ever set, so that taking a later field also
+            // takes that field's answer.
+            newPassword = hints.any { it == "newpassword" }
             if (typed.isNotEmpty()) passwordValue = typed
+            // Pair with the username immediately above it rather than the
+            // first one on the page. On a page carrying both a sign-in and a
+            // sign-up form, the first is the other form's box, and filling it
+            // put the name in one form and the password in the other.
+            usernameId = lastUsernameId
+            if (lastUsernameValue.isNotEmpty()) usernameValue = lastUsernameValue
             return
         }
-        if (usernameId != null || !isUsernameNode(node, hints)) return
-        usernameId = id
-        if (typed.isNotEmpty()) usernameValue = typed
+        if (!isUsernameNode(node, hints)) return
+        lastUsernameId = id
+        lastUsernameValue = typed
+        // Until a password field shows up the newest username is the answer,
+        // which is the whole of a two-step login's first page.
+        if (passwordId == null) {
+            usernameId = id
+            if (typed.isNotEmpty()) usernameValue = typed
+        }
     }
+
+    /**
+     * Whether a newly seen password field should replace the one recorded.
+     *
+     * First one wins, except that a focused field beats an unfocused one. A
+     * single page can carry both a sign-in and a sign-up form — plenty do —
+     * and taking whichever came first in the tree meant offering to fill a
+     * field the user was not in, so nothing appeared under the one they tapped.
+     */
+    private fun claimsPassword(existing: AutofillId?, existingFocused: Boolean, focused: Boolean): Boolean =
+        existing == null || (focused && !existingFocused)
 
     private fun walk(node: AssistStructure.ViewNode, scan: Scan) {
         val hints = node.autofillHints?.map { it.lowercase() }.orEmpty()

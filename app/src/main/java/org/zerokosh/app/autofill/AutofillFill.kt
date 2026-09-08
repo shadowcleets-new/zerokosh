@@ -151,8 +151,15 @@ object AutofillFill {
          * making one needs the FillRequest, and the post-unlock activity has
          * never seen it. Defaulting to none is what lets both callers share
          * this function instead of keeping two copies that drift.
+         *
+         * Keyed on the row rather than on a Record so that rows which are not
+         * a saved credential — the offer to generate one — can have a chip
+         * too. Without it that row exists only as a RemoteViews dropdown, and
+         * on any phone whose keyboard draws the inline strip the user sees
+         * nothing at all.
          */
-        inlineFor: (index: Int, record: Record) -> InlinePresentation? = { _, _ -> null },
+        inlineFor: (index: Int, title: String, subtitle: String?) -> InlinePresentation? =
+            { _, _, _ -> null },
     ): FillResponse? {
         val matches = matchRecords(app, targets)
         val generated = generatedPasswordFor(app, targets, matches)
@@ -163,12 +170,21 @@ object AutofillFill {
         val saveInfo = saveInfoFor(targets) ?: generated?.let { passwordOnlySaveInfo(targets) }
         if (matches.isEmpty() && saveInfo == null && generated == null) return null
         val response = FillResponse.Builder()
-        matches.take(MAX_DATASETS).forEachIndexed { index, record ->
-            response.addDataset(datasetFor(context, targets, record, inlineFor(index, record)))
+        var row = 0
+        matches.take(MAX_DATASETS).forEach { record ->
+            val inline = inlineFor(row++, record.title, usernameOf(record).ifBlank { null })
+            response.addDataset(datasetFor(context, targets, record, inline))
         }
         val passwordId = targets.passwordId
         if (generated != null && passwordId != null) {
-            response.addDataset(generatedDataset(context, passwordId, generated))
+            // No subtitle on the chip: the strip sits above the keyboard in
+            // plain view, and a password painted across it is readable by
+            // anyone glancing over. The dropdown, which is anchored to the
+            // field, still shows it.
+            val title = context.getString(R.string.af_generate_title)
+            response.addDataset(
+                generatedDataset(context, passwordId, generated, inlineFor(row++, title, null)),
+            )
         }
         saveInfo?.let(response::setSaveInfo)
         return response.build()
@@ -197,7 +213,33 @@ object AutofillFill {
         }
         return runCatching {
             PasswordGenerator.generate(length = GENERATED_LENGTH, crypto = app.repository.crypto)
-        }.getOrNull()
+        }.onFailure { android.util.Log.e("ZKAF", "generate failed", it) }.getOrNull()
+    }
+
+    /**
+     * The input type names a password field.
+     *
+     * The variation is a value held in a bit field, not a flag, and that is the
+     * trap: TYPE_TEXT_VARIATION_WEB_PASSWORD is 0xe0 and
+     * TYPE_TEXT_VARIATION_EMAIL_ADDRESS is 0x20, so testing it with
+     * `type and WEB_PASSWORD` is non-zero for an ordinary email box. Every
+     * email field in every app was therefore read as the password: it claimed
+     * the password slot, the real password field was skipped as a duplicate,
+     * and the username was never recorded at all.
+     *
+     * Mask out the variation and compare it, which is what the field is for.
+     */
+    internal fun isPasswordInputType(type: Int): Boolean {
+        if (type and android.text.InputType.TYPE_MASK_CLASS != android.text.InputType.TYPE_CLASS_TEXT) {
+            return false
+        }
+        return when (type and android.text.InputType.TYPE_MASK_VARIATION) {
+            android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD,
+            android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            -> true
+            else -> false
+        }
     }
 
     /**
@@ -228,13 +270,21 @@ object AutofillFill {
     internal const val GENERATED_LENGTH = 16
 
     /** The row that offers it. The value is shown so the user sees what they are taking. */
-    private fun generatedDataset(context: Context, passwordId: AutofillId, password: String): Dataset {
+    private fun generatedDataset(
+        context: Context,
+        passwordId: AutofillId,
+        password: String,
+        inline: InlinePresentation?,
+    ): Dataset {
         val builder = Dataset.Builder(
             suggestionView(context, context.getString(R.string.af_generate_title), password),
         )
         // Only the password field. The username the user has already typed is
         // theirs, and overwriting it would be rude at best.
         builder.setValue(passwordId, AutofillValue.forText(password))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            inline?.let { builder.setInlinePresentation(it) }
+        }
         return builder.build()
     }
 
@@ -253,14 +303,29 @@ object AutofillFill {
      * unlocking there may be several matching credentials to choose between, and
      * only a FillResponse can carry more than one.
      */
-    fun lockedResponse(context: Context, targets: FieldTargets): FillResponse =
-        FillResponse.Builder()
-            .setAuthentication(
-                targets.ids,
-                authIntentSender(context, targets),
-                suggestionView(context, context.getString(R.string.scr_autofill_unlock_first), null),
-            )
-            .build()
+    fun lockedResponse(
+        context: Context,
+        targets: FieldTargets,
+        inline: InlinePresentation? = null,
+    ): FillResponse {
+        val label = context.getString(R.string.scr_autofill_unlock_first)
+        val builder = FillResponse.Builder()
+        val sender = authIntentSender(context, targets)
+        val presentation = suggestionView(context, label, null)
+        // The four-argument overload is API 30. Below that there is no inline
+        // strip to fill anyway, so the three-argument one loses nothing.
+        //
+        // This mattered more than it looks: a locked vault is the common case,
+        // and without a chip the whole prompt was invisible on any phone with
+        // a modern keyboard. The user tapped a password field, saw no sign of
+        // Zerokosh, and concluded autofill did not work.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && inline != null) {
+            builder.setAuthentication(targets.ids, sender, presentation, inline)
+        } else {
+            builder.setAuthentication(targets.ids, sender, presentation)
+        }
+        return builder.build()
+    }
 
     /**
      * FLAG_MUTABLE because the platform writes the request metadata into this
@@ -377,8 +442,19 @@ object AutofillFill {
     internal fun sameSite(here: String, saved: String): Boolean =
         here == saved || here.endsWith(".$saved") || saved.endsWith(".$here")
 
+    /**
+     * The host inside whatever the user typed, or null if there isn't one.
+     *
+     * Whitespace is stripped rather than trusted. A website field gets typed
+     * by hand, often on a phone keyboard that likes to insert a space after a
+     * full stop, and "hdfcbank. com" is not a URI — java.net.URI rejects the
+     * space outright, which would silently cost the user every match on that
+     * record. Being forgiving here is the difference between a saved login
+     * that works and one that appears to do nothing.
+     */
     private fun domainHost(url: String): String? = try {
-        val withScheme = if (url.contains("://")) url else "https://$url"
+        val cleaned = url.filterNot(Char::isWhitespace)
+        val withScheme = if (cleaned.contains("://")) cleaned else "https://$cleaned"
         URI(withScheme).host?.lowercase()?.removePrefix("www.")
     } catch (_: Exception) {
         null

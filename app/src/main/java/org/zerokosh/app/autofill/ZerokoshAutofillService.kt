@@ -14,7 +14,6 @@ import android.os.CancellationSignal
 import android.service.autofill.AutofillService
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
-import android.service.autofill.FillResponse
 import android.service.autofill.InlinePresentation
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
@@ -63,29 +62,15 @@ class ZerokoshAutofillService : AutofillService() {
             callback.onSuccess(AutofillFill.lockedResponse(this, targets))
             return
         }
-        callback.onSuccess(unlockedResponse(request, app, targets))
-    }
-
-    /**
-     * The same content as [AutofillFill.responseFor], plus the inline chips that
-     * only exist here — building one needs the FillRequest, which the auth
-     * activity never sees.
-     */
-    private fun unlockedResponse(
-        request: FillRequest,
-        app: ZerokoshApp,
-        targets: FieldTargets,
-    ): FillResponse? {
-        val matches = AutofillFill.matchRecords(app, targets)
-        val saveInfo = AutofillFill.saveInfoFor(targets)
-        if (matches.isEmpty() && saveInfo == null) return null
-        val response = FillResponse.Builder()
-        matches.take(5).forEachIndexed { index, record ->
-            val inline = inlineFor(request, index, record)
-            response.addDataset(AutofillFill.datasetFor(this, targets, record, inline))
-        }
-        saveInfo?.let(response::setSaveInfo)
-        return response.build()
+        // Same response the post-unlock path builds, plus the keyboard chips.
+        // This used to be a second copy of that logic and had already fallen
+        // behind it: the generated-password offer never appeared here, which is
+        // every fill request on an already-unlocked vault — the common one.
+        callback.onSuccess(
+            AutofillFill.responseFor(this, app, targets) { index, record ->
+                inlineFor(request, index, record)
+            },
+        )
     }
 
     private fun inlineFor(request: FillRequest, index: Int, record: Record): InlinePresentation? {

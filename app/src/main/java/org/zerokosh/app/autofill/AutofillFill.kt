@@ -142,7 +142,18 @@ object AutofillFill {
      * every two-step login. The throw would propagate out of onFillRequest and
      * take the whole app process with it.
      */
-    fun responseFor(context: Context, app: ZerokoshApp, targets: FieldTargets): FillResponse? {
+    fun responseFor(
+        context: Context,
+        app: ZerokoshApp,
+        targets: FieldTargets,
+        /**
+         * Chips for the keyboard strip, which only the service can build —
+         * making one needs the FillRequest, and the post-unlock activity has
+         * never seen it. Defaulting to none is what lets both callers share
+         * this function instead of keeping two copies that drift.
+         */
+        inlineFor: (index: Int, record: Record) -> InlinePresentation? = { _, _ -> null },
+    ): FillResponse? {
         val matches = matchRecords(app, targets)
         val generated = generatedPasswordFor(app, targets, matches)
         // A generated password that never reaches the vault is worse than not
@@ -152,7 +163,9 @@ object AutofillFill {
         val saveInfo = saveInfoFor(targets) ?: generated?.let { passwordOnlySaveInfo(targets) }
         if (matches.isEmpty() && saveInfo == null && generated == null) return null
         val response = FillResponse.Builder()
-        matches.take(MAX_DATASETS).forEach { response.addDataset(datasetFor(context, targets, it)) }
+        matches.take(MAX_DATASETS).forEachIndexed { index, record ->
+            response.addDataset(datasetFor(context, targets, record, inlineFor(index, record)))
+        }
         val passwordId = targets.passwordId
         if (generated != null && passwordId != null) {
             response.addDataset(generatedDataset(context, passwordId, generated))
@@ -306,19 +319,26 @@ object AutofillFill {
 
     // #region Domain matching
     fun matchRecords(app: ZerokoshApp, targets: FieldTargets): List<Record> {
-        val domain = targets.webDomain?.lowercase()?.removePrefix("www.")
-            ?: extractDomainHint(targets.packageName)
+        // Kept apart on purpose. A webDomain is a real host handed over by the
+        // platform and can be held to a host's rules; a package name is a guess
+        // and cannot. Folding them into one variable, as this did, meant the
+        // loose rule the guess needs was also applied to the real thing.
+        val domain = targets.webDomain?.let(::domainHost)
+        val hint = extractDomainHint(targets.packageName)
         return app.repository.body.value?.records.orEmpty()
-            .filter { matches(app, it, domain, targets.packageName) }
+            .filter { matches(app, it, domain, hint, targets.packageName) }
             .sortedByDescending { it.favorite }
     }
 
-    private fun matches(app: ZerokoshApp, rec: Record, domain: String?, pkg: String): Boolean =
+    private fun matches(
+        app: ZerokoshApp,
+        rec: Record,
+        domain: String?,
+        hint: String?,
+        pkg: String,
+    ): Boolean =
         when (rec.template_id) {
-            "login" -> {
-                val site = rec.fields["website"].orEmpty().lowercase()
-                domain != null && (site.contains(domain) || domainHost(site) == domain)
-            }
+            "login" -> matchesLogin(rec, domain, hint)
             "app_profile" -> {
                 val name = rec.fields["app_name"].orEmpty().lowercase()
                 val mapped = app.catalog.appMap[pkg]?.lowercase()
@@ -326,6 +346,36 @@ object AutofillFill {
             }
             else -> false
         }
+
+    /**
+     * A saved login matches the form in front of us.
+     *
+     * In a browser we know the host, so compare hosts. In an app we only have
+     * the package name to go on, so compare the leading label and accept that
+     * it is a guess.
+     */
+    private fun matchesLogin(rec: Record, domain: String?, hint: String?): Boolean {
+        val saved = domainHost(rec.fields["website"].orEmpty()) ?: return false
+        if (domain != null) return sameSite(domain, saved)
+        return hint != null && saved.substringBefore('.') == hint
+    }
+
+    /**
+     * Whether a credential saved for [saved] belongs on [here].
+     *
+     * Either host may be the more specific one. Banks and shops put their login
+     * on a subdomain — you save `hdfcbank.com` and then sign in at
+     * `netbanking.hdfcbank.com` — and someone who saved the full
+     * `accounts.google.com` should still be offered it at `google.com`.
+     *
+     * The dot in the comparison is the whole point, and is what the previous
+     * `contains` check was missing: `mybank.com` contains `bank.com`, so a
+     * credential for one was offered on the other. Requiring the boundary means
+     * only a real parent or child host qualifies, and a lookalike registered to
+     * exploit exactly that — `evil-hdfcbank.com` — does not.
+     */
+    internal fun sameSite(here: String, saved: String): Boolean =
+        here == saved || here.endsWith(".$saved") || saved.endsWith(".$here")
 
     private fun domainHost(url: String): String? = try {
         val withScheme = if (url.contains("://")) url else "https://$url"

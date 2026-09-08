@@ -609,4 +609,5 @@
     <string name="pc_correct">अझै सही छ। केही गर्नुपर्दैन।</string>
     <string name="rem_kit_title">कुनै रिकभरी किट सुरक्षित छैन</string>
     <string name="rem_kit_body">अब तपाईंको भण्डारमा साँचो जानकारी छ। रिकभरी किट बिना पासफ्रेज बिर्सनुभयो भने कसैले तपाईंलाई फर्काउन सक्दैन — हामीले पनि होइन।</string>
+    <string name="af_generate_title">बलियो पासवर्ड प्रयोग गर्नुहोस्</string>
 </resources>

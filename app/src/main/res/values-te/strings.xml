@@ -609,4 +609,5 @@
     <string name="pc_correct">ఇంకా సరైనదే. చేయాల్సింది ఏమీ లేదు.</string>
     <string name="rem_kit_title">రికవరీ కిట్ సేవ్ చేయలేదు</string>
     <string name="rem_kit_body">ఇప్పుడు మీ ఖజానాలో నిజమైన సమాచారం ఉంది. రికవరీ కిట్ లేకుండా పాస్‌ఫ్రేజ్ మర్చిపోతే మిమ్మల్ని ఎవరూ తిరిగి లోపలికి రానివ్వలేరు — మేము కూడా.</string>
+    <string name="af_generate_title">బలమైన పాస్‌వర్డ్ వాడండి</string>
 </resources>

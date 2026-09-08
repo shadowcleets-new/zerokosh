@@ -609,4 +609,5 @@
     <string name="pc_correct">आब सेहो ठीक। किछु करबाक नहि।</string>
     <string name="rem_kit_title">कोनो रिकवरी किट सहेजल नहि अछि</string>
     <string name="rem_kit_body">आब अहाँक भण्डारमे साँच जानकारी अछि। रिकवरी किट बिना पासफ्रेज बिसरला पर केओ अहाँकेँ वापस भीतर नहि आनि सकैत अछि — हमहूँ नहि।</string>
+    <string name="af_generate_title">मजगूत पासवर्ड प्रयोग करू</string>
 </resources>

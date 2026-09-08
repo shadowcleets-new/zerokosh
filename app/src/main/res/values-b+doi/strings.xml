@@ -609,4 +609,5 @@
     <string name="pc_correct">हजें बी ठीक ऐ। कुछ करने दी लोड़ नेईं।</string>
     <string name="rem_kit_title">कोई रिकवरी किट नेईं संभाली दी</string>
     <string name="rem_kit_body">हुन तुंदे भंडार च सच्ची जानकारी ऐ। रिकवरी किट बगैर पासफ्रेज भुल्लने पर कोई तुसें गी वापस अंदर नेईं आनी सकदा — अस बी नेईं।</string>
+    <string name="af_generate_title">मजबूत पासवर्ड बरतो</string>
 </resources>

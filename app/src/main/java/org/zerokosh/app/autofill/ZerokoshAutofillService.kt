@@ -150,13 +150,14 @@ class ZerokoshAutofillService : AutofillService() {
     }
 
     private val Parsed.targets: FieldTargets
-        get() = FieldTargets(packageName, webDomain, usernameId, passwordId)
+        get() = FieldTargets(packageName, webDomain, usernameId, passwordId, isNewPassword)
 
     private data class Parsed(
         val packageName: String,
         val webDomain: String?,
         val usernameId: AutofillId?,
         val passwordId: AutofillId?,
+        val isNewPassword: Boolean = false,
         /** Populated on a save request; empty on a fill request. */
         val usernameValue: String = "",
         val passwordValue: String = "",
@@ -191,10 +192,12 @@ class ZerokoshAutofillService : AutofillService() {
         var webDomain: String? = null
         var usernameId: AutofillId? = null
         var passwordId: AutofillId? = null
+        var newPassword = false
         var usernameValue = ""
         var passwordValue = ""
 
-        fun toParsed() = Parsed(packageName, webDomain, usernameId, passwordId, usernameValue, passwordValue)
+        fun toParsed() =
+            Parsed(packageName, webDomain, usernameId, passwordId, newPassword, usernameValue, passwordValue)
     }
 
     /**
@@ -208,6 +211,9 @@ class ZerokoshAutofillService : AutofillService() {
         if (isPasswordNode(node, hints)) {
             if (passwordId != null) return
             passwordId = id
+            // AUTOFILL_HINT_NEW_PASSWORD, lowercased upstream. Its presence is
+            // the site telling us outright that this is a sign-up.
+            if (hints.any { it == "newpassword" }) newPassword = true
             if (typed.isNotEmpty()) passwordValue = typed
             return
         }

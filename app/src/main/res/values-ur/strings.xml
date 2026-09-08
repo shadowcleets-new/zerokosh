@@ -609,4 +609,5 @@
     <string name="pc_correct">اب بھی درست ہے۔ کچھ کرنے کی ضرورت نہیں۔</string>
     <string name="rem_kit_title">کوئی ریکوری کٹ محفوظ نہیں</string>
     <string name="rem_kit_body">اب آپ کی تجوری میں اصل معلومات ہیں۔ ریکوری کٹ کے بغیر پاس فریز بھولنے پر کوئی آپ کو واپس اندر نہیں لا سکتا — ہم بھی نہیں۔</string>
+    <string name="af_generate_title">مضبوط پاس ورڈ استعمال کریں</string>
 </resources>

@@ -184,6 +184,8 @@
 
     <!-- §6.7 Autofill -->
     <string name="scr_autofill_unlock_first">Unlock Zerokosh to fill</string>
+    <!-- Offered on a sign-up form: a password invented on the device, never fetched. -->
+    <string name="af_generate_title">Use a strong password</string>
 
     <!-- §6.7 Login helper (copy-mode fallback) -->
     <string name="scr_login_helper_channel">Login helper</string>

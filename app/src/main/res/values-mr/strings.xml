@@ -609,4 +609,5 @@
     <string name="pc_correct">अजूनही बरोबर. काही करायची गरज नाही.</string>
     <string name="rem_kit_title">कोणतीही रिकव्हरी किट सेव्ह केलेली नाही</string>
     <string name="rem_kit_body">आता तुमच्या तिजोरीत खरी माहिती आहे. रिकव्हरी किटशिवाय पासफ्रेज विसरलात तर कोणीही तुम्हाला परत आत आणू शकत नाही — आम्हीही नाही.</string>
+    <string name="af_generate_title">मजबूत पासवर्ड वापरा</string>
 </resources>

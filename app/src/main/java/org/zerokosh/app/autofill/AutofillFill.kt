@@ -38,6 +38,7 @@ import android.widget.RemoteViews
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
+import org.zerokosh.core.generator.PasswordGenerator
 import org.zerokosh.core.model.Record
 import java.net.URI
 // #endregion
@@ -55,6 +56,14 @@ data class FieldTargets(
     val webDomain: String?,
     val usernameId: AutofillId?,
     val passwordId: AutofillId?,
+    /**
+     * The form asked for a *new* password rather than an existing one.
+     *
+     * Android distinguishes these: a sign-up field carries the newPassword
+     * hint. It is the difference between "which of your logins is this" and
+     * "invent one", and only the second is worth offering to generate for.
+     */
+    val isNewPassword: Boolean = false,
 ) {
     val ids: Array<AutofillId> get() = listOfNotNull(usernameId, passwordId).toTypedArray()
 
@@ -135,12 +144,91 @@ object AutofillFill {
      */
     fun responseFor(context: Context, app: ZerokoshApp, targets: FieldTargets): FillResponse? {
         val matches = matchRecords(app, targets)
-        val saveInfo = saveInfoFor(targets)
-        if (matches.isEmpty() && saveInfo == null) return null
+        val generated = generatedPasswordFor(app, targets, matches)
+        // A generated password that never reaches the vault is worse than not
+        // offering one: the account exists and nobody knows the password. When
+        // we are the ones inventing it, insist on a SaveInfo even if the form
+        // shows no username field to pair it with.
+        val saveInfo = saveInfoFor(targets) ?: generated?.let { passwordOnlySaveInfo(targets) }
+        if (matches.isEmpty() && saveInfo == null && generated == null) return null
         val response = FillResponse.Builder()
         matches.take(MAX_DATASETS).forEach { response.addDataset(datasetFor(context, targets, it)) }
+        val passwordId = targets.passwordId
+        if (generated != null && passwordId != null) {
+            response.addDataset(generatedDataset(context, passwordId, generated))
+        }
         saveInfo?.let(response::setSaveInfo)
         return response.build()
+    }
+
+    /**
+     * A fresh password to offer, or null when this is not that kind of form.
+     *
+     * Offered when the site says the field is a new password, and also when we
+     * have nothing saved for the site at all — which is what signing up
+     * somewhere new looks like from here. Withheld on a form we already have a
+     * login for, where the useful answer is the existing password, not another
+     * one.
+     *
+     * Generated locally from the same CSPRNG the in-app generator uses. A
+     * password manager that asked a server for this would be handing away the
+     * very thing it is supposed to keep.
+     */
+    private fun generatedPasswordFor(
+        app: ZerokoshApp,
+        targets: FieldTargets,
+        matches: List<Record>,
+    ): String? {
+        if (!shouldOfferGenerated(targets.passwordId != null, targets.isNewPassword, matches.isNotEmpty())) {
+            return null
+        }
+        return runCatching {
+            PasswordGenerator.generate(length = GENERATED_LENGTH, crypto = app.repository.crypto)
+        }.getOrNull()
+    }
+
+    /**
+     * The decision, separated from the generating so it can be tested without
+     * an Android framework or a vault.
+     *
+     * Two ways to qualify. The site saying `newPassword` is the reliable one.
+     * Having nothing saved for the site is the fallback, for the many forms
+     * that set no hint at all — from here, a sign-in page for an account we
+     * have never seen and a sign-up page are the same picture, and offering a
+     * password on the first is a harmless extra row.
+     *
+     * The case that must stay quiet is a form we *do* have a login for: there
+     * the useful answer is the saved password, and burying it under an offer
+     * to invent another one is how people end up with two accounts.
+     */
+    internal fun shouldOfferGenerated(
+        hasPasswordField: Boolean,
+        isNewPassword: Boolean,
+        hasSavedMatches: Boolean,
+    ): Boolean = hasPasswordField && (isNewPassword || !hasSavedMatches)
+
+    /**
+     * 16, not 20: about 100 bits across the full character set, and short
+     * enough that sites with an undisclosed maximum still take it. Anyone who
+     * wants longer has the generator in the app.
+     */
+    internal const val GENERATED_LENGTH = 16
+
+    /** The row that offers it. The value is shown so the user sees what they are taking. */
+    private fun generatedDataset(context: Context, passwordId: AutofillId, password: String): Dataset {
+        val builder = Dataset.Builder(
+            suggestionView(context, context.getString(R.string.af_generate_title), password),
+        )
+        // Only the password field. The username the user has already typed is
+        // theirs, and overwriting it would be rude at best.
+        builder.setValue(passwordId, AutofillValue.forText(password))
+        return builder.build()
+    }
+
+    /** Fallback so a generated password is still captured on a password-only form. */
+    private fun passwordOnlySaveInfo(targets: FieldTargets): SaveInfo? {
+        val password = targets.passwordId ?: return null
+        return SaveInfo.Builder(SaveInfo.SAVE_DATA_TYPE_PASSWORD, arrayOf(password)).build()
     }
     // #endregion
 

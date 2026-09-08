@@ -613,4 +613,5 @@
     <string name="pc_correct">अब भी सही है। कुछ करने की ज़रूरत नहीं।</string>
     <string name="rem_kit_title">कोई रिकवरी किट सेव नहीं है</string>
     <string name="rem_kit_body">अब आपकी तिजोरी में असली जानकारी है। रिकवरी किट के बिना पासफ़्रेज़ भूलने पर कोई आपको वापस अंदर नहीं ला सकता — हम भी नहीं।</string>
+    <string name="af_generate_title">मज़बूत पासवर्ड इस्तेमाल करें</string>
 </resources>

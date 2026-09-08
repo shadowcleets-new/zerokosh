@@ -609,4 +609,5 @@
     <string name="pc_correct">এখনও ঠিক আছে। কিছু করার নেই।</string>
     <string name="rem_kit_title">কোনও রিকভারি কিট সংরক্ষিত নেই</string>
     <string name="rem_kit_body">আপনার সিন্দুকে এখন সত্যিকারের তথ্য আছে। রিকভারি কিট ছাড়া পাসফ্রেজ ভুলে গেলে কেউ আপনাকে ফেরাতে পারবে না — আমরাও না।</string>
+    <string name="af_generate_title">শক্তিশালী পাসওয়ার্ড ব্যবহার করুন</string>
 </resources>

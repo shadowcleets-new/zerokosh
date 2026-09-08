@@ -609,4 +609,5 @@
     <string name="pc_correct">ਹੁਣ ਵੀ ਸਹੀ ਹੈ। ਕੁਝ ਕਰਨ ਦੀ ਲੋੜ ਨਹੀਂ।</string>
     <string name="rem_kit_title">ਕੋਈ ਰਿਕਵਰੀ ਕਿੱਟ ਨਹੀਂ ਸਾਂਭੀ</string>
     <string name="rem_kit_body">ਹੁਣ ਤੁਹਾਡੀ ਤਿਜੌਰੀ ਵਿੱਚ ਅਸਲ ਜਾਣਕਾਰੀ ਹੈ। ਰਿਕਵਰੀ ਕਿੱਟ ਬਿਨਾਂ ਪਾਸਫ਼੍ਰੇਜ਼ ਭੁੱਲਣ \'ਤੇ ਕੋਈ ਤੁਹਾਨੂੰ ਵਾਪਸ ਅੰਦਰ ਨਹੀਂ ਲਿਆ ਸਕਦਾ — ਅਸੀਂ ਵੀ ਨਹੀਂ।</string>
+    <string name="af_generate_title">ਮਜ਼ਬੂਤ ਪਾਸਵਰਡ ਵਰਤੋ</string>
 </resources>

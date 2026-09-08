@@ -609,4 +609,5 @@
     <string name="pc_correct">હજી બરાબર છે. કંઈ કરવાની જરૂર નથી.</string>
     <string name="rem_kit_title">કોઈ રિકવરી કિટ સાચવેલી નથી</string>
     <string name="rem_kit_body">હવે તમારી તિજોરીમાં સાચી માહિતી છે. રિકવરી કિટ વગર પાસફ્રેઝ ભૂલી જાઓ તો કોઈ તમને પાછા અંદર લાવી શકતું નથી — અમે પણ નહીં.</string>
+    <string name="af_generate_title">મજબૂત પાસવર્ડ વાપરો</string>
 </resources>

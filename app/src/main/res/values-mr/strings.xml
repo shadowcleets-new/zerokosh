@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ॲप सोडताच बंद करा</string>
     <string name="scr_settings_autolock_immediately">लगेच</string>
     <string name="scr_settings_autolock_1min">1 मिनिटानंतर</string>
-    <string name="scr_settings_autolock_5min">5 मिनिटांनंतर</string>
-    <string name="scr_settings_autolock_15min">15 मिनिटांनंतर</string>
+    <string name="scr_settings_autolock_mins">%1$d मिनिटांनंतर</string>
     <string name="scr_settings_quick_unlock">फिंगरप्रिंट / फेस अनलॉक</string>
     <string name="scr_settings_change_passphrase">पासफ्रेज बदला</string>
     <string name="scr_settings_new_recovery">नवी रिकव्हरी किल्ली घ्या</string>

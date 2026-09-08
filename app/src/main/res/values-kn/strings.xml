@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ಆಪ್ ಬಿಟ್ಟ ಕೂಡಲೇ ಬೀಗ ಹಾಕು</string>
     <string name="scr_settings_autolock_immediately">ತಕ್ಷಣ</string>
     <string name="scr_settings_autolock_1min">1 ನಿಮಿಷದ ನಂತರ</string>
-    <string name="scr_settings_autolock_5min">5 ನಿಮಿಷದ ನಂತರ</string>
-    <string name="scr_settings_autolock_15min">15 ನಿಮಿಷದ ನಂತರ</string>
+    <string name="scr_settings_autolock_mins">%1$d ನಿಮಿಷದ ನಂತರ</string>
     <string name="scr_settings_quick_unlock">ಬೆರಳಚ್ಚು / ಮುಖ ಅನ್‌ಲಾಕ್</string>
     <string name="scr_settings_change_passphrase">ಪಾಸ್‌ಫ್ರೇಸ್ ಬದಲಿಸಿ</string>
     <string name="scr_settings_new_recovery">ಹೊಸ ರಿಕವರಿ ಕೀ ಪಡೆಯಿರಿ</string>

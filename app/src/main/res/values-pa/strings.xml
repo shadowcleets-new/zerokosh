@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ਐਪ ਛੱਡਦੇ ਹੀ ਬੰਦ ਕਰੋ</string>
     <string name="scr_settings_autolock_immediately">ਤੁਰੰਤ</string>
     <string name="scr_settings_autolock_1min">1 ਮਿੰਟ ਬਾਅਦ</string>
-    <string name="scr_settings_autolock_5min">5 ਮਿੰਟ ਬਾਅਦ</string>
-    <string name="scr_settings_autolock_15min">15 ਮਿੰਟ ਬਾਅਦ</string>
+    <string name="scr_settings_autolock_mins">%1$d ਮਿੰਟ ਬਾਅਦ</string>
     <string name="scr_settings_quick_unlock">ਉਂਗਲ / ਚਿਹਰਾ ਅਨਲੌਕ</string>
     <string name="scr_settings_change_passphrase">ਪਾਸਫ਼੍ਰੇਜ਼ ਬਦਲੋ</string>
     <string name="scr_settings_new_recovery">ਨਵੀਂ ਰਿਕਵਰੀ ਕੁੰਜੀ ਲਓ</string>

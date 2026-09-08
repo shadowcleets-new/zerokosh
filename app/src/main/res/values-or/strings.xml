@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ଆପ୍ ଛାଡ଼ିବା ମାତ୍ରେ ତାଲା ପକାଅ</string>
     <string name="scr_settings_autolock_immediately">ସଙ୍ଗେ ସଙ୍ଗେ</string>
     <string name="scr_settings_autolock_1min">1 ମିନିଟ୍ ପରେ</string>
-    <string name="scr_settings_autolock_5min">5 ମିନିଟ୍ ପରେ</string>
-    <string name="scr_settings_autolock_15min">15 ମିନିଟ୍ ପରେ</string>
+    <string name="scr_settings_autolock_mins">%1$d ମିନିଟ୍ ପରେ</string>
     <string name="scr_settings_quick_unlock">ଆଙ୍ଗୁଠି ଚିହ୍ନ / ମୁହଁ ଅନ୍‌ଲକ୍</string>
     <string name="scr_settings_change_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ବଦଳାନ୍ତୁ</string>
     <string name="scr_settings_new_recovery">ନୂଆ ରିକଭରି ଚାବି ନିଅନ୍ତୁ</string>

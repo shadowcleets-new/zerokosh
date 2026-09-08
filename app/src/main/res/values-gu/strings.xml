@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ઍપ છોડતાં જ બંધ કરી દો</string>
     <string name="scr_settings_autolock_immediately">તરત જ</string>
     <string name="scr_settings_autolock_1min">1 મિનિટ પછી</string>
-    <string name="scr_settings_autolock_5min">5 મિનિટ પછી</string>
-    <string name="scr_settings_autolock_15min">15 મિનિટ પછી</string>
+    <string name="scr_settings_autolock_mins">%1$d મિનિટ પછી</string>
     <string name="scr_settings_quick_unlock">ફિંગરપ્રિન્ટ / ફેસ અનલૉક</string>
     <string name="scr_settings_change_passphrase">પાસફ્રેઝ બદલો</string>
     <string name="scr_settings_new_recovery">નવી રિકવરી ચાવી લો</string>

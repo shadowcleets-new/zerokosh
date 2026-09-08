@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">एप छड्डदे गै बंद करो</string>
     <string name="scr_settings_autolock_immediately">तुरत</string>
     <string name="scr_settings_autolock_1min">1 मिंट बाद</string>
-    <string name="scr_settings_autolock_5min">5 मिंट बाद</string>
-    <string name="scr_settings_autolock_15min">15 मिंट बाद</string>
+    <string name="scr_settings_autolock_mins">%1$d मिंट बाद</string>
     <string name="scr_settings_quick_unlock">उंगली / मुंह अनलॉक</string>
     <string name="scr_settings_change_passphrase">पासफ्रेज बदलो</string>
     <string name="scr_settings_new_recovery">नमीं रिकवरी कुंजी लैओ</string>

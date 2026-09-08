@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ஆப்-ஐ விட்டு வெளியேறியதும் பூட்டு</string>
     <string name="scr_settings_autolock_immediately">உடனே</string>
     <string name="scr_settings_autolock_1min">1 நிமிடம் கழித்து</string>
-    <string name="scr_settings_autolock_5min">5 நிமிடங்கள் கழித்து</string>
-    <string name="scr_settings_autolock_15min">15 நிமிடங்கள் கழித்து</string>
+    <string name="scr_settings_autolock_mins">%1$d நிமிடங்கள் கழித்து</string>
     <string name="scr_settings_quick_unlock">கைரேகை / முக அன்லாக்</string>
     <string name="scr_settings_change_passphrase">கடவுச்சொற்றொடரை மாற்று</string>
     <string name="scr_settings_new_recovery">புதிய மீட்புச் சாவி பெறு</string>

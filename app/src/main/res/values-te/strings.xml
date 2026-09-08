@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">యాప్ వదిలిన వెంటనే తాళం వేయి</string>
     <string name="scr_settings_autolock_immediately">వెంటనే</string>
     <string name="scr_settings_autolock_1min">1 నిమిషం తర్వాత</string>
-    <string name="scr_settings_autolock_5min">5 నిమిషాల తర్వాత</string>
-    <string name="scr_settings_autolock_15min">15 నిమిషాల తర్వాత</string>
+    <string name="scr_settings_autolock_mins">%1$d నిమిషాల తర్వాత</string>
     <string name="scr_settings_quick_unlock">వేలిముద్ర / ముఖ అన్‌లాక్</string>
     <string name="scr_settings_change_passphrase">పాస్‌ఫ్రేజ్ మార్చండి</string>
     <string name="scr_settings_new_recovery">కొత్త రికవరీ కీ తీసుకోండి</string>

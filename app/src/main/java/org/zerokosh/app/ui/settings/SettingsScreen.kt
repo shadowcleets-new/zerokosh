@@ -223,13 +223,17 @@ fun SettingsScreen(
             SettingsGroupTitle(stringResource(R.string.st_group_security))
             SettingsCard {
                 // Auto-lock
+                // Immediately stays at the top: it is the strictest choice and
+                // some people want it. The rest are the grace periods — long
+                // enough to check an OTP in the SMS app and come back without
+                // typing the passphrase again, which is the whole complaint.
+                val minuteOptions = listOf(2, 5, 10, 15, 30)
                 val autoLockOptions = listOf(
                     0 to stringResource(R.string.scr_settings_autolock_immediately),
                     1 to stringResource(R.string.scr_settings_autolock_1min),
-                    5 to stringResource(R.string.scr_settings_autolock_5min),
-                    15 to stringResource(R.string.scr_settings_autolock_15min),
-                )
-                val currentAutoLock = autoLockOptions.firstOrNull { it.first == app.prefs.autoLockMinutes }?.second ?: autoLockOptions[1].second
+                ) + minuteOptions.map { it to stringResource(R.string.scr_settings_autolock_mins, it) }
+                val currentAutoLock = autoLockOptions.firstOrNull { it.first == app.prefs.autoLockMinutes }?.second
+                    ?: autoLockOptions[1].second
                 
                 Box {
                     SettingsRow(

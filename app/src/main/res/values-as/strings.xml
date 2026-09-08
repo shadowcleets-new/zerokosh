@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">এপ এৰিলেই বন্ধ কৰক</string>
     <string name="scr_settings_autolock_immediately">লগে লগে</string>
     <string name="scr_settings_autolock_1min">1 মিনিটৰ পিছত</string>
-    <string name="scr_settings_autolock_5min">5 মিনিটৰ পিছত</string>
-    <string name="scr_settings_autolock_15min">15 মিনিটৰ পিছত</string>
+    <string name="scr_settings_autolock_mins">%1$d মিনিটৰ পিছত</string>
     <string name="scr_settings_quick_unlock">আঙুলি / মুখ আনলক</string>
     <string name="scr_settings_change_passphrase">পাছফ্ৰেজ সলনি কৰক</string>
     <string name="scr_settings_new_recovery">নতুন ৰিকভাৰী চাবি লওক</string>

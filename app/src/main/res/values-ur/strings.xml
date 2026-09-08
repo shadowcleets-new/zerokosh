@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ایپ چھوڑتے ہی بند کریں</string>
     <string name="scr_settings_autolock_immediately">فوراً</string>
     <string name="scr_settings_autolock_1min">1 منٹ بعد</string>
-    <string name="scr_settings_autolock_5min">5 منٹ بعد</string>
-    <string name="scr_settings_autolock_15min">15 منٹ بعد</string>
+    <string name="scr_settings_autolock_mins">%1$d منٹ بعد</string>
     <string name="scr_settings_quick_unlock">انگلی / چہرہ ان لاک</string>
     <string name="scr_settings_change_passphrase">پاس فریز بدلیں</string>
     <string name="scr_settings_new_recovery">نئی ریکوری کنجی لیں</string>

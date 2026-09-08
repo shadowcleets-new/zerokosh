@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">ആപ്പ് വിട്ടാലുടൻ പൂട്ടുക</string>
     <string name="scr_settings_autolock_immediately">ഉടനെ</string>
     <string name="scr_settings_autolock_1min">1 മിനിറ്റിന് ശേഷം</string>
-    <string name="scr_settings_autolock_5min">5 മിനിറ്റിന് ശേഷം</string>
-    <string name="scr_settings_autolock_15min">15 മിനിറ്റിന് ശേഷം</string>
+    <string name="scr_settings_autolock_mins">%1$d മിനിറ്റിന് ശേഷം</string>
     <string name="scr_settings_quick_unlock">വിരലടയാളം / മുഖം അൺലോക്ക്</string>
     <string name="scr_settings_change_passphrase">പാസ്‌ഫ്രെയ്സ് മാറ്റുക</string>
     <string name="scr_settings_new_recovery">പുതിയ റിക്കവറി താക്കോൽ എടുക്കുക</string>

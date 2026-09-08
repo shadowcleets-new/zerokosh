@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">অ্যাপ ছাড়লেই তালা দিন</string>
     <string name="scr_settings_autolock_immediately">সঙ্গে সঙ্গে</string>
     <string name="scr_settings_autolock_1min">1 মিনিট পরে</string>
-    <string name="scr_settings_autolock_5min">5 মিনিট পরে</string>
-    <string name="scr_settings_autolock_15min">15 মিনিট পরে</string>
+    <string name="scr_settings_autolock_mins">%1$d মিনিট পরে</string>
     <string name="scr_settings_quick_unlock">আঙুলের ছাপ / মুখ আনলক</string>
     <string name="scr_settings_change_passphrase">পাসফ্রেজ বদলান</string>
     <string name="scr_settings_new_recovery">নতুন রিকভারি চাবি নিন</string>

@@ -126,8 +126,7 @@
     <string name="scr_settings_autolock">एप छोड़ितहि बन्न करू</string>
     <string name="scr_settings_autolock_immediately">तुरन्त</string>
     <string name="scr_settings_autolock_1min">1 मिनटक बाद</string>
-    <string name="scr_settings_autolock_5min">5 मिनटक बाद</string>
-    <string name="scr_settings_autolock_15min">15 मिनटक बाद</string>
+    <string name="scr_settings_autolock_mins">%1$d मिनटक बाद</string>
     <string name="scr_settings_quick_unlock">आङुर / मुँह अनलॉक</string>
     <string name="scr_settings_change_passphrase">पासफ्रेज बदलू</string>
     <string name="scr_settings_new_recovery">नव रिकवरी कुंजी लिअ</string>

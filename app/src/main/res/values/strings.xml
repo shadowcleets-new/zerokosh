@@ -128,8 +128,7 @@
     <string name="scr_settings_autolock">Lock when I leave the app</string>
     <string name="scr_settings_autolock_immediately">Immediately</string>
     <string name="scr_settings_autolock_1min">After 1 minute</string>
-    <string name="scr_settings_autolock_5min">After 5 minutes</string>
-    <string name="scr_settings_autolock_15min">After 15 minutes</string>
+    <string name="scr_settings_autolock_mins">After %1$d minutes</string>
     <string name="scr_settings_quick_unlock">Fingerprint / face unlock</string>
     <string name="scr_settings_change_passphrase">Change passphrase</string>
     <string name="scr_settings_new_recovery">Get a new Recovery Key</string>

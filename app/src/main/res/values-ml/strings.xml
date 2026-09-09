@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"നിങ്ങളുടെ കലവറ "</string>
     <string name="hm_empty_head_emph">കാത്തിരിക്കുന്നു.</string>
     <string name="hm_empty_blank">ഒഴിഞ്ഞ കലവറ, തയ്യാർ.</string>
+    <string name="hm_detail_placeholder">ഇവിടെ കാണാൻ ഒരു രേഖ തിരഞ്ഞെടുക്കുക</string>
     <string name="hm_empty_body">ഏറ്റവും കൂടുതൽ ഉപകാരപ്പെടുന്ന ഒറ്റ വിവരത്തിൽ നിന്ന് തുടങ്ങുക. നോട്ട്സ് ആപ്പിൽ കിടക്കുന്ന പന്ത്രണ്ട് പാസ്‌വേഡിനെക്കാൾ സൂക്ഷിച്ച ഒരു പാസ്‌വേഡ് സുരക്ഷിതമാണ്.</string>
     <string name="hm_add_first">നിങ്ങളുടെ ആദ്യ രേഖ ചേർക്കുക</string>
     <string name="hm_start_template">ടെംപ്ലേറ്റിൽ നിന്ന് തുടങ്ങുക</string>

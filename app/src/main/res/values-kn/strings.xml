@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"ನಿಮ್ಮ ತಿಜೋರಿ "</string>
     <string name="hm_empty_head_emph">ಕಾಯುತ್ತಿದೆ.</string>
     <string name="hm_empty_blank">ಖಾಲಿ ತಿಜೋರಿ, ಸಿದ್ಧವಿದೆ.</string>
+    <string name="hm_detail_placeholder">ಇಲ್ಲಿ ನೋಡಲು ಒಂದು ದಾಖಲೆ ಆರಿಸಿ</string>
     <string name="hm_empty_body">ಹೆಚ್ಚು ಬಳಕೆಗೆ ಬರುವ ಒಂದೇ ಮಾಹಿತಿಯಿಂದ ಶುರು ಮಾಡಿ. ನೋಟ್ಸ್ ಆಪ್‌ನಲ್ಲಿ ಬಿದ್ದಿರುವ ಹನ್ನೆರಡು ಪಾಸ್‌ವರ್ಡ್‌ಗಿಂತ ಉಳಿಸಿದ ಒಂದು ಪಾಸ್‌ವರ್ಡ್ ಸುರಕ್ಷಿತ.</string>
     <string name="hm_add_first">ನಿಮ್ಮ ಮೊದಲ ದಾಖಲೆ ಸೇರಿಸಿ</string>
     <string name="hm_start_template">ಟೆಂಪ್ಲೇಟ್‌ನಿಂದ ಶುರು ಮಾಡಿ</string>

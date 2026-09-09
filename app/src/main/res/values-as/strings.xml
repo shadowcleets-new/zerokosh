@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"আপোনাৰ ভঁৰাল "</string>
     <string name="hm_empty_head_emph">অপেক্ষাত আছে।</string>
     <string name="hm_empty_blank">খালী ভঁৰাল, সাজু।</string>
+    <string name="hm_detail_placeholder">ইয়াত চাবলৈ এটা ৰেকৰ্ড বাছনি কৰক</string>
     <string name="hm_empty_body">যিটো বস্তু আটাইতকৈ বেছি কামত আহে, তাৰ পৰাই আৰম্ভ কৰক। নোটছ এপত পৰি থকা বাৰটা পাছৱৰ্ডতকৈ সাঁচি থোৱা এটা পাছৱৰ্ড বেছি সুৰক্ষিত।</string>
     <string name="hm_add_first">আপোনাৰ প্ৰথম এণ্ট্ৰী যোগ কৰক</string>
     <string name="hm_start_template">টেমপ্লেটৰ পৰা আৰম্ভ কৰক</string>

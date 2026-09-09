@@ -424,6 +424,7 @@
     <string name="hm_empty_head_lead">"Your vault is "</string>
     <string name="hm_empty_head_emph">waiting.</string>
     <string name="hm_empty_blank">A blank vault, ready.</string>
+    <string name="hm_detail_placeholder">Pick a record to see it here</string>
     <string name="hm_empty_body">Start with the one credential you use the most. Even one saved password is safer than twelve in a notes app.</string>
     <string name="hm_add_first">Add your first record</string>
     <string name="hm_start_template">Start with a template</string>

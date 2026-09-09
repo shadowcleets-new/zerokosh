@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"உங்கள் பெட்டகம் "</string>
     <string name="hm_empty_head_emph">காத்திருக்கிறது.</string>
     <string name="hm_empty_blank">காலியான பெட்டகம், தயார்.</string>
+    <string name="hm_detail_placeholder">இங்கே காண ஒரு பதிவைத் தேர்ந்தெடுக்கவும்</string>
     <string name="hm_empty_body">அதிகம் பயன்படும் ஒரு தகவலிலிருந்து தொடங்குங்கள். நோட்ஸ் ஆப்-இல் கிடக்கும் பன்னிரண்டு கடவுச்சொற்களை விட சேமித்த ஒரு கடவுச்சொல்லே பாதுகாப்பானது.</string>
     <string name="hm_add_first">உங்கள் முதல் பதிவைச் சேருங்கள்</string>
     <string name="hm_start_template">டெம்ப்ளேட்டிலிருந்து தொடங்குங்கள்</string>

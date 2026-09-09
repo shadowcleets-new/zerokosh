@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"آپ کی تجوری "</string>
     <string name="hm_empty_head_emph">انتظار میں ہے۔</string>
     <string name="hm_empty_blank">خالی تجوری، تیار۔</string>
+    <string name="hm_detail_placeholder">یہاں دیکھنے کے لیے ایک ریکارڈ منتخب کریں</string>
     <string name="hm_empty_body">اس ایک چیز سے شروع کریں جو سب سے زیادہ کام آئے۔ نوٹس ایپ میں پڑے بارہ پاس ورڈوں سے ایک محفوظ کیا ہوا پاس ورڈ زیادہ محفوظ ہے۔</string>
     <string name="hm_add_first">اپنا پہلا اندراج شامل کریں</string>
     <string name="hm_start_template">ٹیمپلیٹ سے شروع کریں</string>

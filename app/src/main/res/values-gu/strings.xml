@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"તમારી તિજોરી "</string>
     <string name="hm_empty_head_emph">રાહ જુએ છે.</string>
     <string name="hm_empty_blank">ખાલી તિજોરી, તૈયાર છે.</string>
+    <string name="hm_detail_placeholder">અહીં જોવા માટે એક રેકોર્ડ પસંદ કરો</string>
     <string name="hm_empty_body">એ જ એક માહિતીથી શરૂ કરો જે સૌથી વધુ કામ આવે છે. નોટ્સ ઍપમાં પડેલા બાર પાસવર્ડ કરતાં એક સાચવેલો પાસવર્ડ પણ વધુ સુરક્ષિત છે.</string>
     <string name="hm_add_first">તમારો પહેલો રેકોર્ડ ઉમેરો</string>
     <string name="hm_start_template">ટેમ્પલેટથી શરૂ કરો</string>

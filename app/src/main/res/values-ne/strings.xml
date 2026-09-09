@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"तपाईंको भण्डार "</string>
     <string name="hm_empty_head_emph">पर्खिरहेको छ।</string>
     <string name="hm_empty_blank">खाली भण्डार, तयार।</string>
+    <string name="hm_detail_placeholder">यहाँ हेर्न एउटा रेकर्ड छान्नुहोस्</string>
     <string name="hm_empty_body">सबभन्दा बढी काम लाग्ने एउटै कुराबाट सुरु गर्नुहोस्। नोट्स एपमा रहेका बाह्रवटा पासवर्डभन्दा सुरक्षित गरिएको एउटा पासवर्ड बढी सुरक्षित हुन्छ।</string>
     <string name="hm_add_first">आफ्नो पहिलो प्रविष्टि थप्नुहोस्</string>
     <string name="hm_start_template">टेम्प्लेटबाट सुरु गर्नुहोस्</string>

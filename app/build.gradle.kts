@@ -215,6 +215,11 @@ dependencies {
     // androidx.window, and reports posture with them.
     implementation("androidx.compose.material3.adaptive:adaptive:1.3.0")
     implementation("androidx.window:window:1.5.1")
+    // §6.2 addition (approved): the list-detail scene for Navigation 3. On a
+    // tablet or an unfolded foldable the vault list and the record it opens sit
+    // side by side instead of the record covering the list.
+    implementation("androidx.compose.material3.adaptive:adaptive-navigation3:1.3.0")
+    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.3.0")
 
     // §6.2 addition (approved), instrumented tests. Test-only configurations,
     // so none of this reaches the APK.

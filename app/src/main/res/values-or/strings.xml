@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"ଆପଣଙ୍କ ସିନ୍ଦୁକ "</string>
     <string name="hm_empty_head_emph">ଅପେକ୍ଷା କରୁଛି।</string>
     <string name="hm_empty_blank">ଖାଲି ସିନ୍ଦୁକ, ପ୍ରସ୍ତୁତ।</string>
+    <string name="hm_detail_placeholder">ଏଠାରେ ଦେଖିବାକୁ ଏକ ରେକର୍ଡ ବାଛନ୍ତୁ</string>
     <string name="hm_empty_body">ଯାହା ସବୁଠାରୁ ବେଶୀ କାମରେ ଆସେ ସେହି ଗୋଟିଏ ସୂଚନାରୁ ଆରମ୍ଭ କରନ୍ତୁ। ନୋଟ୍ସ ଆପ୍‌ରେ ପଡ଼ିଥିବା ବାରଟି ପାସୱାର୍ଡଠାରୁ ସଞ୍ଚିତ ଗୋଟିଏ ପାସୱାର୍ଡ ବି ଅଧିକ ସୁରକ୍ଷିତ।</string>
     <string name="hm_add_first">ଆପଣଙ୍କ ପ୍ରଥମ ରେକର୍ଡ ଯୋଡ଼ନ୍ତୁ</string>
     <string name="hm_start_template">ଟେମ୍ପ୍ଲେଟ୍‌ରୁ ଆରମ୍ଭ କରନ୍ତୁ</string>

@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"ਤੁਹਾਡੀ ਤਿਜੌਰੀ "</string>
     <string name="hm_empty_head_emph">ਉਡੀਕ ਰਹੀ ਹੈ।</string>
     <string name="hm_empty_blank">ਖਾਲੀ ਤਿਜੌਰੀ, ਤਿਆਰ।</string>
+    <string name="hm_detail_placeholder">ਇੱਥੇ ਵੇਖਣ ਲਈ ਇੱਕ ਰਿਕਾਰਡ ਚੁਣੋ</string>
     <string name="hm_empty_body">ਉਸ ਇੱਕ ਚੀਜ਼ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ ਜੋ ਸਭ ਤੋਂ ਵੱਧ ਕੰਮ ਆਵੇ। ਨੋਟਸ ਐਪ ਵਿੱਚ ਪਏ ਬਾਰਾਂ ਪਾਸਵਰਡਾਂ ਨਾਲੋਂ ਇੱਕ ਸਾਂਭਿਆ ਪਾਸਵਰਡ ਵੱਧ ਸੁਰੱਖਿਅਤ ਹੈ।</string>
     <string name="hm_add_first">ਆਪਣਾ ਪਹਿਲਾ ਇੰਦਰਾਜ ਜੋੜੋ</string>
     <string name="hm_start_template">ਟੈਂਪਲੇਟ ਤੋਂ ਸ਼ੁਰੂ ਕਰੋ</string>

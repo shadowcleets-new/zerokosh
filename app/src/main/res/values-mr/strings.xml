@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"तुमची तिजोरी "</string>
     <string name="hm_empty_head_emph">वाट बघते आहे.</string>
     <string name="hm_empty_blank">रिकामी तिजोरी, तयार आहे.</string>
+    <string name="hm_detail_placeholder">इथे पाहण्यासाठी एक नोंद निवडा</string>
     <string name="hm_empty_body">जी माहिती सर्वात जास्त कामी येते तिच्यापासून सुरुवात करा. नोट्स ॲपमध्ये पडलेल्या बारा पासवर्डांपेक्षा एक साठवलेला पासवर्डही जास्त सुरक्षित असतो.</string>
     <string name="hm_add_first">तुमची पहिली नोंद जोडा</string>
     <string name="hm_start_template">टेम्पलेटपासून सुरुवात करा</string>

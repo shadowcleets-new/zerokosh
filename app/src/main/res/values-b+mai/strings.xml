@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"अहाँक भण्डार "</string>
     <string name="hm_empty_head_emph">बाट तकैत अछि।</string>
     <string name="hm_empty_blank">खाली भण्डार, तैयार।</string>
+    <string name="hm_detail_placeholder">एतय देखबाक लेल एकटा रेकर्ड चुनू</string>
     <string name="hm_empty_body">जे एकटा वस्तु सभ सँ बेसी काज आबय, ओहि सँ शुरू करू। नोट्स एपमे पड़ल बारहटा पासवर्ड सँ सहेजल एकटा पासवर्ड बेसी सुरक्षित अछि।</string>
     <string name="hm_add_first">अपन पहिल प्रविष्टि जोड़ू</string>
     <string name="hm_start_template">टेम्पलेट सँ शुरू करू</string>

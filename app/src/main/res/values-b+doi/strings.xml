@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"तुंदा भंडार "</string>
     <string name="hm_empty_head_emph">उडीका करदा ऐ।</string>
     <string name="hm_empty_blank">खाली भंडार, तैयार।</string>
+    <string name="hm_detail_placeholder">इत्थें दिक्खने आस्तै इक रिकार्ड चुनो</string>
     <string name="hm_empty_body">जेह्ड़ी इक चीज सारें थमां मता कम्म आवै, ओथून शुरू करो। नोट्स एपै च पेदे बारां पासवर्डें थमां संभाली दा इक पासवर्ड मता सुरक्षित ऐ।</string>
     <string name="hm_add_first">अपनी पैह्ली एंट्री जोड़ो</string>
     <string name="hm_start_template">टेम्पलेट थमां शुरू करो</string>

@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"আপনার সিন্দুক "</string>
     <string name="hm_empty_head_emph">অপেক্ষা করছে।</string>
     <string name="hm_empty_blank">ফাঁকা সিন্দুক, তৈরি।</string>
+    <string name="hm_detail_placeholder">এখানে দেখতে একটি রেকর্ড বেছে নিন</string>
     <string name="hm_empty_body">যেটা সবচেয়ে বেশি কাজে লাগে সেই একটি তথ্য দিয়ে শুরু করুন। নোটস অ্যাপে পড়ে থাকা বারোটা পাসওয়ার্ডের চেয়ে সংরক্ষণ করা একটি পাসওয়ার্ডও নিরাপদ।</string>
     <string name="hm_add_first">আপনার প্রথম রেকর্ড যোগ করুন</string>
     <string name="hm_start_template">টেমপ্লেট দিয়ে শুরু করুন</string>

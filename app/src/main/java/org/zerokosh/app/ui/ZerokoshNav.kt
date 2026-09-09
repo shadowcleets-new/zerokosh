@@ -85,6 +85,11 @@ import androidx.core.content.ContextCompat
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.window.core.layout.WindowSizeClass
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
@@ -250,9 +255,17 @@ private val TabRoutes: Map<VaultTab, Any> = mapOf(
  */
 private val ReminderDateFields = ReminderWorker.AUTO_SUGGEST_FIELDS
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 private fun MainScaffold(app: ZerokoshApp) {
     val navState = rememberVaultNavState()
+    // horizontalPartitionSpacerSize = 0 so the two panes meet without a gutter
+    // the rest of this app's surfaces do not have.
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val paneDirective = remember(adaptiveInfo) {
+        calculatePaneScaffoldDirective(adaptiveInfo).copy(horizontalPartitionSpacerSize = 0.dp)
+    }
+    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>(directive = paneDirective)
 
     // BV-02: the vault is only readable while it is open, so this is the one
     // moment reminders can be evaluated. Ask for POST_NOTIFICATIONS only if the
@@ -425,6 +438,11 @@ private fun MainScaffold(app: ZerokoshApp) {
                     NavDisplay(
                         backStack = navState.displayed,
                         onBack = { navState.back() },
+                        // Where there is room, a record opens beside the list it
+                        // came from rather than on top of it. Below that width
+                        // the strategy simply does not apply and behaviour is
+                        // exactly as before.
+                        sceneStrategies = listOf(listDetailStrategy),
                         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
                         transitionSpec = {
                             globalEnterTransition() togetherWith globalExitTransition()
@@ -433,7 +451,11 @@ private fun MainScaffold(app: ZerokoshApp) {
                             globalPopEnterTransition() togetherWith globalPopExitTransition()
                         },
                         entryProvider = entryProvider {
-                            entry<HomeRoute> {
+                            entry<HomeRoute>(
+                                metadata = ListDetailSceneStrategy.listPane(
+                                    detailPlaceholder = { DetailPlaceholder() },
+                                ),
+                            ) {
                                 // Shared elements come from Nav3's own animation
                                 // scope now. The screens are untouched: they read
                                 // the app's own CompositionLocal, which is what
@@ -477,7 +499,9 @@ private fun MainScaffold(app: ZerokoshApp) {
                                     onClose = { navState.selectTab(VaultTab.Vault) },
                                 )
                             }
-                            entry<DetailRoute> { route ->
+                            entry<DetailRoute>(
+                                metadata = ListDetailSceneStrategy.detailPane(),
+                            ) { route ->
                                 CompositionLocalProvider(
                                     LocalAnimatedVisibilityScope provides LocalNavAnimatedContentScope.current,
                                 ) {
@@ -564,6 +588,31 @@ private fun DamagedScreen() {
                 )
             }
         }
+    }
+}
+// #endregion
+
+// #region List-detail placeholder
+/**
+ * What fills the detail pane before a record is chosen.
+ *
+ * Only ever seen on a wide window, where the pane exists but nothing has been
+ * opened into it yet. Quiet on purpose: it sits beside a list the user is
+ * reading, so it should not compete with it.
+ */
+@Composable
+private fun DetailPlaceholder() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VaultTheme.colors.paper),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.hm_detail_placeholder),
+            style = MaterialTheme.typography.bodyMedium,
+            color = VaultTheme.colors.mute,
+        )
     }
 }
 // #endregion

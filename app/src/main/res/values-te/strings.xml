@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"మీ ఖజానా "</string>
     <string name="hm_empty_head_emph">ఎదురుచూస్తోంది.</string>
     <string name="hm_empty_blank">ఖాళీ ఖజానా, సిద్ధం.</string>
+    <string name="hm_detail_placeholder">ఇక్కడ చూడటానికి ఒక రికార్డును ఎంచుకోండి</string>
     <string name="hm_empty_body">ఎక్కువగా పనికొచ్చే ఒక్క సమాచారంతో మొదలుపెట్టండి. నోట్స్ యాప్‌లో పడి ఉన్న పన్నెండు పాస్‌వర్డ్‌ల కంటే దాచిన ఒక్క పాస్‌వర్డ్ సురక్షితం.</string>
     <string name="hm_add_first">మీ మొదటి రికార్డును జోడించండి</string>
     <string name="hm_start_template">టెంప్లేట్‌తో మొదలుపెట్టండి</string>

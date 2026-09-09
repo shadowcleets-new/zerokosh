@@ -380,6 +380,7 @@
     <string name="hm_empty_head_lead">"आपकी तिजोरी "</string>
     <string name="hm_empty_head_emph">इंतज़ार कर रही है।</string>
     <string name="hm_empty_blank">खाली तिजोरी, तैयार है।</string>
+    <string name="hm_detail_placeholder">यहाँ देखने के लिए कोई रिकॉर्ड चुनें</string>
     <string name="hm_empty_body">उसी एक जानकारी से शुरू करें जो सबसे ज़्यादा काम आती है। नोट्स ऐप में पड़े बारह पासवर्ड से एक सहेजा पासवर्ड भी ज़्यादा सुरक्षित है।</string>
     <string name="hm_add_first">अपना पहला रिकॉर्ड जोड़ें</string>
     <string name="hm_start_template">टेम्पलेट से शुरू करें</string>

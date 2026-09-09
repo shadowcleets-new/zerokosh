@@ -376,6 +376,7 @@
     <string name="hm_empty_head_lead">"तुमचो भंडार "</string>
     <string name="hm_empty_head_emph">रावता.</string>
     <string name="hm_empty_blank">रिकामो भंडार, तयार.</string>
+    <string name="hm_detail_placeholder">हांगा पळोवपाक एक रेकॉर्ड वेंचात</string>
     <string name="hm_empty_body">सगळ्यांत चड उपेगाक पडपी त्या एका वस्तेपासून सुरवात करात. नोट्स ॲपांत पडिल्ल्या बारा पासवर्डांपरस सांबाळिल्लो एक पासवर्ड चड सुरक्षीत.</string>
     <string name="hm_add_first">तुमची पयली नोंद जोडात</string>
     <string name="hm_start_template">टेंप्लेटांतल्यान सुरवात करात</string>

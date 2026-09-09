@@ -7,6 +7,11 @@ import org.zerokosh.app.crypto.AndroidCrypto
 import org.zerokosh.app.data.AssetCatalog
 import org.zerokosh.app.data.LocalVaultStore
 import org.zerokosh.app.data.Prefs
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.zerokosh.app.data.SafVaultStore
 import org.zerokosh.app.data.SessionKeeper
 import org.zerokosh.app.data.VaultRepository
@@ -57,10 +62,72 @@ class ZerokoshApp : Application() {
         }
         repository.onLocked = { SessionKeeper.clear(this) }
 
+        observeProcessLifecycle()
+
         // BV-02: nothing used to enqueue this, so expiry and renewal
         // reminders never fired. KEEP policy makes it idempotent.
         ReminderWorker.schedule(this)
     }
+
+    // #region Auto-lock across the whole process
+    /**
+     * Set while we hand off to another activity of our own volition — a file
+     * picker, a document creator.
+     *
+     * BV-04: that is not the user leaving. Locking on it meant the picker's
+     * result callback ran against a locked repository and lost whatever was
+     * half-typed into an edit form.
+     */
+    @Volatile
+    var handingOffToPicker: Boolean = false
+
+    /** When the app as a whole went to the background; 0 while it is in front. */
+    private var backgroundedAtMs: Long = 0L
+
+    /**
+     * Watch the process rather than one Activity.
+     *
+     * This was hand-rolled in MainActivity, which can only see itself. That is
+     * the shape of bug the review of the session work found — the auto-lock
+     * clock belongs to the app, not to a screen — and it also had to
+     * special-case configuration changes, which ProcessLifecycleOwner already
+     * debounces away.
+     *
+     * The autofill service is deliberately not covered here: it can run with no
+     * Activity at all, so ProcessLifecycleOwner never moves for it. That case is
+     * handled where it happens, in the service's own session-window check.
+     */
+    private fun observeProcessLifecycle() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStop(owner: LifecycleOwner) {
+                    if (handingOffToPicker) return
+                    backgroundedAtMs = System.currentTimeMillis()
+                    // The setting is worded "lock when I leave", so leaving is
+                    // when the clock starts.
+                    repository.renewSession()
+                }
+
+                override fun onStart(owner: LifecycleOwner) {
+                    val leftAt = backgroundedAtMs
+                    backgroundedAtMs = 0L
+                    handingOffToPicker = false
+                    val overdue = leftAt > 0L &&
+                        System.currentTimeMillis() - leftAt >= prefs.autoLockMinutes * 60_000L
+                    if (overdue && repository.state.value == VaultState.Unlocked) {
+                        repository.lock()
+                    }
+                    // Coming back to a process Android killed while we were
+                    // away: the window is measured by SessionKeeper's own
+                    // deadline, which outlived it.
+                    if (repository.state.value == VaultState.Locked) {
+                        ProcessLifecycleOwner.get().lifecycleScope.launch { resumeSessionIfLive() }
+                    }
+                }
+            },
+        )
+    }
+    // #endregion
 
     /** When the held session should stop being valid: the auto-lock window from now. */
     fun sessionExpiryMs(): Long {

@@ -176,6 +176,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("androidx.work:work-runtime-ktx:2.9.0") // reminders + clipboard-clear fallback
 
+    // §6.2 addition (approved): process-level lifecycle for auto-lock.
+    // "Lock when I leave the app" was bookkept by hand in MainActivity, which
+    // could only ever see its own Activity. An adversarial review of the
+    // session work found the hole that leaves: nothing re-locks a process that
+    // has no Activity in it, and the autofill service is exactly that process.
+    // ProcessLifecycleOwner is the supported way to ask whether the app — not
+    // one screen of it — is in the foreground, and it debounces the Activity
+    // hand-offs the hand-rolled version had to special-case.
+    implementation("androidx.lifecycle:lifecycle-process:2.11.0")
+
     // Test only — never in the shipped APK, so outside the §6.2 runtime list.
     // The app module had no test source set at all, which is why every defect
     // this month was found by looking at the app rather than by a build.

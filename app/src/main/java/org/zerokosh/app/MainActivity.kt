@@ -27,17 +27,15 @@ import java.util.Locale
 class MainActivity : FragmentActivity() {
 
     private val app get() = application as ZerokoshApp
-    private var backgroundedAtMs: Long = 0
 
     /**
-     * BV-04: set while we hand off to another activity of our own volition — a
-     * file picker, a document creator. Every ActivityResultRegistry launch funnels
-     * through startActivityForResult, so this catches them all.
+     * BV-04: tell the process-level auto-lock that this backgrounding is ours —
+     * a file picker, a document creator — and not the user leaving. Every
+     * ActivityResultRegistry launch funnels through startActivityForResult, so
+     * this catches them all.
      */
-    private var awaitingActivityResult = false
-
     override fun startActivityForResult(intent: android.content.Intent, requestCode: Int, options: Bundle?) {
-        awaitingActivityResult = true
+        app.handingOffToPicker = true
         super.startActivityForResult(intent, requestCode, options)
     }
 
@@ -119,39 +117,4 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        // §5.2: lock after N minutes in background (0 = immediately)
-        if (backgroundedAtMs > 0 && app.repository.state.value == VaultState.Unlocked) {
-            val minutes = app.prefs.autoLockMinutes
-            val elapsed = System.currentTimeMillis() - backgroundedAtMs
-            if (elapsed >= minutes * 60_000L) app.repository.lock()
-        }
-        // Coming back to a process Android killed while we were away. The
-        // window is measured by SessionKeeper's own expiry, so this is right
-        // even though backgroundedAtMs died with the old process.
-        if (app.repository.state.value == VaultState.Locked) {
-            lifecycleScope.launch { app.resumeSessionIfLive() }
-        }
-        backgroundedAtMs = 0
-        awaitingActivityResult = false
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // BV-04: a rotation or a picker round-trip is not the user leaving. With
-        // auto-lock on "Immediately" (elapsed >= 0 is always true) those would
-        // lock the vault the moment they came back — and the picker's result
-        // callback would then run against a locked repository, losing whatever
-        // was half-typed into an edit form.
-        backgroundedAtMs = if (isChangingConfigurations || awaitingActivityResult) {
-            0
-        } else {
-            // The setting is "lock when I leave", so leaving is when the clock
-            // starts. Pushing the expiry out here is what makes the window mean
-            // the same thing to autofill as it does to the app.
-            app.repository.renewSession()
-            System.currentTimeMillis()
-        }
-    }
 }

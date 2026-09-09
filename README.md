@@ -44,8 +44,6 @@ Requires JDK 17+ and the Android SDK (compileSdk 36).
 - F-Droid — builds from source
 - Google Play
 
-
-```
 ## License
 
 [GPL-3.0-or-later](LICENSE). Free forever for individuals — there is nothing to host, so there is nothing to charge for.

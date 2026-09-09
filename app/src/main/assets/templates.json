@@ -1065,6 +1065,47 @@
           "s": "H"
         }
       ]
+    },
+    {
+      "id": "passkey",
+      "icon": "key",
+      "fields": [
+        {
+          "k": "website",
+          "t": "URL",
+          "s": "L"
+        },
+        {
+          "k": "username",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "credential_id",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "private_key",
+          "t": "SECRET",
+          "s": "H"
+        },
+        {
+          "k": "user_handle",
+          "t": "TEXT",
+          "s": "M"
+        },
+        {
+          "k": "sign_count",
+          "t": "TEXT",
+          "s": "L"
+        },
+        {
+          "k": "notes",
+          "t": "NOTE",
+          "s": "L"
+        }
+      ]
     }
   ]
 }

@@ -215,4 +215,12 @@
     <string name="tpl_voter_id_portal_password">NVSP پاس ورڈ</string>
     <string name="tpl_voter_id_file_copy">اسکین شدہ نقل</string>
     <string name="tpl_voter_id_notes">نوٹ</string>
+    <string name="tpl_passkey">پاس کی</string>
+    <string name="tpl_passkey_credential_id">کریڈینشل ID</string>
+    <string name="tpl_passkey_private_key">نجی کلید</string>
+    <string name="tpl_passkey_user_handle">یوزر ہینڈل</string>
+    <string name="tpl_passkey_sign_count">سائن کاؤنٹ</string>
+    <string name="tpl_passkey_website">ویب سائٹ</string>
+    <string name="tpl_passkey_username">یوزر نیم</string>
+    <string name="tpl_passkey_notes">نوٹ</string>
 </resources>

@@ -215,4 +215,12 @@
     <string name="tpl_voter_id_portal_password">NVSP கடவுச்சொல்</string>
     <string name="tpl_voter_id_file_copy">ஸ்கேன் செய்த நகல்</string>
     <string name="tpl_voter_id_notes">குறிப்புகள்</string>
+    <string name="tpl_passkey">பாஸ்கீ</string>
+    <string name="tpl_passkey_credential_id">கிரெடென்ஷியல் ID</string>
+    <string name="tpl_passkey_private_key">தனிப்பட்ட விசை</string>
+    <string name="tpl_passkey_user_handle">பயனர் ஹேண்டில்</string>
+    <string name="tpl_passkey_sign_count">சைன் கவுண்ட்</string>
+    <string name="tpl_passkey_website">வலைத்தளம்</string>
+    <string name="tpl_passkey_username">பயனர்பெயர்</string>
+    <string name="tpl_passkey_notes">குறிப்புகள்</string>
 </resources>

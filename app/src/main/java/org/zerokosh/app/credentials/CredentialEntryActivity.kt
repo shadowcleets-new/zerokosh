@@ -37,6 +37,11 @@ import androidx.annotation.RequiresApi
 import androidx.compose.ui.res.stringResource
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePasswordResponse
+import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.GetPublicKeyCredentialOption
+import androidx.credentials.PublicKeyCredential
+import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.PasswordCredential
 import androidx.credentials.provider.BeginGetCredentialResponse
@@ -80,6 +85,7 @@ class CredentialEntryActivity : FragmentActivity() {
             if (!ensureUnlocked()) return@launch
             when (intent.action) {
                 ACTION_GET -> deliverPassword()
+                ACTION_GET_PASSKEY -> deliverPasskey()
                 ACTION_UNLOCK_AND_GET -> deliverEntries()
                 ACTION_CREATE -> saveCredential()
                 else -> cancel()
@@ -127,6 +133,7 @@ class CredentialEntryActivity : FragmentActivity() {
                             }
                             when (intent.action) {
                                 ACTION_GET -> deliverPassword()
+                                ACTION_GET_PASSKEY -> deliverPasskey()
                                 ACTION_UNLOCK_AND_GET -> deliverEntries()
                                 ACTION_CREATE -> saveCredential()
                                 else -> cancel()
@@ -178,7 +185,7 @@ class CredentialEntryActivity : FragmentActivity() {
         PendingIntentHandler.setBeginGetCredentialResponse(
             result,
             BeginGetCredentialResponse(
-                credentialEntries = CredentialEntries.passwordEntries(this, app, request),
+                credentialEntries = CredentialEntries.entriesFor(this, app, request),
             ),
         )
         setResult(Activity.RESULT_OK, result)
@@ -190,7 +197,15 @@ class CredentialEntryActivity : FragmentActivity() {
     /** Store a password an app has just had the user choose. */
     private suspend fun saveCredential() {
         val request = PendingIntentHandler.retrieveProviderCreateCredentialRequest(intent)
-        val password = request?.callingRequest as? CreatePasswordRequest
+        if (request == null) {
+            cancel()
+            return
+        }
+        if (request.callingRequest is CreatePublicKeyCredentialRequest) {
+            if (!createPasskey(request)) cancel()
+            return
+        }
+        val password = request.callingRequest as? CreatePasswordRequest
         if (password == null) {
             cancel()
             return
@@ -219,8 +234,84 @@ class CredentialEntryActivity : FragmentActivity() {
     }
     // #endregion
 
+    // #region Passkeys
+    /**
+     * Sign an assertion with a passkey the user picked.
+     *
+     * The counter is written back before the response goes out, so what the
+     * site is told and what the vault holds cannot disagree — a counter that
+     * repeats is what a relying party reads as a cloned credential.
+     */
+    private suspend fun deliverPasskey() {
+        val request = PendingIntentHandler.retrieveProviderGetCredentialRequest(intent)
+        val option = request?.credentialOptions
+            ?.filterIsInstance<GetPublicKeyCredentialOption>()
+            ?.firstOrNull()
+        val id = intent.getStringExtra(EXTRA_RECORD_ID)
+        val record = app.repository.body.value?.records?.firstOrNull { it.uuid == id }
+        if (option == null || record == null) {
+            cancel()
+            return
+        }
+        val options = Passkeys.parseRequestOptions(option.requestJson)
+        if (options == null) {
+            cancel()
+            return
+        }
+        val assertion = Passkeys.assert(
+            record = record,
+            options = options,
+            origin = Passkeys.originFor(request.callingAppInfo),
+            packageName = request.callingAppInfo.packageName,
+        )
+        if (assertion == null) {
+            cancel()
+            return
+        }
+        val stored = runCatching { app.repository.upsertRecord(assertion.updated) }
+            .getOrNull()?.isSuccess == true
+        if (!stored) {
+            // Refusing here rather than signing anyway: an assertion whose
+            // counter was never persisted would repeat on the next sign-in.
+            cancel()
+            return
+        }
+        val result = Intent()
+        PendingIntentHandler.setGetCredentialResponse(
+            result,
+            GetCredentialResponse(PublicKeyCredential(assertion.responseJson)),
+        )
+        setResult(Activity.RESULT_OK, result)
+        finish()
+    }
+
+    /** Create and store a new passkey for the site that asked for one. */
+    private suspend fun createPasskey(request: ProviderCreateCredentialRequest): Boolean {
+        val create = request.callingRequest as? CreatePublicKeyCredentialRequest ?: return false
+        val options = Passkeys.parseCreationOptions(create.requestJson) ?: return false
+        val registration = Passkeys.register(
+            app = app,
+            options = options,
+            origin = Passkeys.originFor(request.callingAppInfo),
+            packageName = request.callingAppInfo.packageName,
+        )
+        val stored = runCatching { app.repository.upsertRecord(registration.record) }
+            .getOrNull()?.isSuccess == true
+        if (!stored) return false
+        val result = Intent()
+        PendingIntentHandler.setCreateCredentialResponse(
+            result,
+            CreatePublicKeyCredentialResponse(registration.responseJson),
+        )
+        setResult(Activity.RESULT_OK, result)
+        finish()
+        return true
+    }
+    // #endregion
+
     companion object {
         const val ACTION_GET = "org.zerokosh.app.credentials.GET"
+        const val ACTION_GET_PASSKEY = "org.zerokosh.app.credentials.GET_PASSKEY"
         const val ACTION_UNLOCK_AND_GET = "org.zerokosh.app.credentials.UNLOCK_AND_GET"
         const val ACTION_CREATE = "org.zerokosh.app.credentials.CREATE"
         const val EXTRA_RECORD_ID = "org.zerokosh.app.credentials.RECORD_ID"

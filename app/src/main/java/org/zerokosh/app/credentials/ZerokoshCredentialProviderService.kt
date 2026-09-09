@@ -43,6 +43,7 @@ import androidx.credentials.provider.BeginCreateCredentialResponse
 import androidx.credentials.provider.BeginGetCredentialRequest
 import androidx.credentials.provider.BeginGetCredentialResponse
 import androidx.credentials.provider.BeginGetPasswordOption
+import androidx.credentials.provider.BeginGetPublicKeyCredentialOption
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.CredentialProviderService
 import androidx.credentials.provider.ProviderClearCredentialStateRequest
@@ -86,7 +87,11 @@ class ZerokoshCredentialProviderService : CredentialProviderService() {
         callback: OutcomeReceiver<BeginGetCredentialResponse, GetCredentialException>,
     ) {
         val app = application as ZerokoshApp
-        if (request.beginGetCredentialOptions.filterIsInstance<BeginGetPasswordOption>().isEmpty()) {
+        val wanted = request.beginGetCredentialOptions
+        val asksForSomethingWeHave = wanted.any {
+            it is BeginGetPasswordOption || it is BeginGetPublicKeyCredentialOption
+        }
+        if (!asksForSomethingWeHave) {
             callback.onResult(BeginGetCredentialResponse())
             return
         }
@@ -107,7 +112,7 @@ class ZerokoshCredentialProviderService : CredentialProviderService() {
                 )
             } else {
                 BeginGetCredentialResponse(
-                    credentialEntries = CredentialEntries.passwordEntries(
+                    credentialEntries = CredentialEntries.entriesFor(
                         this@ZerokoshCredentialProviderService,
                         app,
                         request,

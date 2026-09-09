@@ -18,7 +18,10 @@ import androidx.annotation.RequiresApi
 import androidx.credentials.provider.BeginGetCredentialRequest
 import androidx.credentials.provider.BeginGetPasswordOption
 import androidx.credentials.provider.CallingAppInfo
+import androidx.credentials.provider.BeginGetPublicKeyCredentialOption
+import androidx.credentials.provider.CredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
+import androidx.credentials.provider.PublicKeyCredentialEntry
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.autofill.AutofillFill
 import org.zerokosh.app.autofill.FieldTargets
@@ -51,6 +54,14 @@ internal object CredentialEntries {
         passwordId = null,
     )
 
+    /** Every row worth showing for this request: saved logins, then passkeys. */
+    fun entriesFor(
+        context: Context,
+        app: ZerokoshApp,
+        request: BeginGetCredentialRequest,
+    ): List<CredentialEntry> = passwordEntries(context, app, request) +
+        passkeyEntries(context, app, request)
+
     /** One row per saved login that matches the caller. */
     fun passwordEntries(
         context: Context,
@@ -62,6 +73,36 @@ internal object CredentialEntries {
         val matches = AutofillFill.matchRecords(app, targetsFor(request.callingAppInfo))
         return matches.take(MAX_ENTRIES).flatMap { record ->
             options.map { option -> entryFor(context, record, option) }
+        }
+    }
+
+    /**
+     * One row per passkey held for the relying party that is asking.
+     *
+     * Matched on the rpId the request names rather than on the caller's package,
+     * because that is what a passkey is scoped to — the site, not the app that
+     * happens to be showing it.
+     */
+    fun passkeyEntries(
+        context: Context,
+        app: ZerokoshApp,
+        request: BeginGetCredentialRequest,
+    ): List<PublicKeyCredentialEntry> {
+        val options = request.beginGetCredentialOptions
+            .filterIsInstance<BeginGetPublicKeyCredentialOption>()
+        return options.flatMap { option ->
+            val rpId = Passkeys.parseRequestOptions(option.requestJson)?.rpId.orEmpty()
+            if (rpId.isBlank()) return@flatMap emptyList()
+            Passkeys.passkeysFor(app, rpId).take(MAX_ENTRIES).map { record ->
+                PublicKeyCredentialEntry.Builder(
+                    context,
+                    record.fields["username"].orEmpty().ifBlank { record.title },
+                    entryIntent(context, CredentialEntryActivity.ACTION_GET_PASSKEY, record.uuid),
+                    option,
+                )
+                    .setDisplayName(record.title)
+                    .build()
+            }
         }
     }
 

@@ -215,4 +215,12 @@
     <string name="tpl_voter_id_portal_password">NVSP पासवर्ड</string>
     <string name="tpl_voter_id_file_copy">स्कॅन केलेली प्रत</string>
     <string name="tpl_voter_id_notes">टिपा</string>
+    <string name="tpl_passkey">पासकी</string>
+    <string name="tpl_passkey_credential_id">क्रेडेन्शियल ID</string>
+    <string name="tpl_passkey_private_key">खासगी की</string>
+    <string name="tpl_passkey_user_handle">यूजर हँडल</string>
+    <string name="tpl_passkey_sign_count">साइन काउंट</string>
+    <string name="tpl_passkey_website">वेबसाइट</string>
+    <string name="tpl_passkey_username">युजरनेम</string>
+    <string name="tpl_passkey_notes">टिपा</string>
 </resources>

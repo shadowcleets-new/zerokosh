@@ -15,6 +15,8 @@ SPECIAL = {
     "file_copy": "Scanned copy", "gift_cards": "Gift cards", "password_if_any": "Password (if any)",
     "wifi_password": "Wi-Fi password", "billing_cycle_day": "Billing cycle day",
     "due_day": "Bill due day", "body": "Note",
+    "credential_id": "Credential ID", "private_key": "Private key",
+    "user_handle": "User handle", "sign_count": "Sign count",
 }
 
 root = pathlib.Path(__file__).resolve().parent.parent

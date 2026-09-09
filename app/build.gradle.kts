@@ -38,6 +38,7 @@ android {
         applicationId = "com.zerokosh.app"
         minSdk = 26
         targetSdk = 36
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = 4 // fixed per release — reproducible builds (§6.8)
         versionName = "0.4.0"
 
@@ -198,6 +199,25 @@ dependencies {
     // Google Sign-In helper, it pulls in Play Services, and it would make the
     // F-Droid build non-free. Nothing here needs it.
     implementation("androidx.credentials:credentials:1.6.0")
+
+    // §6.2 addition (approved), instrumented tests. Test-only configurations,
+    // so none of this reaches the APK.
+    //
+    // Every defect worth finding this month was only findable on a device: the
+    // input-type test that read every email field as the password, an unlock
+    // prompt that was invisible on any phone with a modern keyboard, an
+    // authentication Intent that could not return a result. Unit tests could
+    // not have caught any of them, and none of them needed a person to find —
+    // only a device.
+    androidTestImplementation(platform("androidx.compose:compose-bom:2026.03.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("androidx.test:rules:1.7.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    // Supplies the empty activity the Compose test rule launches into. Debug
+    // only, which is why it is debugImplementation and not androidTest*.
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Test only — never in the shipped APK, so outside the §6.2 runtime list.
     // The app module had no test source set at all, which is why every defect

@@ -43,14 +43,9 @@ Requires JDK 17+ and the Android SDK (compileSdk 36).
 - GitHub Releases (this repository) — APK, SHA-256 checksums in release notes
 - F-Droid — builds from source
 - Google Play
+
+
 ```
-
-Check any APK from GitHub Releases against it with
-`keytool -printcert -jarfile <file>.apk`. Note that Play re-signs with its
-own app-signing key, so a build installed from Play will not match this —
-it is the fingerprint for the artifacts published here, and for F-Droid it
-differs again because F-Droid builds from source and signs with its own key.
-
 ## License
 
 [GPL-3.0-or-later](LICENSE). Free forever for individuals — there is nothing to host, so there is nothing to charge for.

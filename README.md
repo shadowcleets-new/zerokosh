@@ -44,7 +44,17 @@ Requires JDK 17+ and the Android SDK (compileSdk 36).
 - F-Droid — builds from source
 - Google Play
 
-Signing certificate SHA-256 fingerprint: *published with the first signed release.*
+Signing certificate SHA-256 fingerprint (upload key, `CN=Zerokosh, O=Zerokosh, C=IN`):
+
+```
+F3:44:C2:3F:26:A4:BC:C5:D2:96:E2:D8:1B:38:89:3B:EA:43:EC:1F:7B:E8:7A:02:49:A9:5C:B7:7A:C3:78:1D
+```
+
+Check any APK from GitHub Releases against it with
+`keytool -printcert -jarfile <file>.apk`. Note that Play re-signs with its
+own app-signing key, so a build installed from Play will not match this —
+it is the fingerprint for the artifacts published here, and for F-Droid it
+differs again because F-Droid builds from source and signs with its own key.
 
 ## License
 

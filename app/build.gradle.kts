@@ -39,8 +39,8 @@ android {
         minSdk = 26
         targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 4 // fixed per release — reproducible builds (§6.8)
-        versionName = "0.4.0"
+        versionCode = 5 // fixed per release — reproducible builds (§6.8)
+        versionName = "0.5.0"
 
         // JNA's aar still carries armeabi, mips and mips64. Android dropped
         // MIPS at NDK r17 and armeabi at r16; no device Play can reach runs

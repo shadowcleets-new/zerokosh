@@ -76,6 +76,19 @@ class VaultRepository(
     val body: StateFlow<VaultBody?> = _body
     // #endregion
 
+    // #region Session continuation hooks
+    /**
+     * Called with the vault key on every unlock, and again on every lock.
+     *
+     * Lambdas rather than a Context, for the same reason [VaultPrefs] exists:
+     * keeping Android out of this class is what makes it testable. The app
+     * points these at SessionKeeper; tests leave them null and the vault
+     * behaves as it always did, dying with the process.
+     */
+    var onUnlocked: ((vaultKey: ByteArray) -> Unit)? = null
+    var onLocked: (() -> Unit)? = null
+    // #endregion
+
     // #region Session secrets (zeroed on lock, §5.2/§3.5)
     private var vaultKey: ByteArray? = null
     private var envelope: VaultEnvelope? = null
@@ -171,17 +184,59 @@ class VaultRepository(
         }
     }
 
-    private fun applyUnlock(result: UnlockResult.Success) {
+    /**
+     * @param renewSession whether this counts as a fresh unlock for the
+     *   auto-lock window. False when continuing a session that is already
+     *   running: re-arming there would push the deadline out on every resume,
+     *   and since autofill resumes, a password field tapped in any app once
+     *   inside the window would keep the vault open for as long as the user
+     *   kept filling forms. The window has to be a deadline, not a treadmill.
+     */
+    private fun applyUnlock(result: UnlockResult.Success, renewSession: Boolean = true) {
         vaultKey?.wipe()
         vaultKey = result.vaultKey
         envelope = result.envelope
         lastSeenModifiedMs = result.envelope.lastModifiedMs
         _body.value = result.body
         _state.value = VaultState.Unlocked
+        if (renewSession) onUnlocked?.invoke(result.vaultKey)
+    }
+
+    /**
+     * Start the auto-lock window again from now, for a vault already open.
+     *
+     * Called when the user leaves the app, because the setting is worded "lock
+     * when I leave" — leaving is when the clock starts. Re-seals rather than
+     * editing a stored deadline, since the deadline is minted into the Keystore
+     * key and cannot be moved without a new one.
+     */
+    fun renewSession() {
+        val key = vaultKey ?: return
+        if (_state.value != VaultState.Unlocked) return
+        onUnlocked?.invoke(key)
+    }
+
+    /**
+     * Re-open from a key kept across a process restart, without a passphrase.
+     *
+     * Separate from [adoptBiometricUnlock] because nothing here is a fresh
+     * proof of identity: the user already unlocked, and this is the same
+     * session continuing after Android reclaimed the process. Returns false
+     * when the key no longer opens the file, which the caller must treat as an
+     * ordinary locked vault.
+     */
+    suspend fun resumeWithVaultKey(sessionKey: ByteArray): Boolean = withContext(Dispatchers.Default) {
+        val bytes = store.read() ?: return@withContext false
+        val result = VaultOperations.unlockWithVaultKey(bytes, sessionKey, crypto)
+        if (result !is UnlockResult.Success) return@withContext false
+        applyUnlock(result, renewSession = false)
+        mergeConflictSiblings()
+        true
     }
 
     /** §5.2: zero keys, drop plaintext, back to S13. */
     fun lock() {
+        onLocked?.invoke()
         org.zerokosh.app.nfc.PendingCard.clear()
         vaultKey?.wipe()
         vaultKey = null

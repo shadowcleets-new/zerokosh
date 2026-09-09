@@ -15,4 +15,18 @@
     <style name="Theme.Zerokosh" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
     </style>
+
+    <!-- The autofill unlock sheet. Translucent and not full-screen so the login
+         page the user is actually on stays visible behind it, the way Google's
+         manager behaves. windowIsTranslucent is what stops the activity
+         painting over the status bar; windowBackground transparent is what
+         stops it painting over the form. -->
+    <style name="Theme.Zerokosh.AutofillSheet" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
 </resources>

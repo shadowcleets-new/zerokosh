@@ -340,8 +340,18 @@ object AutofillFill {
         ).intentSender
 
     fun authIntent(context: Context, targets: FieldTargets): Intent =
-        Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        // AutofillAuthActivity, not MainActivity. Opening the whole password
+        // manager over someone's login page to ask for a passphrase covered the
+        // form, the status bar and everything else; the sheet leaves the page
+        // visible and returns the fill without the app ever appearing.
+        Intent(context, AutofillAuthActivity::class.java).apply {
+            // No FLAG_ACTIVITY_NEW_TASK. It was here because this used to launch
+            // MainActivity, and it is why unlocking never actually filled
+            // anything: an activity started into a new task cannot return a
+            // result, so the platform took RESULT_CANCELED however carefully we
+            // set EXTRA_AUTHENTICATION_RESULT. The whole authentication dataset
+            // was a dead end, which is exactly what it looked like from the
+            // outside — unlock, and the form is still empty.
             putExtra(EXTRA_AUTH, true)
             putExtra(EXTRA_PACKAGE, targets.packageName)
             putExtra(EXTRA_DOMAIN, targets.webDomain)

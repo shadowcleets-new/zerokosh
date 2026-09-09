@@ -243,6 +243,17 @@ object VaultOperations {
         }
     }
 
+    /**
+     * Unlock with an already-held VaultKey.
+     *
+     * The key that opens the body directly, so this skips the KDF entirely —
+     * which is the point. It backs the grace period from "Lock when I leave the
+     * app": resuming inside the window must not cost an Argon2 derivation, and
+     * there is no passphrase around to run one on anyway.
+     */
+    fun unlockWithVaultKey(fileBytes: ByteArray, vaultKey: ByteArray, crypto: CryptoProvider): UnlockResult =
+        unlock(fileBytes, crypto) { vaultKey.copyOf() }
+
     /** Unlock with an already-held MasterKey (biometric quick-unlock path, §3.4). */
     fun unlockWithMasterKey(fileBytes: ByteArray, masterKey: ByteArray, crypto: CryptoProvider): UnlockResult =
         unlock(fileBytes, crypto) { header -> KeyHierarchy.unwrap(header.wrap_mk, masterKey, crypto) }

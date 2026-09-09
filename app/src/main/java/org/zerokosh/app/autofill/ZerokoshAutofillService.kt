@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
+import org.zerokosh.app.data.SessionKeeper
 import org.zerokosh.app.data.VaultState
 import org.zerokosh.core.model.Record
 // #endregion
@@ -55,28 +56,69 @@ class ZerokoshAutofillService : AutofillService() {
         }
 
         val app = application as ZerokoshApp
-        if (app.repository.state.value != VaultState.Unlocked) {
-            // Response-level auth: MainActivity carries the unlock and hands the
-            // finished response back through EXTRA_AUTHENTICATION_RESULT, so the
-            // form the user was standing in is filled the moment they are in.
-            callback.onSuccess(
+        // Off the binder thread. Answering a fill request may have to read the
+        // vault off disk and decrypt it, and where the vault lives in a sync
+        // folder that read is a round trip to a DocumentsProvider that may be
+        // backed by cloud storage. The platform gives this about five seconds
+        // and the app only has one main thread, so doing it inline risked both
+        // a missed suggestion and an ANR — and, because the unlock path takes
+        // the repository's IO mutex, a genuine deadlock against a UI coroutine
+        // holding it. The callback may be answered later, so it is.
+        val job = scope.launch {
+            applySessionWindow(app, targets)
+            val response = if (app.repository.state.value != VaultState.Unlocked) {
+                // Response-level auth: AutofillAuthActivity carries the unlock
+                // and hands the finished response back through
+                // EXTRA_AUTHENTICATION_RESULT, so the form the user was
+                // standing in is filled the moment they are in.
                 AutofillFill.lockedResponse(
-                    this,
+                    this@ZerokoshAutofillService,
                     targets,
                     inlineAt(request, 0, getString(R.string.scr_autofill_unlock_first), null),
-                ),
-            )
+                )
+            } else {
+                // Same response the post-unlock path builds, plus the keyboard
+                // chips. This used to be a second copy of that logic and had
+                // already fallen behind it: the generated-password offer never
+                // appeared here, which is every fill request on an
+                // already-unlocked vault — the common one.
+                AutofillFill.responseFor(
+                    this@ZerokoshAutofillService,
+                    app,
+                    targets,
+                ) { index, title, subtitle -> inlineAt(request, index, title, subtitle) }
+            }
+            withContext(Dispatchers.Main) { callback.onSuccess(response) }
+        }
+        cancellationSignal.setOnCancelListener { job.cancel() }
+    }
+
+    /**
+     * Bring the vault into line with the auto-lock window before answering.
+     *
+     * Two directions, and the second is the one that was missing. A fresh
+     * process holding no key resumes the session, which is what stops "Unlock
+     * Zerokosh to fill" appearing inside a window the user asked for. But a
+     * process that already resumed reports Unlocked forever after: this service
+     * can be the only thing keeping it alive, nothing in it runs on a timer,
+     * and MainActivity — the one place that locks on a schedule — never starts
+     * here. Without the expiry check below, one resume meant filling passwords
+     * for as long as the process happened to survive, hours past the deadline.
+     */
+    private suspend fun applySessionWindow(app: ZerokoshApp, targets: FieldTargets) {
+        // Our own screens are exempt. The record editor's own fields raise fill
+        // requests, and locking the vault under someone who is mid-edit would
+        // throw away what they were typing.
+        if (targets.packageName == packageName) return
+        val held = SessionKeeper.hasStoredSession(this)
+        // isLive clears what it finds expired, so ask whether one was held first.
+        val live = SessionKeeper.isLive(this)
+        val unlocked = app.repository.state.value == VaultState.Unlocked
+        if (held && !live && unlocked) {
+            app.repository.lock()
             return
         }
-        // Same response the post-unlock path builds, plus the keyboard chips.
-        // This used to be a second copy of that logic and had already fallen
-        // behind it: the generated-password offer never appeared here, which is
-        // every fill request on an already-unlocked vault — the common one.
-        callback.onSuccess(
-            AutofillFill.responseFor(this, app, targets) { index, title, subtitle ->
-                inlineAt(request, index, title, subtitle)
-            },
-        )
+        if (!unlocked && live) app.resumeSessionIfLive()
     }
 
     /** A chip for one row of the response, or null when the IME will not draw one. */
@@ -124,19 +166,24 @@ class ZerokoshAutofillService : AutofillService() {
             packageName = parsed.packageName,
         )
 
-        if (app.repository.state.value != VaultState.Unlocked) {
-            // The vault cannot be written shut. Hold the credential in memory —
-            // never in an Intent extra — and open the app so the user can unlock;
-            // ZerokoshNav finishes the save once they do.
-            PendingSave.offer(credential)
-            startActivity(
-                Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
-            )
-            callback.onSuccess()
-            return
-        }
-
         scope.launch {
+            // Same window the fill path applies, and off the binder thread for
+            // the same reason: resuming reads and decrypts the vault.
+            applySessionWindow(app, targets(parsed))
+            if (app.repository.state.value != VaultState.Unlocked) {
+                // The vault cannot be written shut. Hold the credential in
+                // memory — never in an Intent extra — and open the app so the
+                // user can unlock; ZerokoshNav finishes the save once they do.
+                PendingSave.offer(credential)
+                withContext(Dispatchers.Main) {
+                    startActivity(
+                        Intent(this@ZerokoshAutofillService, MainActivity::class.java)
+                            .apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK },
+                    )
+                    callback.onSuccess()
+                }
+                return@launch
+            }
             val ok = runCatching { app.repository.upsertRecord(loginRecordFor(app, credential)) }.isSuccess
             withContext(Dispatchers.Main) {
                 if (ok) callback.onSuccess()
@@ -144,6 +191,10 @@ class ZerokoshAutofillService : AutofillService() {
             }
         }
     }
+
+    /** The origin of a parsed save request, for the session-window check. */
+    private fun targets(parsed: Parsed): FieldTargets =
+        FieldTargets(parsed.packageName, parsed.webDomain, parsed.usernameId, parsed.passwordId)
 
     private val Parsed.targets: FieldTargets
         get() = FieldTargets(packageName, webDomain, usernameId, passwordId, isNewPassword)

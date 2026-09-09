@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
 import org.zerokosh.app.autofill.AutofillFill
 import org.zerokosh.app.data.Prefs
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.zerokosh.app.data.VaultState
 import org.zerokosh.app.ui.ZerokoshNav
 import org.zerokosh.app.ui.theme.ZerokoshTheme
@@ -125,6 +127,12 @@ class MainActivity : FragmentActivity() {
             val elapsed = System.currentTimeMillis() - backgroundedAtMs
             if (elapsed >= minutes * 60_000L) app.repository.lock()
         }
+        // Coming back to a process Android killed while we were away. The
+        // window is measured by SessionKeeper's own expiry, so this is right
+        // even though backgroundedAtMs died with the old process.
+        if (app.repository.state.value == VaultState.Locked) {
+            lifecycleScope.launch { app.resumeSessionIfLive() }
+        }
         backgroundedAtMs = 0
         awaitingActivityResult = false
     }
@@ -139,6 +147,10 @@ class MainActivity : FragmentActivity() {
         backgroundedAtMs = if (isChangingConfigurations || awaitingActivityResult) {
             0
         } else {
+            // The setting is "lock when I leave", so leaving is when the clock
+            // starts. Pushing the expiry out here is what makes the window mean
+            // the same thing to autofill as it does to the app.
+            app.repository.renewSession()
             System.currentTimeMillis()
         }
     }

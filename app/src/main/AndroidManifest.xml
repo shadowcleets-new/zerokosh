@@ -32,6 +32,25 @@
             </intent-filter>
         </activity>
 
+        <!-- The unlock the autofill service asks for. Not exported: only the
+             PendingIntent handed to the platform ever starts it, and that does
+             not need the activity to be open to other apps. excludeFromRecents
+             because a sheet that unlocks a password vault has no business
+             appearing in the recents list.
+
+             No android:noHistory. It looks right for a sheet that should not
+             be returned to, and it silently breaks the whole feature: a
+             noHistory activity is destroyed on leaving the foreground before
+             its result propagates, so setResult never reached the platform and
+             unlocking left the same "Unlock Zerokosh to fill" row sitting
+             there. finish() after delivering is what retires this activity. -->
+        <activity
+            android:name=".autofill.AutofillAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Zerokosh.AutofillSheet"
+            android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- §6.7 autofill provider. BIND_AUTOFILL_SERVICE means only the system
              may bind to it. Without this entry the service class existed but was
              invisible to Android, so it could never be selected (BV-01). -->

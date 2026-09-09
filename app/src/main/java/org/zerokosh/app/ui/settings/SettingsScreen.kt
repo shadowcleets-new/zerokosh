@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -241,18 +242,27 @@ fun SettingsScreen(
                         value = currentAutoLock,
                         onClick = { showAutoLockDropdown = true }
                     )
-                    DropdownMenu(
-                        expanded = showAutoLockDropdown,
-                        onDismissRequest = { showAutoLockDropdown = false }
-                    ) {
-                        autoLockOptions.forEach { (minutes, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
-                                onClick = {
-                                    app.prefs.autoLockMinutes = minutes
-                                    showAutoLockDropdown = false
-                                }
-                            )
+                    // The menu hangs off its parent, and DropdownMenu's own
+                    // modifier styles the content rather than moving the popup —
+                    // so the anchor has to be the thing that moves. This empty
+                    // Box at the row's end is that anchor: without it the list
+                    // of times opened on the far side of the row from the value
+                    // it replaces, covering the rows beneath instead.
+                    Box(Modifier.align(Alignment.TopEnd)) {
+                        DropdownMenu(
+                            expanded = showAutoLockDropdown,
+                            onDismissRequest = { showAutoLockDropdown = false },
+                            offset = DpOffset(x = 0.dp, y = (-8).dp),
+                        ) {
+                            autoLockOptions.forEach { (minutes, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+                                    onClick = {
+                                        app.prefs.autoLockMinutes = minutes
+                                        showAutoLockDropdown = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }

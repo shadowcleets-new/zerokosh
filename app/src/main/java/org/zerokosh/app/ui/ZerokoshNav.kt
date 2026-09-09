@@ -89,6 +89,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.toRoute
 import org.zerokosh.app.MainActivity
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
@@ -165,34 +167,34 @@ private fun OnboardingFlow(app: ZerokoshApp) {
     val onboarding = remember { OnboardingState() }
     NavHost(
         navController = nav,
-        startDestination = "welcome",
+        startDestination = WelcomeRoute,
         enterTransition = { globalEnterTransition() },
         exitTransition = { globalExitTransition() },
         popEnterTransition = { globalPopEnterTransition() },
         popExitTransition = { globalPopExitTransition() },
     ) {
-        composable("welcome") {
+        composable<WelcomeRoute> {
             WelcomeScreen(
                 app = app,
-                onGetStarted = { nav.navigate("language") },
-                onLogin = { nav.navigate("language") }, // NoVault: both paths proceed
+                onGetStarted = { nav.navigate(LanguageRoute) },
+                onLogin = { nav.navigate(LanguageRoute) }, // NoVault: both paths proceed
             )
         }
-        composable("language") {
-            LanguageScreen(app, onBack = { nav.popBackStack() }) { nav.navigate("trust") }
+        composable<LanguageRoute> {
+            LanguageScreen(app, onBack = { nav.popBackStack() }) { nav.navigate(TrustRoute) }
         }
-        composable("trust") {
-            TrustScreen(onBack = { nav.popBackStack() }) { nav.navigate("create") }
+        composable<TrustRoute> {
+            TrustScreen(onBack = { nav.popBackStack() }) { nav.navigate(CreateVaultRoute) }
         }
-        composable("create") {
+        composable<CreateVaultRoute> {
             CreatePassphraseScreen(app, onboarding, onBack = { nav.popBackStack() }) {
-                nav.navigate("recovery")
+                nav.navigate(RecoveryKitRoute)
             }
         }
-        composable("recovery") {
-            RecoveryKitScreen(app, onboarding) { nav.navigate("quickunlock") }
+        composable<RecoveryKitRoute> {
+            RecoveryKitScreen(app, onboarding) { nav.navigate(QuickUnlockRoute) }
         }
-        composable("quickunlock") {
+        composable<QuickUnlockRoute> {
             val context = LocalContext.current
             QuickUnlockScreen(app, onboarding) {
                 app.prefs.onboardingDone = true
@@ -226,11 +228,16 @@ private val QuickAdd = listOf(
  */
 private const val TAP_CARD_ID = "__tap_card__"
 
-private val TabRoutes = mapOf(
-    VaultTab.Vault to "home",
-    VaultTab.Codes to "authenticator",
-    VaultTab.Templates to "gallery",
-    VaultTab.Settings to "settings",
+/**
+ * Which destination each tab shows. Route objects rather than paths, so a
+ * renamed destination is a compile error here instead of a tab that silently
+ * stops highlighting.
+ */
+private val TabRoutes: Map<VaultTab, Any> = mapOf(
+    VaultTab.Vault to HomeRoute,
+    VaultTab.Codes to CodesRoute,
+    VaultTab.Templates to GalleryRoute,
+    VaultTab.Settings to SettingsRoute,
 )
 
 /**
@@ -271,21 +278,25 @@ private fun MainScaffold(app: ZerokoshApp) {
         }
     }
 
-    val currentRoute = backStack?.destination?.route
-    val activeTab = TabRoutes.entries.firstOrNull { it.value == currentRoute }?.key
+    // hasRoute rather than a string compare: the generated route of a typed
+    // destination is not its class name, so comparing text would silently never
+    // match.
+    val activeTab = TabRoutes.entries
+        .firstOrNull { (_, route) -> backStack?.destination?.hasRoute(route::class) == true }
+        ?.key
     val openGallery = {
-        nav.navigate("gallery") {
-            popUpTo("home") { saveState = true }
+        nav.navigate(GalleryRoute) {
+            popUpTo(HomeRoute) { saveState = true }
             launchSingleTop = true
         }
     }
-    // The one place the edit route is built. Encoded because "Punjab & Sind
-    // Bank" and "L&T Finance" would otherwise split the query string and arrive
-    // truncated to "Punjab ".
+    // No encoding here any more. The string route had to Uri.encode these,
+    // because "Punjab & Sind Bank" and "L&T Finance" split the query string on
+    // the ampersand and arrived truncated to "Punjab "; serialization handles it.
     val openEdit = { templateId: String, presetName: String?, brand: String? ->
-        val p = android.net.Uri.encode(presetName ?: "")
-        val b = android.net.Uri.encode(brand ?: "")
-        nav.navigate("edit/$templateId?preset=$p&brand=$b") { popUpTo("home") }
+        nav.navigate(EditRoute(templateId = templateId, preset = presetName, brand = brand)) {
+            popUpTo(HomeRoute)
+        }
     }
     val openTemplate = { templateId: String -> openEdit(templateId, null, null) }
     // The Add FAB used to be a one-way trip to the 20-item template gallery.
@@ -308,7 +319,7 @@ private fun MainScaffold(app: ZerokoshApp) {
 
     val selectTab = { tab: VaultTab ->
         nav.navigate(TabRoutes.getValue(tab)) {
-            popUpTo("home") { saveState = true }
+            popUpTo(HomeRoute) { saveState = true }
             launchSingleTop = true
             restoreState = true
         }
@@ -429,84 +440,78 @@ private fun MainScaffold(app: ZerokoshApp) {
                 CompositionLocalProvider(LocalSharedTransitionScope provides this@SharedTransitionLayout) {
                     NavHost(
                         navController = nav,
-                        startDestination = "home",
+                        startDestination = HomeRoute,
                         modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
                         enterTransition = { globalEnterTransition() },
                         exitTransition = { globalExitTransition() },
                         popEnterTransition = { globalPopEnterTransition() },
                         popExitTransition = { globalPopExitTransition() },
                     ) {
-                        composable("home") {
+                        composable<HomeRoute> {
                             CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
                                 HomeScreen(
                                     app = app,
                                     onScrollHideFab = { hide -> fabVisible = !hide },
-                                    onOpen = { uuid -> nav.navigate("detail/$uuid") },
+                                    onOpen = { uuid -> nav.navigate(DetailRoute(uuid)) },
                                     onAdd = openGallery,
                                     onQuickAdd = openEdit,
                                     // Settings owns the "new recovery key"
                                     // flow, which already asks for the
                                     // passphrase and shows a fresh kit.
-                                    onSaveKit = { nav.navigate("settings") },
+                                    onSaveKit = { nav.navigate(SettingsRoute) },
                                 )
                             }
                         }
-                        composable("authenticator") { AuthenticatorScreen(app) }
-                        composable("settings") {
+                        composable<CodesRoute> { AuthenticatorScreen(app) }
+                        composable<SettingsRoute> {
                             SettingsScreen(
                                 app = app,
-                                onOpenTrash = { nav.navigate("trash") },
-                                onOpenHealth = { nav.navigate("health") },
+                                onOpenTrash = { nav.navigate(TrashRoute) },
+                                onOpenHealth = { nav.navigate(HealthRoute) },
                             )
                         }
-                        composable("trash") { TrashScreen(app, onBack = { nav.popBackStack() }) }
-                        composable("health") {
+                        composable<TrashRoute> { TrashScreen(app, onBack = { nav.popBackStack() }) }
+                        composable<HealthRoute> {
                             VaultHealthScreen(
                                 app = app,
                                 onBack = { nav.popBackStack() },
-                                onOpen = { uuid -> nav.navigate("detail/$uuid") },
+                                onOpen = { uuid -> nav.navigate(DetailRoute(uuid)) },
                             )
                         }
-                        composable("gallery") {
+                        composable<GalleryRoute> {
                             TemplateGalleryScreen(
                                 app = app,
                                 onPick = openEdit,
                                 onClose = {
-                                    nav.navigate("home") {
-                                        popUpTo("home") { inclusive = true }
+                                    nav.navigate(HomeRoute) {
+                                        popUpTo(HomeRoute) { inclusive = true }
                                         launchSingleTop = true
                                     }
                                 },
                             )
                         }
-                        composable("detail/{uuid}") { entry ->
-                            val uuid = entry.arguments?.getString("uuid") ?: return@composable
+                        composable<DetailRoute> { entry ->
+                            val uuid = entry.toRoute<DetailRoute>().uuid
                             CompositionLocalProvider(LocalAnimatedVisibilityScope provides this@composable) {
                                 RecordDetailScreen(
                                     app = app,
                                     uuid = uuid,
-                                    onEdit = { nav.navigate("edit/byid?uuid=$uuid") },
-                                    onOpenRecord = { linked -> nav.navigate("detail/$linked") },
+                                    onEdit = { nav.navigate(EditRoute.forRecord(uuid)) },
+                                    onOpenRecord = { linked -> nav.navigate(DetailRoute(linked)) },
                                     onClose = { nav.popBackStack() },
                                 )
                             }
                         }
-                        composable("edit/{templateId}?uuid={uuid}&preset={preset}&brand={brand}") { entry ->
-                            val templateId = entry.arguments?.getString("templateId") ?: return@composable
-                            val uuid = entry.arguments?.getString("uuid")?.ifEmpty { null }
-                            // Uri.decode whether or not navigation already did:
-                            // these names carry no literal %, so decoding a
-                            // plain string is a no-op.
-                            val preset = entry.arguments?.getString("preset")
-                                ?.ifEmpty { null }?.let(android.net.Uri::decode)
-                            val brand = entry.arguments?.getString("brand")
-                                ?.ifEmpty { null }?.let(android.net.Uri::decode)
+                        composable<EditRoute> { entry ->
+                            // No decoding. The arguments arrive as they were
+                            // sent, ampersands and all.
+                            val route = entry.toRoute<EditRoute>()
                             RecordEditScreen(
                                 app = app,
-                                templateIdArg = templateId,
-                                editUuid = uuid,
-                                presetName = preset,
-                                brandName = brand,
+                                templateIdArg = route.templateId,
+                                editUuid = route.uuid,
+                                presetName = route.preset,
+                                brandName = route.brand,
                                 onDone = { nav.popBackStack() },
                             )
                         }

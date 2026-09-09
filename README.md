@@ -43,11 +43,6 @@ Requires JDK 17+ and the Android SDK (compileSdk 36).
 - GitHub Releases (this repository) — APK, SHA-256 checksums in release notes
 - F-Droid — builds from source
 - Google Play
-
-Signing certificate SHA-256 fingerprint (upload key, `CN=Zerokosh, O=Zerokosh, C=IN`):
-
-```
-F3:44:C2:3F:26:A4:BC:C5:D2:96:E2:D8:1B:38:89:3B:EA:43:EC:1F:7B:E8:7A:02:49:A9:5C:B7:7A:C3:78:1D
 ```
 
 Check any APK from GitHub Releases against it with

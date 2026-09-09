@@ -200,6 +200,16 @@ dependencies {
     // F-Droid build non-free. Nothing here needs it.
     implementation("androidx.credentials:credentials:1.6.0")
 
+    // §6.2 addition (approved): adaptive layout, for tablets and foldables.
+    // The breakpoint here was LocalConfiguration.screenWidthDp >= 600, which
+    // asks about the *screen* rather than the window the app actually has. In
+    // split screen, freeform and desktop windowing those are different numbers,
+    // so a phone-sized window on a tablet was being given the tablet layout.
+    // currentWindowAdaptiveInfo() reads the real window metrics, by way of
+    // androidx.window, and reports posture with them.
+    implementation("androidx.compose.material3.adaptive:adaptive:1.3.0")
+    implementation("androidx.window:window:1.5.1")
+
     // §6.2 addition (approved), instrumented tests. Test-only configurations,
     // so none of this reaches the APK.
     //

@@ -76,13 +76,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.window.core.layout.WindowSizeClass
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -315,7 +316,14 @@ private fun MainScaffold(app: ZerokoshApp) {
     // M3's medium breakpoint: at 600dp and up a bottom bar wastes the vertical
     // space that is already scarce in landscape, so the destinations move to a
     // side rail instead.
-    val wideWindow = LocalConfiguration.current.screenWidthDp >= 600
+    //
+    // Measured on the window, not the screen. LocalConfiguration.screenWidthDp
+    // answers a different question, and it is the wrong one wherever the app
+    // does not own the whole display — split screen, freeform, desktop
+    // windowing, a foldable's cover display. A phone-shaped window on a tablet
+    // was getting the tablet layout because the tablet's screen is wide.
+    val widthClass = currentWindowAdaptiveInfo().windowSizeClass
+    val wideWindow = widthClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

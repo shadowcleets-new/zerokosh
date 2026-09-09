@@ -17,49 +17,50 @@
  */
 package org.zerokosh.app.ui
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 // #region Onboarding (S1 to S6)
 @Serializable
-data object WelcomeRoute
+data object WelcomeRoute : NavKey
 
 @Serializable
-data object LanguageRoute
+data object LanguageRoute : NavKey
 
 @Serializable
-data object TrustRoute
+data object TrustRoute : NavKey
 
 @Serializable
-data object CreateVaultRoute
+data object CreateVaultRoute : NavKey
 
 @Serializable
-data object RecoveryKitRoute
+data object RecoveryKitRoute : NavKey
 
 @Serializable
-data object QuickUnlockRoute
+data object QuickUnlockRoute : NavKey
 // #endregion
 
 // #region Main app
 @Serializable
-data object HomeRoute
+data object HomeRoute : NavKey
 
 @Serializable
-data object CodesRoute
+data object CodesRoute : NavKey
 
 @Serializable
-data object SettingsRoute
+data object SettingsRoute : NavKey
 
 @Serializable
-data object TrashRoute
+data object TrashRoute : NavKey
 
 @Serializable
-data object HealthRoute
+data object HealthRoute : NavKey
 
 @Serializable
-data object GalleryRoute
+data object GalleryRoute : NavKey
 
 @Serializable
-data class DetailRoute(val uuid: String)
+data class DetailRoute(val uuid: String) : NavKey
 
 /**
  * The record editor.
@@ -75,7 +76,7 @@ data class EditRoute(
     val uuid: String? = null,
     val preset: String? = null,
     val brand: String? = null,
-) {
+) : NavKey {
     companion object {
         const val BY_ID = "byid"
 

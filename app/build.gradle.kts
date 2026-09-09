@@ -161,7 +161,13 @@ dependencies {
     implementation("androidx.graphics:graphics-shapes:1.0.1")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.10.1")
-    implementation("androidx.navigation:navigation-compose:2.9.8")
+    // §6.2 addition (approved): Navigation 3. Replaces navigation-compose.
+    // The back stack is an ordinary observable list this app owns, rather than
+    // state held inside a NavController and addressed through it — which is
+    // what lets the four tabs keep genuinely separate stacks instead of
+    // emulating them with popUpTo/saveState/restoreState.
+    implementation("androidx.navigation3:navigation3-runtime:1.1.7")
+    implementation("androidx.navigation3:navigation3-ui:1.1.7")
 
     // §6.2 addition: inline autofill suggestions — the row that appears in the
     // keyboard strip, which is the whole visible difference between this and

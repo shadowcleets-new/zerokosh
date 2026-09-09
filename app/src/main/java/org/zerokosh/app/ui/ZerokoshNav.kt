@@ -317,11 +317,17 @@ private fun MainScaffold(app: ZerokoshApp) {
     // space that is already scarce in landscape, so the destinations move to a
     // side rail instead.
     //
-    // Measured on the window, not the screen. LocalConfiguration.screenWidthDp
-    // answers a different question, and it is the wrong one wherever the app
-    // does not own the whole display — split screen, freeform, desktop
-    // windowing, a foldable's cover display. A phone-shaped window on a tablet
-    // was getting the tablet layout because the tablet's screen is wide.
+    // currentWindowAdaptiveInfo() rather than LocalConfiguration.screenWidthDp.
+    //
+    // Not because the old check was giving wrong answers: measured in a freeform
+    // window on this device, Configuration already reported the window (220dp)
+    // and not the display (923dp), and both routes chose the bottom bar. The
+    // reasons are narrower and worth stating honestly. It is the supported API
+    // for size classes, so it is not exposed to screenWidthDp's shifting
+    // semantics — that value excluded system insets until API 35 and includes
+    // them after, which moves a device sitting near the 600dp line across it.
+    // And it carries posture, which Configuration has no way to report, so a
+    // folding device is answerable here when the two-pane layout arrives.
     val widthClass = currentWindowAdaptiveInfo().windowSizeClass
     val wideWindow = widthClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 

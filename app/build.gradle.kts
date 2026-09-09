@@ -359,6 +359,28 @@ val verifyTemplates by tasks.registering {
         // half translated in every language at once.
         val stringName = Regex("""<string name="([^"]+)"""")
         fun namesIn(f: File) = stringName.findAll(f.readText()).map { it.groupValues[1] }.toSet()
+        // A placeholder that changes shape between languages is a crash, not a
+        // typo: %1$s and %1$d are read differently, and a translation that drops
+        // one throws IllegalFormatException on whichever screen uses it. The
+        // completeness check below would pass such a string happily, because the
+        // key is present — it is only the value that is wrong.
+        val specPattern = Regex("""%\d+\$[sd]|%[sd]""")
+        val stringPair = Regex("""<string name="([^"]+)">(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)
+        fun valuesIn(f: File) =
+            stringPair.findAll(f.readText()).associate { it.groupValues[1] to it.groupValues[2] }
+        val formatProblems = localePairs.flatMap { (base, tr) ->
+            if (!tr.exists()) emptyList() else {
+                val english = valuesIn(base)
+                valuesIn(tr).mapNotNull { (key, translated) ->
+                    val source = english[key] ?: return@mapNotNull null
+                    val want = specPattern.findAll(source).map { it.value }.sorted().toList()
+                    val got = specPattern.findAll(translated).map { it.value }.sorted().toList()
+                    if (want == got) null
+                    else "format specifiers differ in ${tr.parentFile.name}/${tr.name}: $key " +
+                        "expected $want, found $got"
+                }
+            }
+        }
         val localeProblems = localePairs.flatMap { (base, hi) ->
             if (!hi.exists()) listOf("missing translation file: ${hi.name}")
             else {
@@ -424,6 +446,7 @@ val verifyTemplates by tasks.registering {
 
         val problems = mutableListOf<String>()
         problems += localeProblems
+        problems += formatProblems
         problems += whitespaceProblems
         problems += apostropheProblems
         val ids = templates.map { it["id"] as String }.toSet()

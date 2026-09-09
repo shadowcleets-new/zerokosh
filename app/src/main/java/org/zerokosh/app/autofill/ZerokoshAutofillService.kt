@@ -184,7 +184,12 @@ class ZerokoshAutofillService : AutofillService() {
                 }
                 return@launch
             }
-            val ok = runCatching { app.repository.upsertRecord(loginRecordFor(app, credential)) }.isSuccess
+            // upsertRecord returns a Result rather than throwing, so
+            // runCatching{}.isSuccess was true even when the save failed —
+            // reporting a stored password that had been dropped, which is
+            // precisely the failure this method's own history complains about.
+            val ok = runCatching { app.repository.upsertRecord(loginRecordFor(app, credential)) }
+                .getOrNull()?.isSuccess == true
             withContext(Dispatchers.Main) {
                 if (ok) callback.onSuccess()
                 else callback.onFailure(getString(R.string.scr_autofill_save_failed))

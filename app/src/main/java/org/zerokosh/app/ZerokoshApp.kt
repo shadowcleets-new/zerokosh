@@ -81,6 +81,27 @@ class ZerokoshApp : Application() {
     @Volatile
     var handingOffToPicker: Boolean = false
 
+    /**
+     * How many provider sheets are on screen — the autofill unlock, the
+     * Credential Manager entry activity.
+     *
+     * They are ours, but they are not the user coming back to Zerokosh: they
+     * float over another app's form to serve that app. Counting them keeps the
+     * process observer from reading one as a return and locking the vault out
+     * from under the very request it was opened to answer. What those sheets
+     * should be governed by is the session window, which they consult
+     * themselves.
+     */
+    private val sheetsOnScreen = java.util.concurrent.atomic.AtomicInteger(0)
+
+    fun enterProviderSheet() {
+        sheetsOnScreen.incrementAndGet()
+    }
+
+    fun exitProviderSheet() {
+        sheetsOnScreen.updateAndGet { if (it > 0) it - 1 else 0 }
+    }
+
     /** When the app as a whole went to the background; 0 while it is in front. */
     private var backgroundedAtMs: Long = 0L
 
@@ -101,14 +122,24 @@ class ZerokoshApp : Application() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStop(owner: LifecycleOwner) {
-                    if (handingOffToPicker) return
+                    if (handingOffToPicker || sheetsOnScreen.get() > 0) return
                     backgroundedAtMs = System.currentTimeMillis()
+                    if (prefs.autoLockMinutes <= 0) {
+                        // "Immediately" means immediately. Waiting until the
+                        // user comes back to lock left the vault open in memory
+                        // for anything that asked in between — autofill, a
+                        // credential request — which is not what that setting
+                        // says, and it raced with the sheets that serve them.
+                        repository.lock()
+                        return
+                    }
                     // The setting is worded "lock when I leave", so leaving is
                     // when the clock starts.
                     repository.renewSession()
                 }
 
                 override fun onStart(owner: LifecycleOwner) {
+                    if (sheetsOnScreen.get() > 0) return
                     val leftAt = backgroundedAtMs
                     backgroundedAtMs = 0L
                     handingOffToPicker = false

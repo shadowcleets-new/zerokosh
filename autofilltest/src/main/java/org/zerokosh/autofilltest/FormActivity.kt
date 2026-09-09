@@ -15,6 +15,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.credentials.CreatePasswordRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CredentialManagerCallback
+import androidx.credentials.CreateCredentialResponse
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.GetPasswordOption
+import androidx.credentials.PasswordCredential
+import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.GetCredentialException
+import java.util.concurrent.Executors
 // #endregion
 
 /**
@@ -50,7 +61,69 @@ class FormActivity : Activity() {
         root.addView(field("Password", View.AUTOFILL_HINT_PASSWORD, password = true))
         root.addView(Button(this).apply { text = "Sign in" })
 
+        root.addView(heading("Credential Manager"))
+        val status = TextView(this).apply { text = "—" }
+        root.addView(Button(this).apply {
+            text = "Sign in with Credential Manager"
+            setOnClickListener { getCredential(status) }
+        })
+        root.addView(Button(this).apply {
+            text = "Save a password via Credential Manager"
+            setOnClickListener { createCredential(status) }
+        })
+        root.addView(status)
+
         setContentView(root)
+    }
+
+    /**
+     * The path that never touches AutofillService.
+     *
+     * This is the whole reason Zerokosh needs a credential provider: an app
+     * that signs in this way is invisible to an autofill-only manager.
+     */
+    private fun getCredential(status: TextView) {
+        status.text = "requesting…"
+        CredentialManager.create(this).getCredentialAsync(
+            context = this,
+            request = GetCredentialRequest(listOf(GetPasswordOption())),
+            cancellationSignal = null,
+            executor = Executors.newSingleThreadExecutor(),
+            callback = object : CredentialManagerCallback<GetCredentialResponse, GetCredentialException> {
+                override fun onResult(result: GetCredentialResponse) {
+                    val c = result.credential
+                    val text = if (c is PasswordCredential) {
+                        "got: " + c.id + " / " + c.password.length + " chars"
+                    } else {
+                        "got type " + c.type
+                    }
+                    runOnUiThread { status.text = text }
+                }
+
+                override fun onError(e: GetCredentialException) {
+                    runOnUiThread { status.text = "error: " + e.type }
+                }
+            },
+        )
+    }
+
+    private fun createCredential(status: TextView) {
+        status.text = "saving…"
+        CredentialManager.create(this).createCredentialAsync(
+            context = this,
+            request = CreatePasswordRequest("cm-test@zerokosh.com", "CmTestPassword123"),
+            cancellationSignal = null,
+            executor = Executors.newSingleThreadExecutor(),
+            callback = object : CredentialManagerCallback<CreateCredentialResponse, CreateCredentialException> {
+                override fun onResult(result: CreateCredentialResponse) {
+                    runOnUiThread { status.text = "saved" }
+                }
+
+                override fun onError(e: CreateCredentialException) {
+                    runOnUiThread { status.text = "error: " + e.type }
+                }
+            },
+        )
     }
 
     private fun heading(label: String) = TextView(this).apply {

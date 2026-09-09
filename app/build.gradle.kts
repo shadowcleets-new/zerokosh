@@ -186,6 +186,19 @@ dependencies {
     // hand-offs the hand-rolled version had to special-case.
     implementation("androidx.lifecycle:lifecycle-process:2.11.0")
 
+    // §6.2 addition (approved): Credential Manager, as a *provider*.
+    // On Android 14+ an app that signs users in through CredentialManager never
+    // consults AutofillService at all, so Zerokosh was simply absent from those
+    // flows — and that share only grows as apps move to passkeys. This is the
+    // provider half of the library (androidx.credentials.provider), which is
+    // API 34+; autofill remains the path for 26–33 and both work side by side
+    // above that.
+    //
+    // Deliberately NOT credentials-play-services-auth: that is the client-side
+    // Google Sign-In helper, it pulls in Play Services, and it would make the
+    // F-Droid build non-free. Nothing here needs it.
+    implementation("androidx.credentials:credentials:1.6.0")
+
     // Test only — never in the shipped APK, so outside the §6.2 runtime list.
     // The app module had no test source set at all, which is why every defect
     // this month was found by looking at the app rather than by a build.

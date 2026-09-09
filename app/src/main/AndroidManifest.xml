@@ -51,6 +51,37 @@
             android:excludeFromRecents="true"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Credential Manager provider (Android 14+). Alongside the autofill
+             service below, not instead of it: an app that signs users in with
+             CredentialManager never reaches AutofillService, and autofill is
+             still the only path below API 34. Both are separate switches in
+             system settings and both may be on.
+
+             BIND_CREDENTIAL_PROVIDER_SERVICE means only the system may bind. -->
+        <service
+            android:name=".credentials.ZerokoshCredentialProviderService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_CREDENTIAL_PROVIDER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.credentials.CredentialProviderService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.credentials.provider"
+                android:resource="@xml/credential_provider" />
+        </service>
+
+        <!-- Where a picked row becomes a credential. Not exported: only the
+             PendingIntent handed to the platform starts it. Same sheet theme as
+             the autofill unlock, and for the same reason — it floats over
+             somebody else's screen. -->
+        <activity
+            android:name=".credentials.CredentialEntryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Zerokosh.AutofillSheet"
+            android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- §6.7 autofill provider. BIND_AUTOFILL_SERVICE means only the system
              may bind to it. Without this entry the service class existed but was
              invisible to Android, so it could never be selected (BV-01). -->

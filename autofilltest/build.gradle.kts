@@ -36,6 +36,13 @@ android {
     }
 }
 
+dependencies {
+    // The client half of Credential Manager, so this throwaway app can ask the
+    // system for a credential the way a real sign-in screen would — which is
+    // the only way to exercise Zerokosh's provider from outside.
+    implementation("androidx.credentials:credentials:1.6.0")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

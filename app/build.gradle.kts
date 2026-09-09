@@ -444,9 +444,34 @@ val verifyTemplates by tasks.registering {
         val referenced = Regex("""GalleryItem\(\s*"[^"]*",\s*"[^"]*",\s*"([^"]*)"""")
             .findAll(galleryFile.readText()).map { it.groupValues[1] }.toSet()
 
+        // strings_templates.xml is generated from the catalogue by
+        // spec/gen_strings.py. If the two disagree, someone edited the generated
+        // file by hand or changed the catalogue without regenerating — and the
+        // next person to run the generator silently reverts their work. There
+        // used to be a second catalogue for exactly this to drift against; there
+        // is one now, and this is what keeps it that way.
+        val generatedNames = Regex("""<string name="([^"]+)"""")
+            .findAll(stringsFile.readText()).map { it.groupValues[1] }.toSet()
+        val expectedNames = buildSet {
+            templates.forEach { t ->
+                val tid = t["id"] as String
+                add("tpl_$tid")
+                @Suppress("UNCHECKED_CAST")
+                (t["fields"] as List<Map<String, Any>>).forEach { f -> add("tpl_${tid}_${f["k"]}") }
+            }
+        }
+        val generatorProblems = buildList {
+            (expectedNames - generatedNames).sorted().forEach {
+                add("strings_templates.xml is missing $it — run: python spec/gen_strings.py")
+            }
+            (generatedNames - expectedNames).sorted().forEach {
+                add("strings_templates.xml has $it with no field behind it — run: python spec/gen_strings.py")
+            }
+        }
         val problems = mutableListOf<String>()
         problems += localeProblems
         problems += formatProblems
+        problems += generatorProblems
         problems += whitespaceProblems
         problems += apostropheProblems
         val ids = templates.map { it["id"] as String }.toSet()

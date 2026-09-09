@@ -35,7 +35,6 @@
     <string name="tpl_upi_upi_id">UPI ID</string>
     <string name="tpl_upi_linked_account">ଯୋଡ଼ାଯାଇଥିବା ଖାତା</string>
     <string name="tpl_upi_upi_pin">UPI ପିନ୍</string>
-    <string name="tpl_upi_apps_used">କେଉଁ ଆପ୍‌ରେ ଚାଲୁ ଅଛି</string>
     <string name="tpl_upi_notes">ଟିପ୍ପଣୀ</string>
     <string name="tpl_demat">ଡିମ୍ୟାଟ୍</string>
     <string name="tpl_demat_broker">ବ୍ରୋକର୍</string>
@@ -48,7 +47,6 @@
     <string name="tpl_demat_totp">ଏକ-ଥର କୋଡ୍ (TOTP)</string>
     <string name="tpl_demat_api_key">API କୀ</string>
     <string name="tpl_demat_api_secret">API ସିକ୍ରେଟ୍</string>
-    <string name="tpl_demat_mf_folios">ମ୍ୟୁଚୁଆଲ୍ ଫଣ୍ଡ ଫୋଲିଓ</string>
     <string name="tpl_demat_nominee">ନାମିନୀ</string>
     <string name="tpl_demat_notes">ଟିପ୍ପଣୀ</string>
     <string name="tpl_insurance">ବୀମା</string>
@@ -73,11 +71,6 @@
     <string name="tpl_gov_id_file_copy">ସ୍କାନ୍ କରାଯାଇଥିବା ନକଲ</string>
     <string name="tpl_gov_id_notes">ଟିପ୍ପଣୀ</string>
     <string name="tpl_epf_pension">EPF / ପେନସନ୍</string>
-    <string name="tpl_epf_pension_scheme">ଯୋଜନା</string>
-    <string name="tpl_epf_pension_uan_or_pran">UAN / PRAN</string>
-    <string name="tpl_epf_pension_password">ପାସୱାର୍ଡ</string>
-    <string name="tpl_epf_pension_ipin">IPIN</string>
-    <string name="tpl_epf_pension_tpin">TPIN</string>
     <string name="tpl_epf_pension_linked_mobile">ଯୋଡ଼ାଯାଇଥିବା ମୋବାଇଲ୍</string>
     <string name="tpl_epf_pension_notes">ଟିପ୍ପଣୀ</string>
     <string name="tpl_utility">ବିଲ୍ ଓ ସଂଯୋଗ</string>
@@ -86,7 +79,6 @@
     <string name="tpl_utility_consumer_number">ଉପଭୋକ୍ତା ସଂଖ୍ୟା</string>
     <string name="tpl_utility_portal_login">ପୋର୍ଟାଲ୍ ଲଗଇନ୍</string>
     <string name="tpl_utility_portal_password">ପୋର୍ଟାଲ୍ ପାସୱାର୍ଡ</string>
-    <string name="tpl_utility_wifi_password">Wi-Fi ପାସୱାର୍ଡ</string>
     <string name="tpl_utility_vehicle_number">ଗାଡ଼ି ନମ୍ବର</string>
     <string name="tpl_utility_fastag_id">FASTag ID</string>
     <string name="tpl_utility_due_day">ବିଲ୍ ଦେବା ଦିନ</string>
@@ -95,7 +87,6 @@
     <string name="tpl_telecom_mobile_number">ମୋବାଇଲ୍ ନମ୍ବର</string>
     <string name="tpl_telecom_operator">କମ୍ପାନୀ</string>
     <string name="tpl_telecom_plan_type">ପ୍ଲାନର ପ୍ରକାର</string>
-    <string name="tpl_telecom_account_number">ଖାତା ସଂଖ୍ୟା</string>
     <string name="tpl_telecom_sim_pin">ସିମ୍ ପିନ୍</string>
     <string name="tpl_telecom_puk">PUK କୋଡ୍</string>
     <string name="tpl_telecom_renewal_date">ରିଚାର୍ଜ ତାରିଖ</string>

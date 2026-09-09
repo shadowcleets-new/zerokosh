@@ -35,7 +35,6 @@
     <string name="tpl_upi_upi_id">UPI ID</string>
     <string name="tpl_upi_linked_account">ബന്ധിപ്പിച്ച അക്കൗണ്ട്</string>
     <string name="tpl_upi_upi_pin">UPI പിൻ</string>
-    <string name="tpl_upi_apps_used">ഏത് ആപ്പിൽ സജീവം</string>
     <string name="tpl_upi_notes">കുറിപ്പ്</string>
     <string name="tpl_demat">ഡീമാറ്റ്</string>
     <string name="tpl_demat_broker">ബ്രോക്കർ</string>
@@ -48,7 +47,6 @@
     <string name="tpl_demat_totp">ഒറ്റത്തവണ കോഡ് (TOTP)</string>
     <string name="tpl_demat_api_key">API കീ</string>
     <string name="tpl_demat_api_secret">API സീക്രെട്ട്</string>
-    <string name="tpl_demat_mf_folios">മ്യൂച്വൽ ഫണ്ട് ഫോളിയോ</string>
     <string name="tpl_demat_nominee">നോമിനി</string>
     <string name="tpl_demat_notes">കുറിപ്പ്</string>
     <string name="tpl_insurance">ഇൻഷുറൻസ്</string>
@@ -73,11 +71,6 @@
     <string name="tpl_gov_id_file_copy">സ്കാൻ ചെയ്ത പകർപ്പ്</string>
     <string name="tpl_gov_id_notes">കുറിപ്പ്</string>
     <string name="tpl_epf_pension">EPF / പെൻഷൻ</string>
-    <string name="tpl_epf_pension_scheme">പദ്ധതി</string>
-    <string name="tpl_epf_pension_uan_or_pran">UAN / PRAN</string>
-    <string name="tpl_epf_pension_password">പാസ്‌വേഡ്</string>
-    <string name="tpl_epf_pension_ipin">IPIN</string>
-    <string name="tpl_epf_pension_tpin">TPIN</string>
     <string name="tpl_epf_pension_linked_mobile">ബന്ധിപ്പിച്ച മൊബൈൽ</string>
     <string name="tpl_epf_pension_notes">കുറിപ്പ്</string>
     <string name="tpl_utility">ബില്ലുകളും കണക്ഷനുകളും</string>
@@ -86,7 +79,6 @@
     <string name="tpl_utility_consumer_number">ഉപഭോക്തൃ നമ്പർ</string>
     <string name="tpl_utility_portal_login">പോർട്ടൽ ലോഗിൻ</string>
     <string name="tpl_utility_portal_password">പോർട്ടൽ പാസ്‌വേഡ്</string>
-    <string name="tpl_utility_wifi_password">Wi-Fi പാസ്‌വേഡ്</string>
     <string name="tpl_utility_vehicle_number">വാഹന നമ്പർ</string>
     <string name="tpl_utility_fastag_id">FASTag ID</string>
     <string name="tpl_utility_due_day">ബിൽ അടയ്ക്കുന്ന ദിവസം</string>
@@ -95,7 +87,6 @@
     <string name="tpl_telecom_mobile_number">മൊബൈൽ നമ്പർ</string>
     <string name="tpl_telecom_operator">കമ്പനി</string>
     <string name="tpl_telecom_plan_type">പ്ലാൻ തരം</string>
-    <string name="tpl_telecom_account_number">അക്കൗണ്ട് നമ്പർ</string>
     <string name="tpl_telecom_sim_pin">സിം പിൻ</string>
     <string name="tpl_telecom_puk">PUK കോഡ്</string>
     <string name="tpl_telecom_renewal_date">റീചാർജ് തീയതി</string>

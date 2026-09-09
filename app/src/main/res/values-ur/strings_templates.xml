@@ -35,7 +35,6 @@
     <string name="tpl_upi_upi_id">UPI ID</string>
     <string name="tpl_upi_linked_account">جڑا ہوا اکاؤنٹ</string>
     <string name="tpl_upi_upi_pin">UPI پن</string>
-    <string name="tpl_upi_apps_used">کن ایپس میں فعال</string>
     <string name="tpl_upi_notes">نوٹ</string>
     <string name="tpl_demat">ڈی میٹ</string>
     <string name="tpl_demat_broker">بروکر</string>
@@ -48,7 +47,6 @@
     <string name="tpl_demat_totp">ایک بار کا کوڈ (TOTP)</string>
     <string name="tpl_demat_api_key">API کنجی</string>
     <string name="tpl_demat_api_secret">API سیکریٹ</string>
-    <string name="tpl_demat_mf_folios">میوچل فنڈ فولیو</string>
     <string name="tpl_demat_nominee">نامزد</string>
     <string name="tpl_demat_notes">نوٹ</string>
     <string name="tpl_insurance">بیمہ</string>
@@ -73,11 +71,6 @@
     <string name="tpl_gov_id_file_copy">اسکین شدہ نقل</string>
     <string name="tpl_gov_id_notes">نوٹ</string>
     <string name="tpl_epf_pension">EPF / پنشن</string>
-    <string name="tpl_epf_pension_scheme">اسکیم</string>
-    <string name="tpl_epf_pension_uan_or_pran">UAN / PRAN</string>
-    <string name="tpl_epf_pension_password">پاس ورڈ</string>
-    <string name="tpl_epf_pension_ipin">IPIN</string>
-    <string name="tpl_epf_pension_tpin">TPIN</string>
     <string name="tpl_epf_pension_linked_mobile">جڑا ہوا موبائل</string>
     <string name="tpl_epf_pension_notes">نوٹ</string>
     <string name="tpl_utility">بل اور کنکشن</string>
@@ -86,7 +79,6 @@
     <string name="tpl_utility_consumer_number">صارف نمبر</string>
     <string name="tpl_utility_portal_login">پورٹل لاگ اِن</string>
     <string name="tpl_utility_portal_password">پورٹل پاس ورڈ</string>
-    <string name="tpl_utility_wifi_password">Wi-Fi پاس ورڈ</string>
     <string name="tpl_utility_vehicle_number">گاڑی نمبر</string>
     <string name="tpl_utility_fastag_id">FASTag ID</string>
     <string name="tpl_utility_due_day">بل بھرنے کا دن</string>
@@ -95,7 +87,6 @@
     <string name="tpl_telecom_mobile_number">موبائل نمبر</string>
     <string name="tpl_telecom_operator">کمپنی</string>
     <string name="tpl_telecom_plan_type">پلان کی قسم</string>
-    <string name="tpl_telecom_account_number">اکاؤنٹ نمبر</string>
     <string name="tpl_telecom_sim_pin">سم پن</string>
     <string name="tpl_telecom_puk">PUK کوڈ</string>
     <string name="tpl_telecom_renewal_date">ری چارج کی تاریخ</string>

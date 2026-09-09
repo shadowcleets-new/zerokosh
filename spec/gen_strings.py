@@ -1,4 +1,12 @@
-# Generates app/src/main/res/values/strings_templates.xml from spec/templates.json.
+# Generates app/src/main/res/values/strings_templates.xml from the template
+# catalogue the app actually ships: app/src/main/assets/templates.json.
+#
+# There used to be a second copy at spec/templates.json that this script read
+# instead. The two drifted — the shipped one gained a whole template and seven
+# fields the other never got — so running this would have deleted the labels for
+# them. It had already caused worse once before: an earlier drift removed a
+# field id outright, which makes every stored value under it invisible and drops
+# it on the next save. There is one copy now, and it is the one that ships.
 # §12: keys are tpl.<template_id>.<field_id>; Android resource names cannot
 # contain dots, so dots map to underscores (DECISIONS.md D-005).
 import json, pathlib
@@ -20,7 +28,8 @@ SPECIAL = {
 }
 
 root = pathlib.Path(__file__).resolve().parent.parent
-templates = json.loads((root / "spec" / "templates.json").read_text(encoding="utf-8-sig"))
+CATALOGUE = root / "app" / "src" / "main" / "assets" / "templates.json"
+templates = json.loads(CATALOGUE.read_text(encoding="utf-8-sig"))
 
 def humanize(fid: str) -> str:
     if fid in SPECIAL:

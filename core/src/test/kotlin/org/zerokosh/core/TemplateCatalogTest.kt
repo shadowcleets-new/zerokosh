@@ -12,7 +12,14 @@ import kotlin.test.assertTrue
 /** Guards R0.2 item 5: templates.json is verbatim; field IDs are never renamed. */
 class TemplateCatalogTest {
 
-    private val catalog = TemplateCatalog.parse(File("../spec/templates.json").canonicalFile.readText())
+    // The catalogue the app ships, not a second copy of it. This guard exists to
+    // stop a field id being renamed or dropped — which makes every stored value
+    // under it invisible and loses it on the next save — and for as long as it
+    // read spec/templates.json it was guarding a file nobody ships. That is
+    // exactly how the drift it was meant to catch went unnoticed.
+    private val catalog = TemplateCatalog.parse(
+        File("../app/src/main/assets/templates.json").canonicalFile.readText(),
+    )
 
     @Test
     fun `the 12 spec templates are all present, in spec order`() {

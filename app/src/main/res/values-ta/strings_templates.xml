@@ -35,7 +35,6 @@
     <string name="tpl_upi_upi_id">UPI ID</string>
     <string name="tpl_upi_linked_account">இணைந்த கணக்கு</string>
     <string name="tpl_upi_upi_pin">UPI பின்</string>
-    <string name="tpl_upi_apps_used">எந்த ஆப்-இல் இயங்குகிறது</string>
     <string name="tpl_upi_notes">குறிப்புகள்</string>
     <string name="tpl_demat">டீமேட்</string>
     <string name="tpl_demat_broker">புரோக்கர்</string>
@@ -48,7 +47,6 @@
     <string name="tpl_demat_totp">ஒரு முறை குறியீடு (TOTP)</string>
     <string name="tpl_demat_api_key">API கீ</string>
     <string name="tpl_demat_api_secret">API சீக்ரெட்</string>
-    <string name="tpl_demat_mf_folios">மியூச்சுவல் ஃபண்ட் ஃபோலியோ</string>
     <string name="tpl_demat_nominee">நாமினி</string>
     <string name="tpl_demat_notes">குறிப்புகள்</string>
     <string name="tpl_insurance">காப்பீடு</string>
@@ -73,11 +71,6 @@
     <string name="tpl_gov_id_file_copy">ஸ்கேன் செய்த நகல்</string>
     <string name="tpl_gov_id_notes">குறிப்புகள்</string>
     <string name="tpl_epf_pension">EPF / ஓய்வூதியம்</string>
-    <string name="tpl_epf_pension_scheme">திட்டம்</string>
-    <string name="tpl_epf_pension_uan_or_pran">UAN / PRAN</string>
-    <string name="tpl_epf_pension_password">கடவுச்சொல்</string>
-    <string name="tpl_epf_pension_ipin">IPIN</string>
-    <string name="tpl_epf_pension_tpin">TPIN</string>
     <string name="tpl_epf_pension_linked_mobile">இணைந்த மொபைல்</string>
     <string name="tpl_epf_pension_notes">குறிப்புகள்</string>
     <string name="tpl_utility">பில்கள் மற்றும் இணைப்புகள்</string>
@@ -86,7 +79,6 @@
     <string name="tpl_utility_consumer_number">நுகர்வோர் எண்</string>
     <string name="tpl_utility_portal_login">போர்டல் லாகின்</string>
     <string name="tpl_utility_portal_password">போர்டல் கடவுச்சொல்</string>
-    <string name="tpl_utility_wifi_password">Wi-Fi கடவுச்சொல்</string>
     <string name="tpl_utility_vehicle_number">வாகன எண்</string>
     <string name="tpl_utility_fastag_id">FASTag ID</string>
     <string name="tpl_utility_due_day">பில் கட்டும் நாள்</string>
@@ -95,7 +87,6 @@
     <string name="tpl_telecom_mobile_number">மொபைல் எண்</string>
     <string name="tpl_telecom_operator">நிறுவனம்</string>
     <string name="tpl_telecom_plan_type">திட்ட வகை</string>
-    <string name="tpl_telecom_account_number">கணக்கு எண்</string>
     <string name="tpl_telecom_sim_pin">சிம் பின்</string>
     <string name="tpl_telecom_puk">PUK குறியீடு</string>
     <string name="tpl_telecom_renewal_date">ரீசார்ஜ் தேதி</string>

@@ -39,3 +39,8 @@ fetch_*.py
 
 # Stray CLI output, not a version directory
 0.26.0
+
+# GitNexus code-graph index — 54 MB, rebuilt by `npx gitnexus analyze`.
+# gitnexus lists it in .git/info/exclude, which is local to one clone; this
+# makes the ignore travel with the repository.
+.gitnexus/

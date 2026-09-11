@@ -1,3 +1,6 @@
+> The most recent 15 sessions are below. Older entries, verbatim and newest
+> first, are in [`docs/changelog-archive/`](docs/changelog-archive/).
+
 ## [2026-09-09 10:30:00] - v0.5.0: autofill was filling the wrong box, and four libraries
 
 ### 1. Intent, Roles, & Context

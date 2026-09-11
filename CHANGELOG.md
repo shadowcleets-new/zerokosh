@@ -1,6 +1,48 @@
 > The most recent 15 sessions are below. Older entries, verbatim and newest
 > first, are in [`docs/changelog-archive/`](docs/changelog-archive/).
 
+## [2026-09-11 09:05:00] - The QR scanner on camera-compose, and the two bugs it was hiding
+
+### 1. Intent, Roles, & Context
+- **The Problem:** the authenticator's QR scanner was a `PreviewView` wrapped in `AndroidView`, the one camera surface in an otherwise all-Compose app. `camera-view` also pulled `androidx.media3` and, through it, Guava's annotation jars into a password manager that plays no media. Rewriting the scanner turned up two defects in the frame analysis that had nothing to do with the view.
+- **Specialist Personas Invoked:** Android Platform Engineer (CameraX); Principal Security Auditor (dependency surface); Test Architect.
+- **The Strategy:** swap the view for the composable CameraX now ships, fix what the rewrite exposed, and measure the size claim rather than assume it.
+
+### 2. Surgical Technical Modifications
+- **`app/build.gradle.kts`** — `camera-view` replaced by `camera-compose` 1.6.2; `camera-camera2` and `camera-lifecycle` 1.6.1 to 1.6.2. Five dependency groups leave the graph (`androidx.media3`, `com.google.code.findbugs`, `com.google.errorprone`, `com.google.j2objc`, `org.checkerframework`); none are added.
+- **`ui/authenticator/AuthenticatorScreen.kt`** — `CameraXViewfinder` fed by the `Preview` use case's `SurfaceRequest`, bound through `ProcessCameraProvider.awaitInstance` in a `LaunchedEffect` in place of a future and listener. The existing unbind on dispose is kept.
+- **Decoding off the main thread** — the analyzer ran on `ContextCompat.getMainExecutor`, so a full ZXing pass over every camera frame competed with the UI for the one thread it draws on. It now runs on a single-thread executor, shut down on dispose; only the decoded secret is posted back to the main thread.
+- **`ui/authenticator/QrDecode.kt` (new): row stride** — the Y plane was handed to ZXing as if its rows were exactly `width` bytes long. Many cameras pad each row out to a `rowStride` wider than the picture, and on those every row after the first is read from the wrong offset: the QR arrives sheared and never decodes, with no error — the scanner just keeps scanning. `PlanarYUVLuminanceSource` is now given the stride as the data width and cropped to the picture. A frame whose stride or row count cannot hold the picture it claims is refused rather than read.
+- **`app/proguard-rules.pro`** — `-dontwarn` for the errorprone and JSR-305 annotations Tink references. Those classes had been on the classpath only by accident, via media3's Guava; removing media3 made R8 fail on them as missing. Annotation-only, with no runtime behaviour, so not keeping them changes nothing at run time.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test :app:check` green — 180 unit tests, `verifyComplexity` (81 files, 563 functions, 0 new over 10), `verifyTemplates`, `deadComposables`, minified release build. `QrDecodeTest` (5): a packed frame decodes; a frame padded by 96 bytes a row decodes; the same padded frame read the old way returns nothing, which is the bug reproduced; malformed frames are refused; only TOTP payloads pass.
+- **Resulting App State:** on a Pixel 9 the scanner draws the live preview; the camera service logs a `CONNECT` for the app on open and a `DISCONNECT` on leaving, with no client left active. The Pixel packs its rows, so the stride bug could never have been seen on it — which is why the padded-frame test exists.
+- **Size, measured:** the release APK is **15,320 bytes larger (+0.13%)**, not smaller. R8 was already stripping media3 from the old build, so the removal saves nothing on disk; the gain is the smaller dependency graph and one fewer interop view. The earlier suggestion that this swap would shrink the app was wrong.
+- **Next Sprint Phase:** Baseline Profiles, then the `org.multipaz` integration plan.
+
+## [2026-09-11 08:10:00] - After v0.5.0: Navigation 3, two panes, passkeys, translations, one catalogue
+
+### 1. Intent, Roles, & Context
+- **The Problem:** five follow-ups deferred at v0.5.0, taken one at a time: Navigation 3, the adaptive layout it unlocks, passkeys, the sixteen unreviewed translations, and a drifted template catalogue found on the way. Two of the reasons given for deferring them were wrong, and are corrected below.
+- **Specialist Personas Invoked:** Android Platform Engineer; Principal Security Auditor (WebAuthn); Apple-caliber CXO (two-pane); Localisation Lead; Test Architect.
+- **The Strategy:** one commit per piece, so each can be verified and reverted on its own; the commit bodies carry the full reasoning.
+
+### 2. Surgical Technical Modifications
+- **`bd7880a` Type-safe routes** — all fourteen destinations typed with kotlinx.serialization. Hand-built route strings split "Punjab & Sind Bank" on the ampersand; the `Uri.encode`/`Uri.decode` workaround is deleted rather than moved.
+- **`4a01c1e` Navigation 3** — `NavDisplay` over back stacks the app owns, one saveable stack per tab in `VaultNavState`. Nav3 **has** stable releases (1.0.0 to 1.1.7); calling it pre-release at v0.5.0 was wrong. Shared-element transitions carried across unchanged.
+- **`9749b0e` Two-pane list and detail** — `ListDetailSceneStrategy` marks the vault list and the record as panes, so a record opens beside the list on a wide window. Below that width nothing changes.
+- **`0de36c7` Passkeys** — `core/passkey` (CBOR, COSE_Key, authenticator data, ES256 assertions) written against the WebAuthn specification; attestation "none" and a zero AAGUID. A passkey is a record on a new `passkey` template, so the vault format does **not** change — another deferral reason that was wrong. The sign counter is persisted before the assertion is released, and the ceremony is abandoned if that write fails.
+- **`20a5285` Translations** — an audit rather than a native review, which cannot honestly be given: all 766 keys present in all sixteen locales, zero placeholder mismatches. `verifyTemplates` now fails the build on a placeholder mismatch, the one translation error that crashes rather than reads badly. `docs/translation-review/` holds one packet per language for a native speaker, ordered by consequence.
+- **`d37bde4` One template catalogue** — `spec/templates.json` had drifted from the shipped `assets/templates.json` (a whole template and seven fields missing), and `TemplateCatalogTest` guarded the stale copy. The shipped file is now the only one; `verifyTemplates` also fails when `strings_templates.xml` differs from what the generator produces.
+- **`b2f93ed` Changelog archive** — the v0.5.0 trim had moved eighteen entries into gitignored `.claude/`, so they were never committed. Restored to `docs/changelog-archive/`, all 33 entries verified intact. `.gitnexus/`, a 54 MB local code index, is ignored.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test :app:check` green after each commit; 175 unit tests, including twelve byte-exact WebAuthn tests, one verifying a real signature with an independent verifier. 7/7 instrumented tests after the Nav3 migration.
+- **Resulting App State:** on a Pixel 9 with a vault recreated by hand: tabs, pushes and back all behave under Nav3; in landscape the rail, list and record sit side by side, portrait collapses to one pane, and back returns from the record to the list. Observed and not yet changed: the nav rail hides while a record is open in two-pane mode.
+- **Known gaps:** passkey ceremonies are proven by tests but not yet run end to end against a real relying party. No native speaker has reviewed any translation.
+- **Next Sprint Phase:** the camera-compose swap and Baseline Profiles.
+
 ## [2026-09-09 10:30:00] - v0.5.0: autofill was filling the wrong box, and four libraries
 
 ### 1. Intent, Roles, & Context
@@ -291,50 +333,3 @@
 - **Resulting App State:** verified on a Pixel 9 by screenshot in **both** themes — the device happened to flip to dark mid-session, which covered the half that is otherwise easy to miss. FAB `+` visible light and dark; detail toolbar orange, not pink; TOTP ring reads as a countdown with a visible track/active split; Settings shows GPL-3.0; the Expiry field carries a real calendar icon.
 - **Known and deliberately unchanged:** the teal accent `#018D87` on paper caps at ~3.4:1 at any tint. That is the brand colour, not a defect, and it already governs existing text ("Copy", "Unlocked"). Changing it is a design decision, not a glitch fix.
 - **Next Sprint Phase:** logo redesign — brief sent to Lovable for 8 letterform options (Z / 0 / KSH / KH / ZK). On selection: replace `ic_launcher_foreground.xml`, and **add a separate single-colour `ic_launcher_monochrome.xml`** — the adaptive icon currently points `<monochrome>` at the two-colour foreground, which renders as a filled blob under Android 13+ themed icons. Also still open: the `bharatvault` directory rename, and `SearchBar`/`SearchBarState`.
-
-## [2026-08-20 11:40:00] - Material 3 Expressive makeover
-
-### 1. Intent, Roles, & Context
-- **The Problem:** the Lovable rebuild reproduced the mockup by hand — CSS elliptical `border-radius` blobs ported into a custom `Shape`, a nav dock built from `Row`/`Column` with a manually drawn pill indicator, a segmented control faked with a background swap, a TOTP countdown drawn with two `drawArc` calls, six hand-cut progress bars. Every one of those is a component Material 3 Expressive now ships, done better and animated.
-- **Specialist Personas Invoked:** Apple-caliber UI Motion Designer & CXO; Android Platform Engineer; Accessibility Auditor.
-- **The Strategy:** *Expressive as mechanism, Lovable as identity.* Adopt M3 Expressive's components and `MotionScheme`, but keep the OKLCH-derived colour scheme, the Newsreader/Instrument Sans/JetBrains Mono type scale and the corner geometry, so the Organic Editorial direction survives the swap. Where the alpha API's interaction model conflicted with the mockup, the mockup won.
-
-### 2. Surgical Technical Modifications
-- **Modified Files:**
-  - `ui/theme/Theme.kt` (L28-96): `MaterialTheme` → `MaterialExpressiveTheme` with `MotionScheme.expressive()`; deleted the dead `IosSpring` bezier and `DurationFast/Base/Slow` constants — read `MaterialTheme.motionScheme` at the call site instead.
-  - `ui/common/VaultUi.kt`: hand-rolled `BlobShape` (incl. a port of the CSS radius-overlap normalisation) → `VaultBlobs` on `MaterialShapes.Puffy` / `Clover4Leaf` / `Cookie9Sided`; `VaultNavBar` (~65 lines) → `ShortNavigationBar`; `StepProgress` (six drawn bars) → `LinearWavyProgressIndicator` on a spatial spring; `VaultFilterChip` → M3 `FilterChip` with an animated corner morph on selection; `PrimaryPillButton` gained `loading` backed by `LoadingIndicator`; added `VaultToggleRow` (`ToggleButton`) and `VaultNavRail` (`WideNavigationRail`).
-  - `ui/ZerokoshNav.kt`: Add FAB → `FloatingActionButtonMenu` + `ToggleFloatingActionButton`, with four quick templates (login, card, upi, bank_account) and "All templates" as the escape hatch; `BackHandler` closes it; a `LaunchedEffect` collapses it on tab change. Bottom bar swaps to the side rail at ≥600dp.
-  - `ui/authenticator/AuthenticatorScreen.kt` (~L443): `Canvas` + two `drawArc` → `CircularWavyProgressIndicator`.
-  - `ui/onboarding/Onboarding.kt`: `SegmentButton` deleted, replaced by `VaultToggleRow`; "Sealing…" and the S6 finish button now show `LoadingIndicator`.
-  - `ui/gallery/TemplateGalleryScreen.kt`: "Suggested for you" stacked `GroupCard` → `HorizontalMultiBrowseCarousel`.
-  - `ui/record/RecordDetailScreen.kt`: the "…" overflow `DropdownMenu` deleted; Edit/Delete/Back now sit in a `HorizontalFloatingToolbar`.
-  - `ui/home/HomeScreen.kt`, `ui/authenticator/AuthenticatorScreen.kt`: avatar initials `"BV"` → `"ZK"` — two leftovers the rename missed.
-- **Irreversible Actions:** none. Isolated from the toolchain commit (`1faa172`) so it reverts independently.
-- **Payload/Schema Changes:** none.
-
-### 3. Verification & Validation
-- **Execution Commands & Diagnostics:** `:app:assembleDebug` clean; `:app:lintDebug` 0 errors (684 warnings, unchanged baseline); `:core:test` 42/42. API signatures read from the `material3-android-1.5.0-alpha25` **sources jar** rather than guessed — the earlier flat `javap` extract had silently omitted the `carousel` subpackage.
-- **Resulting App State:** verified end-to-end on a Pixel 9 through a fresh onboarding run — wavy step progress, the toggle pair flipping the counter `0/10 → 0/6`, seal, recovery-kit gate (correctly disabled until the kit is saved *and* the offline checkbox is ticked), FAB menu expanding to all five items and routing straight into the Login template, filter chips moving their check on selection, the detail floating toolbar's Edit/Back, the gallery carousel's small-item keyline and tap-through, a live TOTP ring counting `11s → 5s → 29s`, and the bottom bar ⇄ side rail swap in both rotation directions. The SAF picker opened without crashing — BV-24 still fixed.
-- **Next Sprint Phase:** decide on `SearchBar`/`SearchBarState` — the one item from the approved list left undone, because M3's model moves results into a separate expanding surface while the mockup filters the list in place. Also still open: the `C:\Users\acer\bharatvault` directory rename, registering zerokosh.com/.in, and a trademark agent's read on Zerodha §11(2).
-
-## [2026-08-20 00:30:00] - Renamed BharatVault → Zerokosh
-
-### 1. Intent, Roles, & Context
-- **The Problem:** "Bharat Vault" was generic on two axes — "vault" is the most contested noun in the category (1Password, Bitwarden, Proton Pass, HashiCorp), and "Bharat + category noun" is a naming formula rather than a name. Availability checks then killed the first replacement candidate: "Hasp" collided with a live local-only password manager already on Google Play, plus Thales' 30-year-old Sentinel HASP licensing brand.
-- **Specialist Personas Invoked:** Brand Naming Strategist; Trademark Researcher; Android Release Engineer.
-- **The Strategy:** Zerokosh — English "zero" fused with Sanskrit कोष *kosh* (treasury, repository), on the Zerodha construction. It states the product's argument rather than labelling it: the Trust screen counts zero servers, zero trackers, one file on device. Verified clear before committing: no app, company or repository by that name; zerokosh.com unregistered (RDAP, with a control lookup to confirm the endpoint); Zerodha's Indian mark is Class 36 (financial services) against our Class 9/42 filing.
-
-### 2. Surgical Technical Modifications
-- **Package:** `org.bharatvault.*` → `org.zerokosh.*` across `app` and `core`, via `git mv` so history follows. Chose `org.zerokosh` over `in.zerokosh` because `in` is a Kotlin hard keyword — every package declaration would have needed backtick escaping.
-- **Identity:** `applicationId`/`namespace` → `org.zerokosh.app`; `rootProject.name` → `zerokosh`; `app_name` → Zerokosh; `Theme.BharatVault` → `Theme.Zerokosh`.
-- **Classes renamed (files and declarations):** `BharatVaultApp` → `ZerokoshApp`, `BharatVaultNav` → `ZerokoshNav`, `BharatVaultAutofillService` → `ZerokoshAutofillService`, `BharatVaultTheme` → `ZerokoshTheme`.
-- **Format constants — these break compatibility with any prior install:** vault file `vault.bvlt` → `vault.kosh`; recovery prefix `BVR-` → `KSH-`; prefs store `bharatvault_prefs` → `zerokosh_prefs`; Keystore alias `bharatvault_quick_unlock` → `zerokosh_quick_unlock`; WorkManager and notification-channel ids likewise. Acceptable because versionCode 1 has never been published.
-- **Docs:** README, THREAT_MODEL, CONTRIBUTING, SECURITY, DECISIONS and `spec/` rewritten; `spec/bharatvault_master_build_manual_v2.md` renamed.
-- **Deliberately untouched:** `.ai-context/` (archived copy of the Lovable source — renaming it would falsify the design reference) and prior CHANGELOG entries, which correctly record work done under the old name and cite the Lovable project genuinely still called "Bharat Vault".
-- **Irreversible Actions:** the old `org.bharatvault.app` package was uninstalled from the test device; its vault was orphaned by the filename change regardless.
-
-### 3. Verification & Validation
-- **Execution Commands & Diagnostics:** `:core:test` **42/42**, `:app:assembleDebug` SUCCESS, zero residual matches for `bharatvault|BharatVault|BVR|bvlt` under `app/` and `core/src/`.
-- **On-device (Pixel 9 / Android 17):** installs as `org.zerokosh.app`, launches showing "Zerokosh", full onboarding runs, and the Recovery Kit renders `ZEROKOSH RECOVERY` with a live `KSH-0S4A4-68C2D-…` key — proving the rename reaches the crypto layer. On disk: `files/vault.kosh`, `shared_prefs/zerokosh_prefs.xml`.
-- **Next Sprint Phase:** register zerokosh.com and zerokosh.in; get an Indian trademark agent's opinion on Zerodha's well-known-mark status under §11(2) before filing Class 9/42; optionally rename the repo directory itself.
-

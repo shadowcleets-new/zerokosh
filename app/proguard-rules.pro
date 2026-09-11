@@ -41,3 +41,20 @@
     public static int v(...);
     public static int d(...);
 }
+
+# Tink, pulled in by androidx.security:security-crypto for the encrypted prefs,
+# annotates its API with Error Prone and JSR-305 annotations. They are
+# compile-time only: nothing reads them at runtime, so they are not shipped.
+#
+# These classes used to reach the build by accident. camera-view pulled in
+# camera-video, which pulled in media3, which pulled in Guava's annotation
+# jars — so the release build passed R8 only because a video library happened
+# to supply Tink's annotations. Moving the scanner to camera-compose dropped
+# media3 and exposed it. -dontwarn is Tink's own documented answer; adding the
+# jars back would put dead annotation classes into every APK.
+-dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
+-dontwarn com.google.errorprone.annotations.CheckReturnValue
+-dontwarn com.google.errorprone.annotations.Immutable
+-dontwarn com.google.errorprone.annotations.RestrictedApi
+-dontwarn javax.annotation.Nullable
+-dontwarn javax.annotation.concurrent.GuardedBy

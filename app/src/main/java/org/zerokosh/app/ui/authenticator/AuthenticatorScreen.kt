@@ -24,10 +24,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.SurfaceRequest
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
+import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -94,6 +97,7 @@ import org.zerokosh.core.model.FieldType
 import org.zerokosh.core.model.Record
 import org.zerokosh.core.totp.Totp
 import java.util.EnumMap
+import java.util.concurrent.Executors
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 // #endregion
@@ -584,78 +588,61 @@ fun QrScannerScreen(
                 }
             }
 
-            AndroidView(
-                factory = { ctx ->
-                    val previewView = PreviewView(ctx)
-                    runCatching {
-                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                        cameraProviderFuture.addListener({
-                            runCatching {
-                                val provider = cameraProviderFuture.get()
-                                val preview = Preview.Builder().build().also {
-                                    it.surfaceProvider = previewView.surfaceProvider
-                                }
-                                val analysis = ImageAnalysis.Builder()
-                                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                    .build()
+            // The frame the camera draws into, handed over by Preview when it
+            // is ready. Null until then, so nothing is drawn over a black box.
+            var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
+            // Decoding a QR code off a full frame is real work. It used to run
+            // on the main executor, which blocked the UI for every analysed
+            // frame and made the preview stutter while it searched.
+            val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
+            DisposableEffect(analysisExecutor) {
+                onDispose { analysisExecutor.shutdown() }
+            }
 
-                                analysis.setAnalyzer(ContextCompat.getMainExecutor(ctx)) { imageProxy ->
-                                    if (handled.get()) {
-                                        imageProxy.close()
-                                        return@setAnalyzer
-                                    }
-                                    try {
-                                        val buffer = imageProxy.planes[0].buffer
-                                        val data = ByteArray(buffer.remaining())
-                                        buffer.get(data)
-                                        val w = imageProxy.width
-                                        val h = imageProxy.height
-                                        val source = PlanarYUVLuminanceSource(data, w, h, 0, 0, w, h, false)
-
-                                        var result = runCatching { reader.decodeWithState(BinaryBitmap(HybridBinarizer(source))) }.getOrNull()
-                                        if (result == null) {
-                                            result = runCatching { reader.decodeWithState(BinaryBitmap(HybridBinarizer(source.rotateCounterClockwise()))) }.getOrNull()
-                                        }
-
-                                        if (result != null) {
-                                            val text = result.text
-                                            if (text.startsWith("otpauth://", ignoreCase = true) ||
-                                                text.matches(Regex("^[A-Z2-7=]+$", RegexOption.IGNORE_CASE))
-                                            ) {
-                                                if (handled.compareAndSet(false, true)) {
-                                                    onSecret(text)
-                                                }
-                                            }
-                                        }
-                                    } catch (_: Exception) {
-                                    } finally {
-                                        imageProxy.close()
-                                    }
-                                }
-
-                                provider.unbindAll()
-                                val selector = if (provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
-                                    CameraSelector.DEFAULT_BACK_CAMERA
-                                } else if (provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA)) {
-                                    CameraSelector.DEFAULT_FRONT_CAMERA
-                                } else null
-
-                                if (selector != null && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
-                                    val cam = provider.bindToLifecycle(
-                                        lifecycleOwner,
-                                        selector,
-                                        preview,
-                                        analysis,
-                                    )
-                                    camera = cam
-                                }
+            LaunchedEffect(Unit) {
+                val provider = runCatching { ProcessCameraProvider.awaitInstance(context) }.getOrNull()
+                    ?: return@LaunchedEffect
+                val preview = Preview.Builder().build().apply {
+                    setSurfaceProvider { request -> surfaceRequest = request }
+                }
+                val analysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                val mainExecutor = ContextCompat.getMainExecutor(context)
+                analysis.setAnalyzer(analysisExecutor) { imageProxy ->
+                    try {
+                        if (!handled.get()) {
+                            val text = decodeOtpQr(reader, imageProxy)
+                            if (text != null && handled.compareAndSet(false, true)) {
+                                // Back to the main thread: onSecret moves the
+                                // user on, and UI state is not for this executor.
+                                mainExecutor.execute { onSecret(text) }
                             }
-                        }, ContextCompat.getMainExecutor(ctx))
+                        }
+                    } finally {
+                        imageProxy.close()
                     }
-                    previewView
-                },
-                modifier = Modifier.fillMaxSize(),
-            )
+                }
+
+                provider.unbindAll()
+                val selector = when {
+                    provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) -> CameraSelector.DEFAULT_BACK_CAMERA
+                    provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) -> CameraSelector.DEFAULT_FRONT_CAMERA
+                    else -> null
+                }
+                if (selector != null && lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
+                    camera = runCatching {
+                        provider.bindToLifecycle(lifecycleOwner, selector, preview, analysis)
+                    }.getOrNull()
+                }
+            }
+
+            surfaceRequest?.let { request ->
+                CameraXViewfinder(
+                    surfaceRequest = request,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
 
             // Scanning Overlay Reticle
             Box(
@@ -772,6 +759,21 @@ fun QrScannerScreen(
             }
         }
     }
+}
+// #endregion
+
+// #region QR decoding
+/**
+ * An otpauth URI or a bare base32 secret from one camera frame, or null.
+ *
+ * Only unpacks the frame; the reading itself is [decodeOtpLuminance], which is
+ * plain JVM code so it can be tested against frames this device never makes.
+ */
+internal fun decodeOtpQr(reader: MultiFormatReader, imageProxy: ImageProxy): String? {
+    val plane = imageProxy.planes[0]
+    val buffer = plane.buffer
+    val data = ByteArray(buffer.remaining()).also { buffer.get(it) }
+    return decodeOtpLuminance(reader, data, plane.rowStride, imageProxy.width, imageProxy.height)
 }
 // #endregion
 

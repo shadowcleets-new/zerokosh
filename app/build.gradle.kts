@@ -247,9 +247,15 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
     // TOTP QR scanning only (§6.2)
-    implementation("androidx.camera:camera-camera2:1.6.1")
-    implementation("androidx.camera:camera-lifecycle:1.6.1")
-    implementation("androidx.camera:camera-view:1.6.1")
+    // camera-compose rather than camera-view. The scanner used exactly one thing
+    // from camera-view — PreviewView, a View embedded in Compose through
+    // AndroidView — and camera-view drags in camera-video and with it all of
+    // media3, a video stack in an app that only ever reads a QR code.
+    // CameraXViewfinder is the native Compose surface for the same job.
+    // Every CameraX artifact must share one version, hence all three move.
+    implementation("androidx.camera:camera-camera2:1.6.2")
+    implementation("androidx.camera:camera-lifecycle:1.6.2")
+    implementation("androidx.camera:camera-compose:1.6.2")
     implementation("com.google.zxing:core:3.5.3")
 }
 

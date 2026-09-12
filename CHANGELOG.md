@@ -1,6 +1,26 @@
 > The most recent 15 sessions are below. Older entries, verbatim and newest
 > first, are in [`docs/changelog-archive/`](docs/changelog-archive/).
 
+## [2026-09-11 10:30:00] - Baseline Profiles, generated where they cannot reach a real vault
+
+### 1. Intent, Roles, & Context
+- **The Problem:** release builds shipped with the profiles Compose and Tink carry for themselves and none for Zerokosh's own code. Every cold start interpreted and JIT-compiled the app's startup, lock screen and vault until the phone compiled them in the background — which Play eventually helps with through cloud profiles, and F-Droid and GitHub installs never get at all.
+- **Specialist Personas Invoked:** Android Performance Engineer; Principal Security Auditor (where the generator is allowed to run); Build & Release Engineer (F-Droid reproducibility).
+- **The Strategy:** record the real journey with the Baseline Profile Gradle plugin and a macrobenchmark generator, on a Gradle-managed emulator only. The test phone holds a vault of 195 records, and a test run uninstalls the app it tested — which is how a test vault was lost once already.
+
+### 2. Surgical Technical Modifications
+- **`:baselineprofile` (new)** — a `com.android.test` module targeting `:app`, with `androidx.baselineprofile` and `benchmark-macro-junit4` 1.5.0 (released 9 Sep 2026; the first line that supports AGP 9 without `newDsl=false`). A managed `pixel6Api34` device on the plain AOSP image, which was already installed, and `useConnectedDevices = false`.
+- **`BaselineProfileGenerator.kt` (new)** — the first iteration creates a vault through the real onboarding (passphrase, recovery kit deferred, no quick unlock — an emulator has no sensor); every later one starts where a returning user does, at the lock screen, unlocks and walks all four tabs. `includeInStartupProfile` also emits a startup profile, which R8 uses for dex layout. The passphrase is a throwaway constant, deliberately not the PIN used on real phones: this repository is public.
+- **`app/build.gradle.kts`** — applies the plugin and names the producer. The plugin's `nonMinifiedRelease` and `benchmarkRelease` build types copy release, and two things must not be copied: the signing (unsigned on any clone without the keystore, so uninstallable — the debug key is used) and the applicationId (now `com.zerokosh.app.benchmark`, so even on a phone the profiled build sits beside a real Zerokosh and the post-run uninstall removes only itself). `profileinstaller` is not added: compose-ui, biometric and lazysodium already bring 1.4.0, so the §6.2 list gains nothing.
+- **`app/src/release/generated/baselineProfiles/` (new, committed)** — 29,916 rules, 1,848 of them Zerokosh's own: startup, lock screen, onboarding, vault home, the four tabs, navigation, the vault and crypto core. A plain release build only reads these files, so F-Droid never runs a device.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:app:generateBaselineProfile --dry-run` — the only device task in the graph is the managed emulator's, zero connected-device tasks. The generator passed on the emulator (1 test, 0 failed; stable by iteration 8 after the first-run onboarding made early iterations differ). `:core:test :app:check :baselineprofile:assemble` green: the same 180 unit tests, `verifyComplexity` (81 files, 563 functions, 16 baselined, 0 new over 10), `verifyTemplates`, `deadComposables`. The profiled APK was inspected rather than assumed: package `com.zerokosh.app.benchmark`, signed `CN=Android Debug`.
+- **Resulting App State:** the release APK is **147,514 bytes larger (+1.21%)**, 12,193,302 to 12,340,816. The compiled profile inside it grows 9,133 to 14,281 bytes, and R8 now splits the dex it used to emit whole — one 5.64 MB `classes.dex` becomes 3.07 MB plus 2.87 MB — which is the startup profile doing what it is for, putting the classes cold start needs in the primary dex. The cost is paid in download size for a cold start that does less work.
+- **Not yet measured:** the startup gain itself. Macrobenchmark numbers from an emulator this memory-starved would not mean much, and the Pixel run is not mine to start without asking — although the separate applicationId now makes it harmless to the vault on it.
+- **Known gaps:** the `.benchmark` applicationId was verified by inspecting the built APK, not by a second generation run — the machine ran out of memory during the first (the harness killed the Gradle client; the daemon finished the job). The vault the generator makes is empty, so list rows are not profiled; Play's cloud profiles cover them there.
+- **Next Sprint Phase:** the `org.multipaz` plan; optionally a startup benchmark on the Pixel.
+
 ## [2026-09-11 09:05:00] - The QR scanner on camera-compose, and the two bugs it was hiding
 
 ### 1. Intent, Roles, & Context
@@ -308,28 +328,3 @@
 - **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:check` (incl. `deadComposables`), `:core:test` — 0 lint errors, all tests green, 102 composables checked.
 - **Resulting App State:** verified on a Pixel 9. The blob morph was measured rather than eyeballed — silhouette area swings **15.7%** (30,320 → 25,558 px) while the bounding box expands, which a background gradient cannot do; at `animator_duration_scale=0` three frames are byte-identical, confirming the reduced-motion path. **NFC confirmed against a real contactless card**: number and expiry captured, and the expiry stored in `YYYY-MM` exactly as the `MMYY` conversion predicts. Cardholder name absent — that issuer does not expose tag `5F20`, which is the documented "sometimes available" case now confirmed in the field rather than in theory. (The issuer and the captured values are deliberately not recorded here: this file is public, and a changelog is not a place to write down anything read off a payment card.)
 - **Next Sprint Phase:** 47 monogram fallbacks remain (mostly foreign banks and bus operators; `design/audit_logos.py` lists them). `TextFieldLabelPosition.Cutout` is blocked behind a `TextFieldState` migration. 12 duplicate drawable resource names still ship twice. And the repo directory rename to `zerokosh` is now done.
-
-## [2026-08-20 22:15:00] - Expressive visual glitch sweep
-
-### 1. Intent, Roles, & Context
-- **The Problem:** the Add FAB rendered as a plain orange square with no `+`. A screenshot-driven sweep of every screen found it was one symptom of a systemic fault, plus three unrelated defects the sweep surfaced.
-- **Specialist Personas Invoked:** Apple-caliber UI Motion Designer & CXO; Accessibility Auditor; Android Platform Engineer.
-- **The Strategy:** find the class of bug, not the instance. The Expressive components resolve `ColorScheme` roles the hand-rolled UI never touched, so any role left undefined silently returns the M3 baseline purple/pink. Fix the scheme once rather than patching call sites one screenshot at a time.
-
-### 2. Surgical Technical Modifications
-- **Modified Files:**
-  - `ui/theme/Theme.kt`: filled the 12 unset roles — `tertiaryContainer`, `onTertiaryContainer`, `errorContainer`, `onErrorContainer`, `surfaceContainerLow/High/Highest`, `surfaceBright`, `surfaceDim`, `inversePrimary`, `surfaceTint`, `scrim` — for both light and dark. Replaced the translucent `primaryContainer`/`secondaryContainer` with pre-flattened opaque tints; M3 composites container roles over surfaces it selects itself, so a translucent container picks up whatever sits behind it.
-  - `ui/ZerokoshNav.kt`: pinned the FAB icon colour. `animateIcon` tints through a `ColorFilter` that overrides `Icon(tint=)`, and its default is `onPrimaryContainer` — our burnt orange, over the burnt orange container we had overridden. 1:1 contrast, now 5.01:1.
-  - `ui/record/RecordDetailScreen.kt`: passed toolbar and FAB colours explicitly. `vibrantFloatingToolbarColors()` reads `TertiaryContainer` for the FAB (unset → baseline pink `#FFD8E4`) and `PrimaryContainer` for the bar.
-  - `ui/authenticator/AuthenticatorScreen.kt`: dropped the `Modifier.size(44.dp)` that fought the indicator's own 48dp container and distorted the wave into a blob; damped amplitude to 0.45, which is legible at this diameter.
-  - `ui/common/VaultUi.kt`: `VaultToggleRow`'s checked container made opaque.
-  - `ui/settings/SettingsScreen.kt`: licence label `MIT` → `GPL-3.0`, matching `LICENSE`.
-  - `ui/record/RecordEditScreen.kt`: two date pickers used a raw 📅 emoji as their button glyph; replaced with `Icons.Outlined.CalendarToday` and a "Pick a date" content description.
-- **Irreversible Actions:** none.
-- **Payload/Schema Changes:** none.
-
-### 3. Verification & Validation
-- **Execution Commands & Diagnostics:** `:app:assembleDebug` clean, `:app:lintDebug` 0 errors, `:core:test` 42/42. Contrast computed for all 12 new colour pairs; `primaryContainer` and `errorContainer` nudged to clear 4.5:1.
-- **Resulting App State:** verified on a Pixel 9 by screenshot in **both** themes — the device happened to flip to dark mid-session, which covered the half that is otherwise easy to miss. FAB `+` visible light and dark; detail toolbar orange, not pink; TOTP ring reads as a countdown with a visible track/active split; Settings shows GPL-3.0; the Expiry field carries a real calendar icon.
-- **Known and deliberately unchanged:** the teal accent `#018D87` on paper caps at ~3.4:1 at any tint. That is the brand colour, not a defect, and it already governs existing text ("Copy", "Unlocked"). Changing it is a design decision, not a glitch fix.
-- **Next Sprint Phase:** logo redesign — brief sent to Lovable for 8 letterform options (Z / 0 / KSH / KH / ZK). On selection: replace `ic_launcher_foreground.xml`, and **add a separate single-colour `ic_launcher_monochrome.xml`** — the adaptive icon currently points `<monochrome>` at the two-colour foreground, which renders as a filled blob under Android 13+ themed icons. Also still open: the `bharatvault` directory rename, and `SearchBar`/`SearchBarState`.

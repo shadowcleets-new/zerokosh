@@ -6,6 +6,10 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
+    // Build tooling, not a runtime dependency: it compiles the checked-in
+    // profile in src/release/generated/ into the APK. The profileinstaller
+    // that applies it off-Play already arrives through compose-ui.
+    id("androidx.baselineprofile")
 }
 
 // #region Release signing
@@ -125,8 +129,28 @@ kotlin {
     }
 }
 
+// The build types the Baseline Profile plugin adds copy release. Two things
+// must not be copied:
+//  - the signing, because release is unsigned on any clone without the upload
+//    keystore and an unsigned APK cannot be installed; the debug key will do
+//    for an APK that only exists to be profiled;
+//  - the applicationId. A test run uninstalls the app it tested afterwards,
+//    and with the real id that is the real Zerokosh and its vault — which is
+//    how a test vault was lost once already. Beside it, never over it, the
+//    same reason releaseCheck has its own id. The profile names classes, not
+//    the app id, so it is unaffected.
+androidComponents {
+    onVariants { variant ->
+        if (variant.buildType == "nonMinifiedRelease" || variant.buildType == "benchmarkRelease") {
+            variant.signingConfig.setConfig(android.signingConfigs.getByName("debug"))
+            variant.applicationId.set("com.zerokosh.app.benchmark")
+        }
+    }
+}
+
 dependencies {
     implementation(project(":core"))
+    baselineProfile(project(":baselineprofile"))
 
     // BV-24: androidx.biometric 1.1.0 pins androidx.fragment 1.2.5, whose
     // FragmentActivity.startActivityForResult still enforces the legacy

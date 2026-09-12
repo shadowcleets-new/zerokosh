@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "zerokosh"
-include(":core", ":app", ":autofilltest")
+include(":core", ":app", ":autofilltest", ":baselineprofile")

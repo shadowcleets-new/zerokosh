@@ -23,6 +23,9 @@ interface VaultPrefs {
     var cooldownUntilMs: Long
     var cooldownSeconds: Int
     var syncFolderUri: String
+
+    /** Set by the repository on every successful unlock — see [Prefs.secretIsPin]. */
+    var secretIsPin: Boolean
 }
 
 /**
@@ -38,6 +41,17 @@ interface VaultPrefs {
  * a replacement exists, and migrate the keys rather than dropping them.
  */
 @Suppress("DEPRECATION")
+/** The one definition of what counts as a PIN, used wherever a secret is set. */
+fun looksLikePin(secret: String): Boolean = secret.length == 6 && secret.all(Char::isDigit)
+
+/**
+ * The same question of a secret still in its bytes. Deliberately not
+ * `String(secret)`: that would copy the passphrase onto the heap to count its
+ * digits, and nothing here needs it as text.
+ */
+fun looksLikePin(secret: ByteArray): Boolean =
+    secret.size == 6 && secret.all { it >= '0'.code.toByte() && it <= '9'.code.toByte() }
+
 class Prefs(context: Context) : VaultPrefs {
 
     private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
@@ -85,6 +99,21 @@ class Prefs(context: Context) : VaultPrefs {
     var quickUnlockEnabled: Boolean
         get() = prefs.getBoolean(KEY_QUICK_UNLOCK, false)
         set(v) = prefs.edit().putBoolean(KEY_QUICK_UNLOCK, v).apply()
+
+    /**
+     * Whether the vault opens with a 6-digit PIN rather than a passphrase.
+     *
+     * The lock screen has to name the thing it is asking for before anything is
+     * decrypted, so this cannot live inside the vault. It records the *shape* of
+     * the secret, not the secret: an attacker who can read this file can read
+     * the vault file beside it, and six digits is the first thing anyone would
+     * try against a vault anyway. False until something says otherwise, so an
+     * install that predates this says "passphrase" until the first typed unlock
+     * settles it.
+     */
+    override var secretIsPin: Boolean
+        get() = prefs.getBoolean(KEY_SECRET_IS_PIN, false)
+        set(v) = prefs.edit().putBoolean(KEY_SECRET_IS_PIN, v).apply()
 
     // §5.1 S13: failed-attempt cooldown, doubling — survives process death.
     override var failedAttempts: Int
@@ -149,6 +178,7 @@ class Prefs(context: Context) : VaultPrefs {
 
     private companion object {
         const val KEY_DEVICE_ID = "device_id"
+        const val KEY_SECRET_IS_PIN = "secret_is_pin"
         const val KEY_KDF_OPS = "kdf_ops"
         const val KEY_KDF_MEM = "kdf_mem"
         const val KEY_AUTOLOCK = "auto_lock_minutes"

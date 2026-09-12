@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">पासफ्रेज</string>
     <string name="scr_lock_unlock">खोह्लो</string>
     <string name="scr_lock_wrong">पासफ्रेज गलत ऐ</string>
+    <string name="scr_lock_wrong_pin">पिन गलत ऐ</string>
+    <string name="scr_lock_use_pin_once">किरपा करियै इक बारी पिन कन्नै खोह्लो</string>
     <string name="scr_lock_cooldown">मते बारी गलत कोशश होई। %1$d सैकेंड रुको।</string>
     <string name="scr_lock_use_recovery">रिकवरी कुंजी बरतो</string>
     <string name="scr_lock_use_passphrase">पासफ्रेज बरतो</string>

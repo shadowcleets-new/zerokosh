@@ -43,11 +43,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.zerokosh.app.R
+import org.zerokosh.app.ZerokoshApp
 // #endregion
 
 /**
@@ -65,6 +68,10 @@ fun UnlockSheet(
     onUnlock: (passphrase: String, onWrong: () -> Unit) -> Unit,
     onCancel: () -> Unit,
 ) {
+    // Same rule as the lock screen: ask for what the user actually set. This
+    // sheet floats over another app's form, where a wrong word is even more
+    // confusing than it is at home.
+    val isPin = (LocalContext.current.applicationContext as ZerokoshApp).prefs.secretIsPin
     var entered by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
@@ -102,15 +109,22 @@ fun UnlockSheet(
                     singleLine = true,
                     isError = wrong,
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (isPin) KeyboardType.NumberPassword else KeyboardType.Password,
+                        imeAction = ImeAction.Go,
+                    ),
                     keyboardActions = KeyboardActions(onGo = { submit() }),
-                    label = { Text(stringResource(R.string.scr_lock_hint)) },
+                    label = {
+                        Text(stringResource(if (isPin) R.string.ob_pass_tab_pin else R.string.scr_lock_hint))
+                    },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (wrong) {
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = stringResource(R.string.scr_lock_wrong),
+                        text = stringResource(
+                            if (isPin) R.string.scr_lock_wrong_pin else R.string.scr_lock_wrong,
+                        ),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )

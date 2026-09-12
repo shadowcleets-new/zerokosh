@@ -51,6 +51,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,6 +66,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -88,27 +90,25 @@ import org.zerokosh.app.data.UnlockOutcome
 import org.zerokosh.app.quickunlock.QuickUnlockManager
 import org.zerokosh.app.ui.common.Kicker
 import org.zerokosh.app.ui.theme.Newsreader
-import org.zerokosh.app.ui.theme.VaultAccent
-import org.zerokosh.app.ui.theme.VaultDock
-import org.zerokosh.app.ui.theme.VaultErrorDark
-import org.zerokosh.app.ui.theme.VaultPaper
-import org.zerokosh.app.ui.theme.VaultPrimary
+import org.zerokosh.app.ui.theme.VaultColors
+import org.zerokosh.app.ui.theme.VaultTheme
 import org.zerokosh.core.vault.UnlockResult
 // #endregion
 
-// #region Fixed dark palette
-// The mockup draws the lock screen on ink in both themes, so this screen uses
-// the literal tokens rather than the theme-flipping ones.
-private val LockSurface = VaultDock
-private val LockOnSurface = VaultPaper
-
+// #region Palette
 /**
- * BV-10: this screen is charcoal in both themes, but it was pulling the error
- * colour from the active scheme — which in light theme is #D40C1A, about 3.6:1
- * against #120C09. That is the "wrong passphrase" message, so it takes the
- * dark-theme error unconditionally.
+ * This screen used to be charcoal in both themes, because the mockup drew it
+ * that way. On a phone set to light that is the one screen that ignores the
+ * choice, and it arrives unannounced at the moment the app is opened — so it
+ * now takes the ordinary theme tokens like every other screen.
+ *
+ * Two things fall out of that. The error colour goes back to the active scheme
+ * (BV-10 forced the dark one because the background was always dark; with the
+ * background following the theme, so must the error). And the accent is now
+ * the theme's, which in dark is the lighter #F0834E rather than the #BB4717
+ * this screen was drawing on charcoal at about 3:1.
  */
-private val LockError = VaultErrorDark
+private fun VaultColors.isDark(): Boolean = paper.luminance() < 0.5f
 // #endregion
 
 // #region Screen + unlock logic
@@ -125,13 +125,52 @@ private fun recordPassphraseUse(app: ZerokoshApp, recoveryMode: Boolean, outcome
     }
 }
 
+// #region Naming the secret
+// A vault opened with six digits should not be asked for a passphrase. Kept as
+// four small functions rather than four `when`s inside the screen, which is
+// already the largest function in the app and may not grow.
+
+/** "…with your PIN once" or "…with your passphrase once". */
+internal fun usePassphraseOnce(isPin: Boolean): Int =
+    if (isPin) R.string.scr_lock_use_pin_once else R.string.scr_lock_use_passphrase_once
+
+internal fun fieldLabel(recoveryMode: Boolean, isPin: Boolean): Int = when {
+    recoveryMode -> R.string.scr_lock_recovery_hint
+    isPin -> R.string.ob_pass_tab_pin
+    else -> R.string.scr_lock_hint
+}
+
+internal fun wrongSecret(recoveryMode: Boolean, isPin: Boolean): Int = when {
+    recoveryMode -> R.string.scr_lock_recovery_invalid
+    isPin -> R.string.scr_lock_wrong_pin
+    else -> R.string.scr_lock_wrong
+}
+
+/** Six digits deserve a digit keypad, not a full keyboard. */
+internal fun keyboardFor(recoveryMode: Boolean, isPin: Boolean): KeyboardType = when {
+    recoveryMode -> KeyboardType.Text
+    isPin -> KeyboardType.NumberPassword
+    else -> KeyboardType.Password
+}
+// #endregion
+
 @Composable
 fun LockScreen(app: ZerokoshApp) {
+    val c = VaultTheme.colors
+    // Ask for what the user actually set. Saying "passphrase" to someone whose
+    // vault opens with six digits is the screen describing a different app.
+    val isPin = app.prefs.secretIsPin
+    val dark = c.isDark()
     var passphrase by remember { mutableStateOf("") }
     var wrong by remember { mutableStateOf(false) }
     var damagedRestored by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
-    var recoveryMode by remember { mutableStateOf(false) }
+    // Saveable, unlike the two fields below: a rotation or a theme switch used
+    // to throw the user back to the passphrase view mid-recovery. The secrets
+    // themselves stay in plain remember deliberately — rememberSaveable writes
+    // to the instance-state bundle, which is the last place a passphrase or a
+    // recovery key should be.
+    var recoveryMode by rememberSaveable { mutableStateOf(false) }
     var recoveryInput by remember { mutableStateOf("") }
     var recoveryInvalid by remember { mutableStateOf(false) }
     var cooldown by remember { mutableIntStateOf(app.repository.cooldownRemainingSeconds()) }
@@ -145,7 +184,7 @@ fun LockScreen(app: ZerokoshApp) {
     var biometricFellBack by remember { mutableStateOf(false) }
     // Biometric-first, exactly as the mockup: the credential field only appears
     // when the sensor is unavailable or the user asks for it.
-    var showCredential by remember { mutableStateOf(!biometricReady) }
+    var showCredential by rememberSaveable { mutableStateOf(!biometricReady) }
 
     // cooldown ticker
     LaunchedEffect(cooldown) {
@@ -203,7 +242,7 @@ fun LockScreen(app: ZerokoshApp) {
     val canSubmit = !busy && cooldown == 0 &&
         (if (recoveryMode) recoveryInput.isNotBlank() else passphrase.isNotBlank())
 
-    Box(Modifier.fillMaxSize().background(LockSurface)) {
+    Box(Modifier.fillMaxSize().background(c.paper)) {
         // Two blurred glows, per the mockup.
         // Modifier.blur clips at the layer bounds by default, which drew these as
         // hard-edged rectangles instead of soft glows. Unbounded lets the blur
@@ -214,7 +253,8 @@ fun LockScreen(app: ZerokoshApp) {
                 .align(Alignment.TopStart)
                 .offset(x = (-64).dp, y = (-80).dp)
                 .blur(48.dp, BlurredEdgeTreatment.Unbounded)
-                .background(VaultPrimary.copy(alpha = 0.25f), CircleShape),
+                // A wash that reads as a glow on ink is a stain on paper.
+                .background(c.primary.copy(alpha = if (dark) 0.25f else 0.14f), CircleShape),
         )
         Box(
             Modifier
@@ -222,7 +262,7 @@ fun LockScreen(app: ZerokoshApp) {
                 .align(Alignment.BottomEnd)
                 .offset(x = 48.dp, y = 96.dp)
                 .blur(48.dp, BlurredEdgeTreatment.Unbounded)
-                .background(VaultAccent.copy(alpha = 0.20f), CircleShape),
+                .background(c.accent.copy(alpha = if (dark) 0.20f else 0.11f), CircleShape),
         )
 
         Column(
@@ -238,7 +278,7 @@ fun LockScreen(app: ZerokoshApp) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(48.dp))
-            Kicker(stringResource(R.string.kicker_locked), color = LockOnSurface.copy(alpha = 0.6f))
+            Kicker(stringResource(R.string.kicker_locked), color = c.ink.copy(alpha = 0.6f))
 
             Spacer(Modifier.height(20.dp))
             Text(
@@ -248,19 +288,19 @@ fun LockScreen(app: ZerokoshApp) {
                         SpanStyle(
                             fontFamily = Newsreader,
                             fontStyle = FontStyle.Italic,
-                            color = VaultPrimary,
+                            color = c.primary,
                         ),
                     ) { append(stringResource(R.string.lk_welcome_emph)) }
                 },
                 style = MaterialTheme.typography.displayMedium,
-                color = LockOnSurface,
+                color = c.ink,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(R.string.lk_crypto_note),
                 fontSize = 12.sp,
-                color = LockOnSurface.copy(alpha = 0.6f),
+                color = c.ink.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,
             )
 
@@ -268,7 +308,7 @@ fun LockScreen(app: ZerokoshApp) {
                 Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(R.string.msg_file_damaged),
-                    color = LockError,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )
@@ -276,9 +316,9 @@ fun LockScreen(app: ZerokoshApp) {
             if (biometricFellBack) {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    stringResource(R.string.scr_lock_use_passphrase_once),
+                    stringResource(usePassphraseOnce(isPin)),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = LockOnSurface.copy(alpha = 0.8f),
+                    color = c.ink.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center,
                 )
             }
@@ -290,7 +330,7 @@ fun LockScreen(app: ZerokoshApp) {
                 Text(
                     stringResource(R.string.lk_touch_unlock),
                     fontSize = 12.sp,
-                    color = LockOnSurface.copy(alpha = 0.7f),
+                    color = c.ink.copy(alpha = 0.7f),
                 )
             }
 
@@ -308,18 +348,13 @@ fun LockScreen(app: ZerokoshApp) {
                     },
                     label = {
                         Text(
-                            stringResource(
-                                if (recoveryMode) R.string.scr_lock_recovery_hint
-                                else R.string.scr_lock_hint,
-                            ),
+                            stringResource(fieldLabel(recoveryMode, isPin)),
                         )
                     },
                     visualTransformation =
                         if (recoveryMode || revealed) androidx.compose.ui.text.input.VisualTransformation.None
                         else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = if (recoveryMode) KeyboardType.Text else KeyboardType.Password,
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = keyboardFor(recoveryMode, isPin)),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = if (recoveryMode) recoveryInvalid else wrong,
@@ -327,11 +362,8 @@ fun LockScreen(app: ZerokoshApp) {
                         val err = if (recoveryMode) recoveryInvalid else wrong
                         if (err) {
                             Text(
-                                stringResource(
-                                    if (recoveryMode) R.string.scr_lock_recovery_invalid
-                                    else R.string.scr_lock_wrong,
-                                ),
-                                color = LockError,
+                                stringResource(wrongSecret(recoveryMode, isPin)),
+                                color = MaterialTheme.colorScheme.error,
                             )
                         }
                     },
@@ -343,7 +375,7 @@ fun LockScreen(app: ZerokoshApp) {
                             // home inside the field rather than a dead control.
                             ContainedLoadingIndicator(
                                 modifier = Modifier.size(40.dp),
-                                indicatorColor = LockOnSurface,
+                                indicatorColor = c.ink,
                             )
                         }
                     } else if (recoveryMode) null else {
@@ -351,22 +383,22 @@ fun LockScreen(app: ZerokoshApp) {
                             RevealToggle(
                                 visible = revealed,
                                 onToggle = { revealed = !revealed },
-                                tint = LockOnSurface.copy(alpha = 0.7f),
+                                tint = c.ink.copy(alpha = 0.7f),
                             )
                         }
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = LockOnSurface,
-                        unfocusedTextColor = LockOnSurface,
-                        disabledTextColor = LockOnSurface.copy(alpha = 0.4f),
-                        cursorColor = VaultPrimary,
-                        focusedBorderColor = VaultPrimary,
-                        unfocusedBorderColor = LockOnSurface.copy(alpha = 0.15f),
-                        focusedLabelColor = VaultPrimary,
-                        unfocusedLabelColor = LockOnSurface.copy(alpha = 0.55f),
-                        focusedContainerColor = LockOnSurface.copy(alpha = 0.06f),
-                        unfocusedContainerColor = LockOnSurface.copy(alpha = 0.06f),
+                        focusedTextColor = c.ink,
+                        unfocusedTextColor = c.ink,
+                        disabledTextColor = c.ink.copy(alpha = 0.4f),
+                        cursorColor = c.primary,
+                        focusedBorderColor = c.primary,
+                        unfocusedBorderColor = c.ink.copy(alpha = 0.15f),
+                        focusedLabelColor = c.primary,
+                        unfocusedLabelColor = c.ink.copy(alpha = 0.55f),
+                        focusedContainerColor = c.ink.copy(alpha = 0.06f),
+                        unfocusedContainerColor = c.ink.copy(alpha = 0.06f),
                     ),
                 )
 
@@ -376,7 +408,7 @@ fun LockScreen(app: ZerokoshApp) {
                         .fillMaxWidth()
                         .height(52.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(if (canSubmit) VaultPrimary else LockOnSurface.copy(alpha = 0.10f))
+                        .background(if (canSubmit) c.primary else c.ink.copy(alpha = 0.10f))
                         .clickable(enabled = canSubmit) { submit() },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -384,13 +416,14 @@ fun LockScreen(app: ZerokoshApp) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = LockOnSurface,
+                            color = c.ink,
                         )
                     } else {
                         Text(
                             stringResource(R.string.scr_lock_unlock),
                             style = MaterialTheme.typography.labelLarge,
-                            color = if (canSubmit) VaultPaper else LockOnSurface.copy(alpha = 0.5f),
+                            color = if (canSubmit) MaterialTheme.colorScheme.onPrimary
+                            else c.ink.copy(alpha = 0.5f),
                         )
                     }
                 }
@@ -401,7 +434,7 @@ fun LockScreen(app: ZerokoshApp) {
                 Text(
                     stringResource(R.string.scr_lock_cooldown, cooldown),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = LockError,
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -412,7 +445,7 @@ fun LockScreen(app: ZerokoshApp) {
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 if (!showCredential && !recoveryMode) {
-                    DarkOutlineButton(stringResource(R.string.scr_lock_use_passphrase_once)) {
+                    LockOutlineButton(stringResource(usePassphraseOnce(isPin))) {
                         showCredential = true
                     }
                 }
@@ -421,7 +454,7 @@ fun LockScreen(app: ZerokoshApp) {
                 // "Use Recovery Key" meant that once you were in recovery mode
                 // nothing on screen said so, and the only way back was a button
                 // claiming to do the thing you were already doing.
-                DarkOutlineButton(
+                LockOutlineButton(
                     stringResource(
                         if (recoveryMode) R.string.scr_lock_use_passphrase
                         else R.string.scr_lock_use_recovery,
@@ -444,14 +477,15 @@ fun LockScreen(app: ZerokoshApp) {
 }
 
 @Composable
-private fun DarkOutlineButton(label: String, onClick: () -> Unit) {
+private fun LockOutlineButton(label: String, onClick: () -> Unit) {
+    val c = VaultTheme.colors
     Box(
         Modifier
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(LockOnSurface.copy(alpha = 0.10f))
-            .border(1.dp, LockOnSurface.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+            .background(c.ink.copy(alpha = 0.10f))
+            .border(1.dp, c.ink.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -459,7 +493,7 @@ private fun DarkOutlineButton(label: String, onClick: () -> Unit) {
             label,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            color = LockOnSurface,
+            color = c.ink,
             textAlign = TextAlign.Center,
         )
     }
@@ -470,6 +504,7 @@ private fun DarkOutlineButton(label: String, onClick: () -> Unit) {
 /** The 128dp fingerprint target with the breathing glow behind it. */
 @Composable
 private fun SensorTarget(enabled: Boolean, onClick: () -> Unit) {
+    val c = VaultTheme.colors
     val pulse by rememberInfiniteTransition(label = "sensor").animateFloat(
         initialValue = 0.94f,
         targetValue = 1.10f,
@@ -482,21 +517,21 @@ private fun SensorTarget(enabled: Boolean, onClick: () -> Unit) {
                 .size(128.dp)
                 .scale(pulse)
                 .blur(24.dp)
-                .background(VaultPrimary.copy(alpha = 0.30f), CircleShape),
+                .background(c.primary.copy(alpha = 0.30f), CircleShape),
         )
         Box(
             Modifier
                 .size(128.dp)
                 .clip(CircleShape)
-                .background(LockOnSurface.copy(alpha = 0.08f))
-                .border(1.dp, LockOnSurface.copy(alpha = 0.15f), CircleShape)
+                .background(c.ink.copy(alpha = 0.08f))
+                .border(1.dp, c.ink.copy(alpha = 0.15f), CircleShape)
                 .clickable(enabled = enabled, onClick = onClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 Icons.Outlined.Fingerprint,
                 contentDescription = stringResource(R.string.scr_lock_biometric_title),
-                tint = VaultPrimary,
+                tint = c.primary,
                 modifier = Modifier.size(64.dp),
             )
         }

@@ -889,6 +889,8 @@ fun CreatePassphraseScreen(
                     onboarding.sealToDevice = seal
                     scope.launch {
                         val bytes = pass.toByteArray()
+                        // So the lock screen can ask for the right thing by name.
+                        app.prefs.secretIsPin = pinMode
                         val recovery = app.repository.createVault(bytes)
                         onboarding.passphrase = bytes
                         onboarding.recoveryKey = recovery

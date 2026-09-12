@@ -113,6 +113,8 @@
     <string name="scr_lock_hint">Passphrase</string>
     <string name="scr_lock_unlock">Unlock</string>
     <string name="scr_lock_wrong">Wrong passphrase</string>
+    <string name="scr_lock_wrong_pin">Wrong PIN</string>
+    <string name="scr_lock_use_pin_once">Please unlock with your PIN once</string>
     <string name="scr_lock_cooldown">Too many tries. Wait %1$d seconds.</string>
     <string name="scr_lock_use_recovery">Use Recovery Key</string>
     <string name="scr_lock_use_passphrase">Use passphrase</string>

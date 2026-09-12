@@ -51,6 +51,7 @@ class FakeVaultPrefs(override val deviceId: String = "test-device") : VaultPrefs
     override var cooldownUntilMs: Long = 0
     override var cooldownSeconds: Int = 30
     override var syncFolderUri: String = ""
+    override var secretIsPin: Boolean = false
 }
 
 /**

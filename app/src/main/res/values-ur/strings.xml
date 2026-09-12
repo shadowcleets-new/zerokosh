@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">پاس فریز</string>
     <string name="scr_lock_unlock">کھولیں</string>
     <string name="scr_lock_wrong">پاس فریز غلط ہے</string>
+    <string name="scr_lock_wrong_pin">پن غلط ہے</string>
+    <string name="scr_lock_use_pin_once">براہِ کرم ایک بار پن سے کھولیں</string>
     <string name="scr_lock_cooldown">کئی بار غلط کوشش ہوئی۔ %1$d سیکنڈ انتظار کریں۔</string>
     <string name="scr_lock_use_recovery">ریکوری کنجی استعمال کریں</string>
     <string name="scr_lock_use_passphrase">پاس فریز استعمال کریں</string>

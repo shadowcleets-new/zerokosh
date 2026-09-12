@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">પાસફ્રેઝ</string>
     <string name="scr_lock_unlock">ખોલો</string>
     <string name="scr_lock_wrong">પાસફ્રેઝ ખોટો છે</string>
+    <string name="scr_lock_wrong_pin">પિન ખોટો છે</string>
+    <string name="scr_lock_use_pin_once">કૃપા કરીને એક વાર પિનથી ખોલો</string>
     <string name="scr_lock_cooldown">બહુ વાર ખોટી કોશિશ થઈ. %1$d સેકન્ડ રાહ જુઓ.</string>
     <string name="scr_lock_use_recovery">રિકવરી ચાવી વાપરો</string>
     <string name="scr_lock_use_passphrase">પાસફ્રેઝ વાપરો</string>

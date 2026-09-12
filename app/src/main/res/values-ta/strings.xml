@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">கடவுச்சொற்றொடர்</string>
     <string name="scr_lock_unlock">திற</string>
     <string name="scr_lock_wrong">கடவுச்சொற்றொடர் தவறு</string>
+    <string name="scr_lock_wrong_pin">பின் எண் தவறு</string>
+    <string name="scr_lock_use_pin_once">ஒருமுறை பின் எண்ணால் திறக்கவும்</string>
     <string name="scr_lock_cooldown">பல முறை தவறாக முயன்றுவிட்டீர்கள். %1$d வினாடிகள் காத்திருங்கள்.</string>
     <string name="scr_lock_use_recovery">மீட்புச் சாவியைப் பயன்படுத்து</string>
     <string name="scr_lock_use_passphrase">கடவுச்சொற்றொடரைப் பயன்படுத்து</string>

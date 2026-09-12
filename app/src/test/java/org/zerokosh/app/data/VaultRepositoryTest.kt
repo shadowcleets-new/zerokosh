@@ -34,6 +34,42 @@ class VaultRepositoryTest {
         return r to store
     }
 
+    /**
+     * Reported from a phone whose vault opens with six digits: every prompt on
+     * the lock screen said "passphrase". Nothing recorded which kind of secret
+     * had been set, so a vault made before that flag existed has to learn it
+     * here — the one moment the app holds the secret and knows it was right.
+     */
+    @Test
+    fun `a successful unlock records whether the secret was a PIN`() = runTest {
+        val prefs = FakeVaultPrefs()
+        val pin = "241000".toByteArray()
+        val r = VaultRepository(FakeCrypto(), FakeVaultStore(), prefs)
+        r.createVault(pin.copyOf())
+        assertFalse(prefs.secretIsPin, "nothing is claimed before an unlock proves it")
+
+        assertEquals(UnlockOutcome.SUCCESS, r.unlockWithPassphrase(pin.copyOf()))
+        assertTrue(prefs.secretIsPin)
+
+        // And a wrong guess that happens to look like a PIN claims nothing.
+        val otherPrefs = FakeVaultPrefs()
+        val other = VaultRepository(FakeCrypto(), FakeVaultStore(), otherPrefs)
+        other.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.WRONG_CREDENTIAL, other.unlockWithPassphrase("999999".toByteArray()))
+        assertFalse(otherPrefs.secretIsPin)
+    }
+
+    /** Changing to a passphrase has to take the label back off again. */
+    @Test
+    fun `unlocking with a passphrase clears the PIN label`() = runTest {
+        val prefs = FakeVaultPrefs()
+        prefs.secretIsPin = true
+        val r = VaultRepository(FakeCrypto(), FakeVaultStore(), prefs)
+        r.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, r.unlockWithPassphrase(passphrase.copyOf()))
+        assertFalse(prefs.secretIsPin)
+    }
+
     private fun record(uuid: String = "u1", password: String = "first-secret") = Record(
         uuid = uuid,
         template_id = "login",

@@ -145,6 +145,10 @@ class VaultRepository(
 
     suspend fun unlockWithPassphrase(passphrase: ByteArray): UnlockOutcome =
         attemptUnlock { bytes -> VaultOperations.unlockWithPassphrase(bytes, passphrase, crypto) }
+            // A vault made before secretIsPin existed learns what it is here:
+            // the one moment the app holds the secret and knows it was right.
+            // Every unlock route reaches this, the autofill sheet included.
+            .also { if (it == UnlockOutcome.SUCCESS) prefs.secretIsPin = looksLikePin(passphrase) }
 
     suspend fun unlockWithRecoveryKey(recovery: String): UnlockOutcome =
         attemptUnlock { bytes -> VaultOperations.unlockWithRecoveryKey(bytes, recovery, crypto) }

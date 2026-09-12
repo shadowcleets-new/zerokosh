@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">पासफ्रेज</string>
     <string name="scr_lock_unlock">खोल्नुहोस्</string>
     <string name="scr_lock_wrong">पासफ्रेज गलत छ</string>
+    <string name="scr_lock_wrong_pin">पिन गलत छ</string>
+    <string name="scr_lock_use_pin_once">कृपया एकपटक पिनले खोल्नुहोस्</string>
     <string name="scr_lock_cooldown">धेरै पटक गलत प्रयास भयो। %1$d सेकेन्ड पर्खनुहोस्।</string>
     <string name="scr_lock_use_recovery">रिकभरी साँचो प्रयोग गर्नुहोस्</string>
     <string name="scr_lock_use_passphrase">पासफ्रेज प्रयोग गर्नुहोस्</string>

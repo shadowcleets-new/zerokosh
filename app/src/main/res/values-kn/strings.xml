@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">ಪಾಸ್‌ಫ್ರೇಸ್</string>
     <string name="scr_lock_unlock">ತೆರೆಯಿರಿ</string>
     <string name="scr_lock_wrong">ಪಾಸ್‌ಫ್ರೇಸ್ ತಪ್ಪಾಗಿದೆ</string>
+    <string name="scr_lock_wrong_pin">ಪಿನ್ ತಪ್ಪಾಗಿದೆ</string>
+    <string name="scr_lock_use_pin_once">ದಯವಿಟ್ಟು ಒಮ್ಮೆ ಪಿನ್‌ನಿಂದ ತೆರೆಯಿರಿ</string>
     <string name="scr_lock_cooldown">ಬಹಳ ಸಲ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. %1$d ಸೆಕೆಂಡ್ ಕಾಯಿರಿ.</string>
     <string name="scr_lock_use_recovery">ರಿಕವರಿ ಕೀ ಬಳಸಿ</string>
     <string name="scr_lock_use_passphrase">ಪಾಸ್‌ಫ್ರೇಸ್ ಬಳಸಿ</string>

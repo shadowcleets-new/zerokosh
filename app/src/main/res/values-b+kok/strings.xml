@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">पासफ्रेज</string>
     <string name="scr_lock_unlock">उगडात</string>
     <string name="scr_lock_wrong">पासफ्रेज चुकीचो आसा</string>
+    <string name="scr_lock_wrong_pin">पिन चुकीचो आसा</string>
+    <string name="scr_lock_use_pin_once">उपकार करून एक फावट पिनान उगडात</string>
     <string name="scr_lock_cooldown">जायते फावट चुकीचो यत्न जालो. %1$d सेकंद रावात.</string>
     <string name="scr_lock_use_recovery">रिकवरी चावी वापरात</string>
     <string name="scr_lock_use_passphrase">पासफ्रेज वापरात</string>

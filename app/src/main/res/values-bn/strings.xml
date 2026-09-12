@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">পাসফ্রেজ</string>
     <string name="scr_lock_unlock">খুলুন</string>
     <string name="scr_lock_wrong">পাসফ্রেজ ভুল</string>
+    <string name="scr_lock_wrong_pin">পিন ভুল</string>
+    <string name="scr_lock_use_pin_once">অনুগ্রহ করে একবার পিন দিয়ে খুলুন</string>
     <string name="scr_lock_cooldown">অনেকবার ভুল চেষ্টা হয়েছে। %1$d সেকেন্ড অপেক্ষা করুন।</string>
     <string name="scr_lock_use_recovery">রিকভারি চাবি ব্যবহার করুন</string>
     <string name="scr_lock_use_passphrase">পাসফ্রেজ ব্যবহার করুন</string>

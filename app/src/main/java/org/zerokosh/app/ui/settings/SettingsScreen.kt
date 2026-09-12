@@ -63,6 +63,7 @@ import org.zerokosh.app.BuildConfig
 import org.zerokosh.app.R
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.autofill.AutofillSetup
+import org.zerokosh.app.data.looksLikePin
 import org.zerokosh.app.quickunlock.QuickUnlockManager
 import org.zerokosh.app.ui.backup.rememberImportBackup
 import org.zerokosh.app.ui.backup.rememberImportCsv
@@ -762,6 +763,7 @@ private fun ChangePassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                         val ok = app.repository.changePassphrase(current.toByteArray(), newPass.toByteArray())
                         busy = false
                         if (ok) {
+                            app.prefs.secretIsPin = looksLikePin(newPass)
                             Toast.makeText(context, passphraseChangedMessage, Toast.LENGTH_SHORT).show()
                             onDismiss()
                         } else {
@@ -885,6 +887,7 @@ private fun ResetPassphraseDialog(app: ZerokoshApp, onDismiss: () -> Unit) {
                         busy = false
                         Toast.makeText(context, if (ok) doneMessage else failedMessage, Toast.LENGTH_LONG).show()
                         if (ok) {
+                            app.prefs.secretIsPin = looksLikePin(newPass)
                             app.prefs.lastPassphraseUseMs = System.currentTimeMillis()
                             onDismiss()
                         }

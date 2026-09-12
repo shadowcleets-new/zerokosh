@@ -111,6 +111,8 @@
     <string name="scr_lock_hint">ପାସ୍‌ଫ୍ରେଜ୍</string>
     <string name="scr_lock_unlock">ଖୋଲନ୍ତୁ</string>
     <string name="scr_lock_wrong">ପାସ୍‌ଫ୍ରେଜ୍ ଭୁଲ୍</string>
+    <string name="scr_lock_wrong_pin">ପିନ୍ ଭୁଲ୍</string>
+    <string name="scr_lock_use_pin_once">ଦୟାକରି ଥରେ ପିନ୍‌ରେ ଖୋଲନ୍ତୁ</string>
     <string name="scr_lock_cooldown">ବହୁତ ଥର ଭୁଲ୍ ଚେଷ୍ଟା ହେଲା। %1$d ସେକେଣ୍ଡ ଅପେକ୍ଷା କରନ୍ତୁ।</string>
     <string name="scr_lock_use_recovery">ରିକଭରି ଚାବି ବ୍ୟବହାର କରନ୍ତୁ</string>
     <string name="scr_lock_use_passphrase">ପାସ୍‌ଫ୍ରେଜ୍ ବ୍ୟବହାର କରନ୍ତୁ</string>

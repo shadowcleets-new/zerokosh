@@ -72,30 +72,7 @@ class MainActivity : FragmentActivity() {
             }
             ZerokoshTheme(darkTheme = darkTheme) {
                 ZerokoshNav(app)
-                DeliverAutofillWhenUnlocked()
             }
-        }
-    }
-
-    /**
-     * When this activity was opened by the autofill service to unlock the vault,
-     * hand the response back the moment it is open and get out of the way.
-     *
-     * Without this the authentication dataset was a dead end: it launched the
-     * app, the user unlocked, and the form they came from stayed empty — they
-     * had to leave, come back, and tap the field again. The vault re-locks a
-     * minute after you leave it, so that was the ordinary path, not the edge.
-     */
-    @Composable
-    private fun DeliverAutofillWhenUnlocked() {
-        val targets = remember { AutofillFill.targetsFrom(intent) } ?: return
-        val state by app.repository.state.collectAsState()
-        LaunchedEffect(state) {
-            if (state != VaultState.Unlocked) return@LaunchedEffect
-            AutofillFill.deliver(this@MainActivity, app, targets)
-            // Consumed: a rotation must not re-deliver and re-finish.
-            intent.removeExtra("org.zerokosh.app.autofill.AUTH")
-            finish()
         }
     }
 

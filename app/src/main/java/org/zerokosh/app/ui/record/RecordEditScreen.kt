@@ -193,7 +193,7 @@ private fun CustomFieldsCard(
  * is the two guards and the write, and the field-by-field construction — which
  * carries the rules about what an edit preserves — sits on its own.
  */
-private fun buildRecord(
+internal fun buildRecord(
     existing: Record?,
     templateId: String,
     title: String,
@@ -208,6 +208,10 @@ private fun buildRecord(
     fields = values.filterValues { it.isNotBlank() }, // §2.1: empty fields omitted
     custom_fields = customFields.filter { it.label.isNotBlank() },
     // An edit preserves what the form never showed.
+    // history included: it is only rebuilt when a secret actually changes, so
+    // leaving it out dropped every remembered password whenever anything else
+    // was edited — a title fix wiped the lot.
+    history = existing?.history ?: emptyList(),
     tags = existing?.tags ?: emptyList(),
     favorite = existing?.favorite ?: false,
     created_at = existing?.created_at ?: 0,
@@ -787,8 +791,8 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
         val state = rememberDatePickerState(
             initialSelectedDateMillis = remember(value) {
                 runCatching {
-                    java.time.LocalDate.parse(value)
-                        .atStartOfDay(java.time.ZoneOffset.UTC)
+                    LocalDate.parse(value)
+                        .atStartOfDay(ZoneOffset.UTC)
                         .toInstant().toEpochMilli()
                 }.getOrNull()
             },
@@ -799,8 +803,8 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { millis ->
                         onValueChange(
-                            java.time.Instant.ofEpochMilli(millis)
-                                .atZone(java.time.ZoneOffset.UTC).toLocalDate().toString(),
+                            Instant.ofEpochMilli(millis)
+                                .atZone(ZoneOffset.UTC).toLocalDate().toString(),
                         )
                     }
                     showPicker = false
@@ -834,7 +838,7 @@ private fun MonthYearField(value: String, onValueChange: (String) -> Unit, label
         FieldInput(value = value, onValueChange = {}, mono = true, placeholder = "YYYY-MM")
     }
     if (showPicker) {
-        val now = java.time.LocalDate.now()
+        val now = LocalDate.now()
         var month by remember { mutableStateOf(value.substringAfter('-', "").toIntOrNull() ?: now.monthValue) }
         var year by remember { mutableStateOf(value.substringBefore('-', "").toIntOrNull() ?: now.year) }
         AlertDialog(

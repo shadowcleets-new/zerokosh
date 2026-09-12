@@ -68,6 +68,12 @@ class CredentialEntryActivity : FragmentActivity() {
 
     private val app: ZerokoshApp get() = application as ZerokoshApp
 
+    /**
+     * Whether the user proved who they are during *this* ceremony — not whether
+     * the vault happens to be open. Only this earns a passkey's UV flag.
+     */
+    private var verifiedNow = false
+
     override fun onDestroy() {
         app.exitProviderSheet()
         super.onDestroy()
@@ -94,7 +100,7 @@ class CredentialEntryActivity : FragmentActivity() {
     }
 
     private fun cancel() {
-        setResult(Activity.RESULT_CANCELED)
+        setResult(RESULT_CANCELED)
         finish()
     }
     // #endregion
@@ -112,6 +118,7 @@ class CredentialEntryActivity : FragmentActivity() {
             val result = QuickUnlockManager.unlock(this, app)
             if (result is UnlockResult.Success) {
                 app.repository.adoptBiometricUnlock(result)
+                verifiedNow = true
                 return true
             }
         }
@@ -131,6 +138,7 @@ class CredentialEntryActivity : FragmentActivity() {
                                 onWrong()
                                 return@launch
                             }
+                            verifiedNow = true
                             when (intent.action) {
                                 ACTION_GET -> deliverPassword()
                                 ACTION_GET_PASSKEY -> deliverPasskey()
@@ -164,7 +172,7 @@ class CredentialEntryActivity : FragmentActivity() {
         )
         val result = Intent()
         PendingIntentHandler.setGetCredentialResponse(result, response)
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
     }
 
@@ -188,7 +196,7 @@ class CredentialEntryActivity : FragmentActivity() {
                 credentialEntries = CredentialEntries.entriesFor(this, app, request),
             ),
         )
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
     }
     // #endregion
@@ -229,7 +237,7 @@ class CredentialEntryActivity : FragmentActivity() {
         }
         val result = Intent()
         PendingIntentHandler.setCreateCredentialResponse(result, CreatePasswordResponse())
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
     }
     // #endregion
@@ -263,6 +271,7 @@ class CredentialEntryActivity : FragmentActivity() {
             options = options,
             origin = Passkeys.originFor(request.callingAppInfo),
             packageName = request.callingAppInfo.packageName,
+            userVerified = verifiedForCeremony(),
         )
         if (assertion == null) {
             cancel()
@@ -281,8 +290,25 @@ class CredentialEntryActivity : FragmentActivity() {
             result,
             GetCredentialResponse(PublicKeyCredential(assertion.responseJson)),
         )
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
+    }
+
+    /**
+     * A passkey's UV flag says the user was verified for this ceremony, and a
+     * relying party may drop its own second factor on the strength of it. A
+     * vault left open behind a live auto-lock window proves nothing, so ask for
+     * the fingerprint now; if there is no enrolment to ask, the assertion goes
+     * out with UV unset rather than with a claim we cannot support.
+     */
+    private suspend fun verifiedForCeremony(): Boolean {
+        if (verifiedNow) return true
+        if (!QuickUnlockManager.isEnrolled(this)) return false
+        val result = QuickUnlockManager.unlock(this, app)
+        if (result !is UnlockResult.Success) return false
+        app.repository.adoptBiometricUnlock(result)
+        verifiedNow = true
+        return true
     }
 
     /** Create and store a new passkey for the site that asked for one. */
@@ -294,6 +320,7 @@ class CredentialEntryActivity : FragmentActivity() {
             options = options,
             origin = Passkeys.originFor(request.callingAppInfo),
             packageName = request.callingAppInfo.packageName,
+           userVerified = verifiedForCeremony(),
         )
         val stored = runCatching { app.repository.upsertRecord(registration.record) }
             .getOrNull()?.isSuccess == true
@@ -303,7 +330,7 @@ class CredentialEntryActivity : FragmentActivity() {
             result,
             CreatePublicKeyCredentialResponse(registration.responseJson),
         )
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
         return true
     }

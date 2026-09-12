@@ -97,6 +97,7 @@ internal object Passkeys {
         options: CreationOptions,
         origin: String,
         packageName: String?,
+        userVerified: Boolean,
     ): Registration {
         val pair = WebAuthn.generateKeyPair()
         val public = pair.public as ECPublicKey
@@ -114,6 +115,7 @@ internal object Passkeys {
             signCount = 0,
             credentialId = credentialId,
             coseKey = WebAuthn.coseKey(public),
+            userVerified = userVerified,
         )
         val attestation = WebAuthn.attestationObject(authData)
         val now = System.currentTimeMillis()
@@ -167,6 +169,7 @@ internal object Passkeys {
         options: RequestOptions,
         origin: String,
         packageName: String?,
+        userVerified: Boolean,
     ): Assertion? {
         val credentialId = credentialIdOf(record) ?: return null
         val pkcs8 = record.fields["private_key"]
@@ -186,6 +189,7 @@ internal object Passkeys {
         val authData = WebAuthn.authenticatorData(
             rpId = options.rpId.ifBlank { record.fields["website"].orEmpty() },
             signCount = nextCount,
+            userVerified = userVerified,
         )
         val signature = WebAuthn.sign(privateKey, authData, clientData)
         val handle = record.fields["user_handle"]

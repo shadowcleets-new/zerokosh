@@ -89,6 +89,13 @@ object VaultFileCodec {
         return prefix + headerBytes + ciphertext
     }
 
+    /** @see decode — the header arrives unauthenticated, so refuse a downgrade. */
+    private fun requireKdfFloor(header: VaultHeader) {
+        if (header.ops < CryptoProvider.MIN_OPS || header.mem < CryptoProvider.MIN_MEM_BYTES) {
+            throw VaultFormatException("KDF parameters below floor: ops=${header.ops} mem=${header.mem}")
+        }
+    }
+
     fun decode(fileBytes: ByteArray): VaultEnvelope {
         if (fileBytes.size < PREFIX_LEN) throw VaultFormatException("file too short")
         val buf = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN)
@@ -111,6 +118,20 @@ object VaultFileCodec {
         } catch (e: Exception) {
             throw VaultFormatException("unreadable header")
         }
+        // The body's AEAD authenticates the 60-byte prefix, not this header, and
+        // body_sha256 is an unkeyed hash anyone can recompute — so ops/mem
+        // arrive unauthenticated. Someone who can write the file (a synced
+        // folder, a stolen backup) can lower them; the passphrase then appears
+        // wrong, the user takes the fingerprint reset, and the re-wrap carries
+        // the weakened parameters forward for good. A floor is the cheap half
+        // of the fix: anything below what this app will ever write is refused.
+        //
+        // The other half is a format change, not a patch. One (ops, mem) pair
+        // serves both wrap_mk and wrap_rk, and a passphrase change cannot
+        // recompute wrap_rk without the recovery key — so re-wrapping at
+        // stronger parameters would silently destroy the recovery key. Per-wrap
+        // parameters, or a header covered by the AEAD, need FORMAT_VERSION + 1.
+        requireKdfFloor(header)
         val ciphertext = fileBytes.copyOfRange(PREFIX_LEN + headerLen, fileBytes.size)
         if (sha256Hex(ciphertext) != header.body_sha256) throw VaultFormatException("body checksum mismatch")
         return VaultEnvelope(
@@ -274,9 +295,18 @@ object VaultOperations {
         } catch (e: VaultFormatException) {
             return UnlockResult.Corrupt
         }
-        val vaultKey = obtainVaultKey(envelope.header) ?: return UnlockResult.WrongCredential
+        // unb64 and argon2id throw on a malformed salt or wrap, and this is the
+        // one place that can tell a damaged file from a wrong passphrase.
+        val vaultKey = try {
+            obtainVaultKey(envelope.header)
+        } catch (e: IllegalArgumentException) {
+            return UnlockResult.Corrupt
+        } ?: return UnlockResult.WrongCredential
         val plaintext = crypto.aeadDecrypt(envelope.bodyCiphertext, envelope.prefix, envelope.bodyNonce, vaultKey)
-            ?: return UnlockResult.Corrupt // wrap opened but body doesn't — damaged file
+            ?: run {
+                vaultKey.wipe() // the body never opened; nothing needs this key now
+                return UnlockResult.Corrupt // wrap opened but body doesn't — damaged file
+            }
         val body = try {
             VaultJson.decodeFromString<VaultBody>(plaintext.decodeToString())
         } catch (e: Exception) {

@@ -7,6 +7,7 @@ import org.zerokosh.core.model.Record
 import org.zerokosh.core.model.VaultBody
 import org.zerokosh.core.vault.UnlockResult
 import org.zerokosh.core.vault.VaultMerge
+import org.zerokosh.core.crypto.CryptoProvider
 import org.zerokosh.core.vault.VaultOperations
 
 /**
@@ -21,8 +22,10 @@ class ImportRoundTripTest {
 
     private val crypto = LazySodiumTestCrypto()
     private val now = 1_751_875_200_000L
-    private val cheapOps = 1L
-    private val cheapMem = 8L * 1024 * 1024
+    // The floor the format now enforces, not lower: a vault built below it is
+    // refused at decode, which is the point of the floor.
+    private val cheapOps = CryptoProvider.MIN_OPS
+    private val cheapMem = CryptoProvider.MIN_MEM_BYTES
 
     private fun record(
         uuid: String,

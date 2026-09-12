@@ -36,12 +36,22 @@ class PasskeyTest {
         )
     }
 
+    /**
+     * UV is a claim the relying party acts on — a bank may skip its own second
+     * factor on the strength of it — so it is set only when the user actually
+     * proved who they are for this ceremony, never merely because the vault was
+     * open. UP stays set: something did touch the phone.
+     */
     @Test
-    fun `flags say user present and verified, and not attested, for an assertion`() {
-        val flags = WebAuthn.authenticatorData(rpId, signCount = 0)[32].toInt()
-        assertEquals(0x01, flags and 0x01, "UP")
-        assertEquals(0x04, flags and 0x04, "UV")
-        assertEquals(0x00, flags and 0x40, "AT must be clear without attested data")
+    fun `user verified is claimed only when it happened`() {
+        val unverified = WebAuthn.authenticatorData(rpId, signCount = 0)[32].toInt()
+        assertEquals(0x01, unverified and 0x01, "UP")
+        assertEquals(0x00, unverified and 0x04, "UV must be clear when nobody was verified")
+        assertEquals(0x00, unverified and 0x40, "AT must be clear without attested data")
+
+        val verified = WebAuthn.authenticatorData(rpId, signCount = 0, userVerified = true)[32].toInt()
+        assertEquals(0x01, verified and 0x01, "UP")
+        assertEquals(0x04, verified and 0x04, "UV")
     }
 
     @Test

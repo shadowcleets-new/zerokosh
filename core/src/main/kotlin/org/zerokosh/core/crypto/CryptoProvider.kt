@@ -34,6 +34,7 @@ interface CryptoProvider {
         const val DEFAULT_OPS = 3L
         const val DEFAULT_MEM_BYTES = 67_108_864L // 64 MiB
         const val MIN_MEM_BYTES = 33_554_432L // 32 MiB floor (§3.2)
+        const val MIN_OPS = 3L // §3.2; chooseKdfParams has never returned less
     }
 }
 

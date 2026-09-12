@@ -115,14 +115,25 @@ object WebAuthn {
      * @param signCount incremented on every assertion. A relying party that
      *   tracks it can spot a cloned credential by the counter going backwards.
      */
+    /**
+     * @param userVerified whether the user proved who they are *for this
+     *   ceremony* — a fingerprint or a typed passphrase just now, not a vault
+     *   that happens to be open. UV is a claim the relying party acts on: a
+     *   bank may skip its own second factor on the strength of it, so setting
+     *   it unconditionally told every site that a thief holding an unlocked
+     *   phone had been verified. Defaults to false, which is merely useless
+     *   rather than untrue.
+     */
     fun authenticatorData(
         rpId: String,
         signCount: Long,
         credentialId: ByteArray? = null,
         coseKey: ByteArray? = null,
+        userVerified: Boolean = false,
     ): ByteArray {
         val rpIdHash = sha256(rpId.toByteArray(Charsets.UTF_8))
-        var flags = FLAG_USER_PRESENT or FLAG_USER_VERIFIED
+        var flags = FLAG_USER_PRESENT
+        if (userVerified) flags = flags or FLAG_USER_VERIFIED
         if (credentialId != null && coseKey != null) flags = flags or FLAG_ATTESTED
 
         val out = ArrayList<Byte>(128)

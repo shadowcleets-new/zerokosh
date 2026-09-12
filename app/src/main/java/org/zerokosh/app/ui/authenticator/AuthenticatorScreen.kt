@@ -16,6 +16,7 @@ package org.zerokosh.app.ui.authenticator
 
 // #region Imports
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -67,6 +68,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.zxing.*
 import com.google.zxing.common.HybridBinarizer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.zerokosh.app.ZerokoshApp
@@ -118,7 +120,11 @@ private fun activeCodeCount(count: Int): String = stringResource(
 )
 
 @Composable
-fun AuthenticatorScreen(app: ZerokoshApp) {
+fun AuthenticatorScreen(
+    app: ZerokoshApp,
+    scanRequested: Boolean = false,
+    onScanRequestHandled: () -> Unit = {},
+) {
     val c = VaultTheme.colors
     val body by app.repository.body.collectAsState()
     val context = LocalContext.current
@@ -132,6 +138,14 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
     val savedMessage = stringResource(R.string.msg_saved)
     val scope = rememberCoroutineScope()
 
+    // The Scan button in the scaffold above cannot reach showScanner directly.
+    LaunchedEffect(scanRequested) {
+        if (scanRequested) {
+            showScanner = true
+            onScanRequestHandled()
+        }
+    }
+
     val entries = remember(body) {
         body?.records.orEmpty().flatMap { record ->
             record.fields.mapNotNull { (k, v) ->
@@ -139,8 +153,10 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
                 val field = app.catalog.templates.byId(record.template_id)?.fields?.firstOrNull { it.k == k }
                 val isTotp = field?.type == FieldType.TOTP || k.equals("totp", ignoreCase = true) || v.startsWith("otpauth://", ignoreCase = true)
                 if (!isTotp) return@mapNotNull null
-                val params = Totp.parseOtpauthUri(v)
-                    ?: Totp.Params(secretBase32 = v.trim(), label = record.title)
+                // A value that cannot produce a code is skipped rather than
+                // shown: TotpCard asks for one during composition, so a single
+                // unusable secret used to crash the whole list.
+                val params = Totp.paramsOrNull(v, label = record.title) ?: return@mapNotNull null
                 TotpEntry(record.uuid, record.title, k, params)
             }
         }
@@ -156,32 +172,20 @@ fun AuthenticatorScreen(app: ZerokoshApp) {
 
     // Read in composition: onSaveSecret is a plain lambda, not a composable.
     val fallbackName = stringResource(R.string.au_fallback_name)
+    val invalidSecretMessage = stringResource(R.string.au_invalid_secret)
+    // The work is a plain function below: it is not composable, and keeping its
+    // branches out of this one keeps the screen inside the complexity budget.
     val onSaveSecret: (String, String?) -> Unit = { secretOrUri, customTitle ->
-        val params = Totp.parseOtpauthUri(secretOrUri)
-            ?: Totp.Params(secretBase32 = secretOrUri.trim())
-        val now = System.currentTimeMillis()
-        val title = customTitle?.takeIf { it.isNotBlank() }
-            ?: listOf(params.issuer, params.label)
-                .filter { it.isNotBlank() }
-                .distinct()
-                .joinToString(" · ")
-                .ifBlank { fallbackName }
-
-        val record = Record(
-            uuid = UUID.randomUUID().toString(),
-            template_id = "login",
-            title = title,
-            fields = mapOf(
-                "totp" to (if (secretOrUri.startsWith("otpauth://", true)) secretOrUri else params.secretBase32),
-            ),
-            created_at = now,
-            modified_at = now,
-            device_id = app.prefs.deviceId,
+        saveScannedSecret(
+            app = app,
+            scope = scope,
+            context = context,
+            secretOrUri = secretOrUri,
+            customTitle = customTitle,
+            fallbackName = fallbackName,
+            savedMessage = savedMessage,
+            invalidMessage = invalidSecretMessage,
         )
-        scope.launch {
-            app.repository.upsertRecord(record)
-            Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show()
-        }
     }
 
     if (showScanner) {
@@ -848,3 +852,51 @@ private fun ManualTotpDialog(
     )
 }
 // #endregion
+
+/**
+ * Turn a scanned QR or a hand-typed key into a record, or refuse it.
+ *
+ * Refusing matters more than saving: a value that cannot produce a code used to
+ * be stored anyway, and [TotpCard] asks for a code during composition, so one
+ * unusable record crashed the whole list of codes every time it was opened.
+ */
+private fun saveScannedSecret(
+    app: ZerokoshApp,
+    scope: CoroutineScope,
+    context: Context,
+    secretOrUri: String,
+    customTitle: String?,
+    fallbackName: String,
+    savedMessage: String,
+    invalidMessage: String,
+) {
+    val params = Totp.paramsOrNull(secretOrUri)
+    if (params == null) {
+        Toast.makeText(context, invalidMessage, Toast.LENGTH_SHORT).show()
+        return
+    }
+    val now = System.currentTimeMillis()
+    val title = customTitle?.takeIf { it.isNotBlank() }
+        ?: listOf(params.issuer, params.label)
+            .filter { it.isNotBlank() }
+            .distinct()
+            .joinToString(" · ")
+            .ifBlank { fallbackName }
+    val record = Record(
+        uuid = UUID.randomUUID().toString(),
+        template_id = "login",
+        title = title,
+        fields = mapOf(
+            // The URI is kept whole when there was one: it carries the digits,
+            // period and algorithm that a bare secret does not.
+            "totp" to (if (secretOrUri.startsWith("otpauth://", true)) secretOrUri else params.secretBase32),
+        ),
+        created_at = now,
+        modified_at = now,
+        device_id = app.prefs.deviceId,
+    )
+    scope.launch {
+        app.repository.upsertRecord(record)
+        Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show()
+    }
+}

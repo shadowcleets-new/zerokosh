@@ -45,6 +45,12 @@ class VaultNavState(
     var tab: VaultTab by mutableStateOf(initialTab)
         private set
 
+    /**
+     * The Codes tab's Scan button, which lives in this scaffold's FAB while the
+     * scanner it opens belongs to the screen below. Set here, consumed there.
+     */
+    var scanRequested: Boolean by mutableStateOf(false)
+
     private val current: NavBackStack<NavKey> get() = stacks.getValue(tab)
 
     val displayed: List<NavKey>

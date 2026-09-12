@@ -86,7 +86,10 @@ object Totp {
     private fun paramsFrom(label: String, params: Map<String, String>): Params? {
         val secret = params["secret"] ?: return null
         return try {
-            base32Decode(secret) // validate early
+            // Validate early, and reject a secret that decodes to nothing:
+            // Mac.init throws on an empty key, and it would throw on whichever
+            // screen later asked for a code rather than here.
+            if (base32Decode(secret).isEmpty()) return null
             Params(
                 secretBase32 = secret,
                 label = label,
@@ -98,6 +101,27 @@ object Totp {
         } catch (e: IllegalArgumentException) {
             null
         }
+    }
+
+    /**
+     * The only way a scanned or stored value should become [Params]: an
+     * otpauth:// URI, or a bare base32 secret.
+     *
+     * Null when it is neither, which is what the callers need to hear. The
+     * alternative they used to fall back on — wrapping whatever was scanned in
+     * Params and hoping — stored unusable text as a secret, and the throw
+     * surfaced later, on the screen that listed the codes, taking every other
+     * code down with it.
+     */
+    fun paramsOrNull(secretOrUri: String, label: String = ""): Params? {
+        parseOtpauthUri(secretOrUri)?.let { return it }
+        // A URI we could not parse is not a secret. otpauth://hotp/ (counter
+        // based) lands here, and so does a totp URI with no query.
+        if (secretOrUri.trim().startsWith("otpauth:", ignoreCase = true)) return null
+        val raw = secretOrUri.trim()
+        return runCatching { base32Decode(raw) }.getOrNull()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { Params(secretBase32 = raw, label = label) }
     }
 
     fun parseOtpauthUri(uri: String): Params? {

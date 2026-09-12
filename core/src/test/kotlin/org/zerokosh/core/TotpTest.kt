@@ -5,6 +5,7 @@ import org.zerokosh.core.totp.Totp
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 // #endregion
 
@@ -66,5 +67,48 @@ class TotpTest {
         assertNull(Totp.parseOtpauthUri("https://example.com"))
         assertNull(Totp.parseOtpauthUri("otpauth://totp/NoSecret?issuer=x"))
         assertNull(Totp.parseOtpauthUri("otpauth://totp/Bad?secret=11111111")) // '1' not in RFC4648 base32
+    }
+
+    /**
+     * The chain that crashed the authenticator screen: a counter-based QR was
+     * accepted by the scanner, could not be parsed as TOTP, and was then stored
+     * whole as if the URI itself were the secret. Asking for a code decoded
+     * "otpauth://hotp/..." as base32 and threw — during composition, on the one
+     * screen that lists every code, so one bad record took all of them out.
+     */
+    @Test
+    fun `a value that cannot make a code is refused rather than wrapped`() {
+        assertNull(Totp.paramsOrNull("otpauth://hotp/ACME?secret=JBSWY3DPEHPK3PXP&counter=1"))
+        assertNull(Totp.paramsOrNull("otpauth://totp/NoQuery"))
+        assertNull(Totp.paramsOrNull("otpauth-migration://offline?data=CjEKCkhlbGxvId6tvu8"))
+        assertNull(Totp.paramsOrNull("https://example.com"))
+        assertNull(Totp.paramsOrNull(""))
+        assertNull(Totp.paramsOrNull("   "))
+        // Decodes to zero bytes, and Mac.init rejects an empty key.
+        assertNull(Totp.paramsOrNull("A"))
+        assertNull(Totp.paramsOrNull("="))
+        assertNull(Totp.parseOtpauthUri("otpauth://totp/Empty?secret=A"))
+    }
+
+    /** Executable proof of what the old fallback did, so nobody restores it. */
+    @Test
+    fun `wrapping an unparsed URI as a secret throws when a code is asked for`() {
+        val asTheScreenUsedToBuildIt =
+            Totp.Params(secretBase32 = "otpauth://hotp/ACME?secret=JBSWY3DPEHPK3PXP&counter=1")
+        assertFailsWith<IllegalArgumentException> { Totp.code(asTheScreenUsedToBuildIt, 0L) }
+    }
+
+    @Test
+    fun `what can make a code is accepted, URI or bare secret`() {
+        val uri = Totp.paramsOrNull("otpauth://totp/Zoho:me?secret=JBSWY3DPEHPK3PXP&issuer=Zoho")
+        assertEquals("JBSWY3DPEHPK3PXP", uri?.secretBase32)
+        assertEquals("Zoho", uri?.issuer)
+        val bare = Totp.paramsOrNull("jbswy3dpehpk3pxp", label = "Typed by hand")
+        assertEquals("jbswy3dpehpk3pxp", bare?.secretBase32)
+        assertEquals("Typed by hand", bare?.label)
+        // Every accepted value can actually produce a code.
+        for (p in listOfNotNull(uri, bare)) {
+            assertEquals(6, Totp.code(p, 1_789_000_000_000L).length)
+        }
     }
 }

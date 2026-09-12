@@ -1,6 +1,28 @@
 > The most recent 15 sessions are below. Older entries, verbatim and newest
 > first, are in [`docs/changelog-archive/`](docs/changelog-archive/).
 
+## [2026-09-12 10:10:00] - TOTP end to end on a real site, and the two bugs that found
+
+### 1. Intent, Roles, & Context
+- **The Problem:** TOTP had never been run against a real service. The RFC 6238 vectors were covered by unit tests; nothing covered the chain that matters — scan a QR, store the secret in the vault, show a code, have a server accept it.
+- **Specialist Personas Invoked:** QA Automation Lead; Android Platform Engineer; Principal Security Auditor.
+- **The Strategy:** run the whole ceremony on a real site, capture the device log across it, then read the code for what a *working* case cannot reveal. The working case passed; the reading found two bugs.
+
+### 2. Surgical Technical Modifications
+- **Verified by the user on Zoho:** a QR scanned into Zerokosh, the enrollment code accepted, then signed out and signed back in with a fresh code. The feature works.
+- **`ZerokoshNav` Codes FAB** — labelled "Scan" with a QR-scanner icon, `onClick = openGallery`, which selects the **Templates tab**. The scanner was only ever reachable from the empty-state button or the "Add another authenticator" row. It now raises `VaultNavState.scanRequested`, which the authenticator screen consumes — the FAB lives in the scaffold above and cannot reach that screen's state directly.
+- **`Totp.paramsOrNull` (new)** — the single way a scanned or stored value becomes `Params`. Both the save path and the list now go through it.
+- **The crash the old fallback caused** — `isOtpPayload` accepted any `otpauth://` prefix, while `parseOtpauthUri` accepts only `otpauth://totp/`. So a counter-based `otpauth://hotp/` QR was scanned, failed to parse, and was then stored *whole* as though the URI were the secret (`?: Totp.Params(secretBase32 = secretOrUri)`). `TotpCard` asks for a code **during composition**, so on every later visit `base32Decode` hit the `:` and threw `IllegalArgumentException`: one unusable record crashed the entire list of codes, permanently, taking every working code with it until that record was deleted. Closed at three levels — the scanner accepts only payloads that can make a code, the save path refuses the rest with the existing "Invalid Base32 secret" toast, and the list skips what it cannot use rather than dying on it.
+- **An empty secret is no longer accepted** — `secret=A` decodes to zero bytes and `Mac.init` throws on an empty key: the same crash through another door.
+- **`saveScannedSecret` extracted** — `verifyComplexity` refused the additions (`AuthenticatorScreen` 16 to 17, and the baseline may only shrink), so the save path moved out of the composable entirely. The guard did its job on its own author.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test :app:check` green — `verifyComplexity` (81 files, 565 functions, 16 baselined, 0 new over 10), `deadComposables` (134 composables), `verifyTemplates`. New tests: executable proof that the old fallback throws when a code is asked for; `hotp`, `otpauth-migration`, no-query and empty-secret payloads all refused by the scanner's filter; a valid URI and a bare base32 secret still accepted and still able to produce a code.
+- **Device log across the real run:** the camera opened at 09:36:41 and was released at 09:36:46, the app logged nothing but two IME lines, and the crash buffer was empty. The two alarming-looking system lines in the window — "Skipped 45 frames" and a second camera connection — belong to Digital Wellbeing and Gmail, not to Zerokosh.
+- **Not verified on device:** the Scan FAB fix and the refusal toast. The phone still runs the v0.5.0 release; these are proven by tests and by reading only.
+- **Known gaps:** the app emits 9 log statements in total and none in the TOTP or scanner path, so a device log cannot show whether TOTP worked — only that nothing crashed. A counter-based QR and a Google Authenticator export QR (`otpauth-migration://`) are now silently not recognised rather than accepted and broken; neither gets its own message yet.
+- **Next Sprint Phase:** install on the phone to confirm the FAB and the toast; decide whether those two unsupported QR kinds deserve a sentence each.
+
 ## [2026-09-11 10:30:00] - Baseline Profiles, generated where they cannot reach a real vault
 
 ### 1. Intent, Roles, & Context
@@ -301,30 +323,3 @@
 - **Execution Commands & Diagnostics:** `:app:bundleRelease` clean; merged release manifest reads `package="com.zerokosh.app"`; `jarsigner -verify` passes with the upload key (alias `zerokosh`, valid to 2054-01-10, comfortably past Play's 2033 floor); `design/check_listing.py` green (24/30, 72/80, 2964/4000); `make_play_screenshots.py` emitted 5 files at exactly 1080×1920.
 - **Resulting App State:** unchanged at runtime — one build-config string moved. The 10.9 MB AAB is uploadable as it stands.
 - **Next Sprint Phase:** the Console work only the account holder can do — upload the AAB, accept Play App Signing, complete Data safety and the content-rating questionnaire, paste the listing. The app module still has 0 tests; seven ship-blocking bugs this month were all found by looking at the app, none by the suite.
-
-## [2026-08-21 09:30:00] - NFC card capture, brand logos, Expressive completion
-
-### 1. Intent, Roles, & Context
-- **The Problem:** eight sessions of work with nothing logged since the glitch sweep — a second logo batch, the rest of the Expressive surface, a colour system rebuild, a dead-code purge, and a new NFC capture path.
-- **Specialist Personas Invoked:** Android Platform Engineer; Principal Security Auditor (EMV/PAN handling); Colour Systems Engineer; Accessibility Auditor.
-- **The Strategy:** finish what the coverage audit listed, then let the audit's own findings redirect the work — the two most valuable changes this session were both things the audit surfaced rather than things that were planned.
-
-### 2. Surgical Technical Modifications
-- **NFC card capture** (`cdf2abe`) — tap a contactless card to prefill the card template.
-  - `core/emv/Tlv.kt`, `core/emv/EmvCard.kt`: BER-TLV reader and Track 2 / `5A` / `5F24` / `5F20` decoding, in pure Kotlin with **17 unit tests**, because this consumes data off a payment card.
-  - `app/nfc/CardNfcReader.kt`: reader mode, PPSE → AID → GPO → READ RECORD.
-  - `ui/record/TapCardSheet.kt`: the sheet, plus a contactless button on the card-number field.
-  - **The printed CVV is not on the chip and cannot be read.** The chip's CVC3 is a per-tap value, not the number on the signature strip. Stated in the sheet's own copy so nobody hunts for a setting that does not exist. Fills 3 of the card template's 12 fields.
-  - Tap-to-Pay is host card emulation — the phone pretending to *be* a card. Reading one is the opposite (`enableReaderMode`), and the two conflict, so reader mode is scoped to the sheet and released on dispose.
-  - No new dependency: `IsoDep` is platform, so the §6.2 list is untouched. NFC declared `required="false"`.
-- **Colour system rebuilt tonally** (`f909021`) — `expressiveLightColorScheme()` turned out to be `lightColorScheme()` with four roles moved to tone 30: the M3 baseline palette, no seed, no dark counterpart. Adopting it literally would have replaced the burnt orange with Google's purple. So the Expressive *rule* was adopted instead: a full scheme generated from our own seeds in CIELAB (an M3 tone **is** L\*), emitted as constants by `design/gen_tonal_scheme.py`. **36 roles, all derived** — the old scheme set 24 by hand and left 12 undefined, which is what produced a pink FAB. Worst contrast pair 4.07:1, up from ~3.4:1.
-- **Dead code purge + build guard** (`6922f37`) — `PasswordGeneratorScreen` was not merely unreferenced: it carried a second password generator built on `kotlin.collections.random()`, i.e. `Random.Default`, a **non-cryptographic PRNG**. Wiring it up would have shipped a weak generator in a password manager. Deleted, along with seven other unreferenced composables (419 lines).
-  - Nothing in the toolchain catches this: "public but unused" is never a warning because public implies an external caller, and unused *private* composables are not flagged either because the Compose plugin rewrites them. The build emits 21 warnings and not one is "never used". Hence `:app:deadComposables`, wired into `check`, no dependency added.
-- **Expressive completion** (`341943a`) — inset focus rings, `FilterChipDefaults.shapes()` replacing a hand-rolled morph, `ButtonGroup`, `animateFloatingActionButton`, `roundedShape`, `rememberBottomSheetState`, `ContainedLoadingIndicator`. Referenced Expressive APIs 15 → 24.
-- **Brand logos** (`745c70b`, `54470c1`, `7bb498d`) — 73 imported across two batches; monogram fallbacks **98 → 47**. Nine `.jfif` and one SVG could not ship as delivered; Mastercard was rebuilt from the SVG's own geometry. Five sources had the transparency checkerboard baked in as pixels.
-- **Accessibility** (`4289b85`, `450686b`) — a reveal toggle on all nine masked fields (only two had one), and the lock screen's mode button now names where it goes rather than where it has been.
-
-### 3. Verification & Validation
-- **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:check` (incl. `deadComposables`), `:core:test` — 0 lint errors, all tests green, 102 composables checked.
-- **Resulting App State:** verified on a Pixel 9. The blob morph was measured rather than eyeballed — silhouette area swings **15.7%** (30,320 → 25,558 px) while the bounding box expands, which a background gradient cannot do; at `animator_duration_scale=0` three frames are byte-identical, confirming the reduced-motion path. **NFC confirmed against a real contactless card**: number and expiry captured, and the expiry stored in `YYYY-MM` exactly as the `MMYY` conversion predicts. Cardholder name absent — that issuer does not expose tag `5F20`, which is the documented "sometimes available" case now confirmed in the field rather than in theory. (The issuer and the captured values are deliberately not recorded here: this file is public, and a changelog is not a place to write down anything read off a payment card.)
-- **Next Sprint Phase:** 47 monogram fallbacks remain (mostly foreign banks and bus operators; `design/audit_logos.py` lists them). `TextFieldLabelPosition.Cutout` is blocked behind a `TextFieldState` migration. 12 duplicate drawable resource names still ship twice. And the repo directory rename to `zerokosh` is now done.

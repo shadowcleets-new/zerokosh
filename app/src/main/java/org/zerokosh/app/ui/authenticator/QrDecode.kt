@@ -12,6 +12,7 @@ import com.google.zxing.BinaryBitmap
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
+import org.zerokosh.core.totp.Totp
 // #endregion
 
 /**
@@ -46,6 +47,4 @@ internal fun decodeOtpLuminance(
 }
 
 /** What a TOTP enrolment QR can legitimately hold. */
-internal fun isOtpPayload(text: String): Boolean =
-    text.startsWith("otpauth://", ignoreCase = true) ||
-        text.matches(Regex("^[A-Z2-7=]+$", RegexOption.IGNORE_CASE))
+internal fun isOtpPayload(text: String): Boolean = Totp.paramsOrNull(text) != null

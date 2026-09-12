@@ -90,4 +90,17 @@ class QrDecodeTest {
         assertFalse(isOtpPayload("https://example.com"))
         assertFalse(isOtpPayload("WIFI:S:home;T:WPA;P:password;;"))
     }
+
+    /**
+     * An otpauth:// prefix used to be enough to be scanned and saved, which is
+     * how a counter-based or malformed code became a stored record that crashed
+     * the list it appeared in. The filter now asks whether a code can be made.
+     */
+    @Test
+    fun `otpauth payloads that cannot make a code are not accepted`() {
+        assertFalse(isOtpPayload("otpauth://hotp/ACME?secret=JBSWY3DPEHPK3PXP&counter=1"))
+        assertFalse(isOtpPayload("otpauth://totp/NoSecret?issuer=x"))
+        assertFalse(isOtpPayload("otpauth-migration://offline?data=CjEKCkhlbGxv"))
+        assertFalse(isOtpPayload("otpauth://totp/Empty?secret=A"))
+    }
 }

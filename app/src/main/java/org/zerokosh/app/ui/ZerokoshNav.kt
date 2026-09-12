@@ -422,7 +422,8 @@ private fun MainScaffold(app: ZerokoshApp) {
                 }
                 VaultTab.Codes -> VaultExtendedFab(
                     label = stringResource(R.string.nav_scan),
-                    onClick = openGallery,
+                    // Said Scan, opened the Templates tab.
+                    onClick = { navState.scanRequested = true },
                     icon = Icons.Outlined.QrCodeScanner,
                 )
                 else -> Unit
@@ -476,7 +477,13 @@ private fun MainScaffold(app: ZerokoshApp) {
                                     )
                                 }
                             }
-                            entry<CodesRoute> { AuthenticatorScreen(app) }
+                            entry<CodesRoute> {
+                                AuthenticatorScreen(
+                                    app,
+                                    scanRequested = navState.scanRequested,
+                                    onScanRequestHandled = { navState.scanRequested = false },
+                                )
+                            }
                             entry<SettingsRoute> {
                                 SettingsScreen(
                                     app = app,

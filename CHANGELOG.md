@@ -1,6 +1,28 @@
 > The most recent 15 sessions are below. Older entries, verbatim and newest
 > first, are in [`docs/changelog-archive/`](docs/changelog-archive/).
 
+## [2026-09-12 12:40:00] - The lock screen ignored the theme, and called a PIN a passphrase
+
+### 1. Intent, Roles, & Context
+- **The Problem:** reported from a phone: the lock screen is charcoal even with the whole app in light mode, and every prompt on it says "passphrase" although that vault opens with a 6-digit PIN. Both are on the one screen that greets every session, before anything else is seen.
+- **Specialist Personas Invoked:** Apple-caliber CXO (the screen); Android Platform Engineer; Principal Security Auditor (where the new flag may live); Localisation Lead.
+- **The Strategy:** take the ordinary theme tokens rather than pinning ink, record what the user actually chose, and prove it on an emulator rather than on the phone holding 195 real records.
+
+### 2. Surgical Technical Modifications
+- **`LockScreen` palette** — the screen pinned `VaultDock`/`VaultPaper` because the mockup drew it on ink in both themes. It now uses `VaultTheme.colors` like every other screen. The error colour returns to the active scheme (BV-10 forced the dark one only because the background was always dark), and the accent becomes the theme's, which in dark is `#F0834E` instead of the `#BB4717` this screen was drawing on charcoal at about 3:1. The status-bar icons stop being a coin toss: a light-theme phone draws dark icons, which were nearly invisible over the charcoal.
+- **The two glows** are softened on paper, 0.14/0.11 against 0.25/0.20 on ink — a wash that reads as a glow on ink is a stain on paper.
+- **`VaultPrefs.secretIsPin` (new)** — nothing recorded which kind of secret was set; onboarding's `pinMode` was a local variable that died with the composable, so the screen could not have known. Written at creation, at both ways of changing the secret later, and by `VaultRepository` on every successful unlock — the one moment the app holds the secret and knows it was right, which also settles vaults made before the flag existed. It sits in the repository rather than the lock screen so the autofill unlock sheet is covered by the same line.
+- **What the lock screen and the unlock sheet now do with it** — ask for the right thing by name, say "Wrong PIN" when that is what was wrong, and raise a digit keypad instead of a full keyboard.
+- **Recovery mode survives a configuration change** — found while verifying the theme fix: it was plain `remember`, so a rotation or a theme switch threw the user back to the passphrase view mid-recovery. It and `showCredential` are saveable now; the two secret fields deliberately are not, because `rememberSaveable` writes to the instance-state bundle.
+- **Two new strings in all sixteen locales**, each built from that locale's own sentence with its own word for PIN. Tamil takes "பின் எண்" rather than "பின்" alone, which also means "after". Machine-made and unreviewed, like the rest.
+
+### 3. Verification & Validation
+- **Execution Commands & Diagnostics:** `:core:test :app:check` green — `verifyComplexity` (81 files, 571 functions, 0 new over 10; it refused these branches twice, so naming the secret is four small functions beside the screen rather than four `when`s inside it), `verifyTemplates`, `deadComposables`. Fifteen new unit tests: the four naming decisions, what counts as a PIN in both String and ByteArray form, and the repository recording it from a six-digit unlock and clearing it from a passphrase one.
+- **Resulting App State:** verified on a Gradle-managed emulator — a vault created through real onboarding, then the lock screen inspected in both themes. Light is `#FDFAF6` with legible dark status icons and soft glows; dark is unchanged at `#120C09` with the brighter accent; the recovery view follows both; recovery mode now survives a theme switch, which it did not before.
+- **Where the flag lives, and why that is safe enough:** it records the shape of the secret, never the secret, and lands in the same `EncryptedSharedPreferences` as the rest of the app's state. It cannot live inside the vault, because the screen has to name what it wants before anything is decrypted.
+- **Known gaps:** the PIN wording itself was not exercised on a device. An emulator has no hardware-backed biometrics, so onboarding offers no PIN branch at all; the wording is covered by tests. On the reporting phone the first lock screen after the update will still say "passphrase" until one successful unlock teaches it.
+- **Next Sprint Phase:** install on the phone to confirm the PIN wording against the vault that prompted the report.
+
 ## [2026-09-12 10:10:00] - TOTP end to end on a real site, and the two bugs that found
 
 ### 1. Intent, Roles, & Context
@@ -302,24 +324,3 @@
 - **Execution Commands & Diagnostics:** `:app:assembleDebug`, `:app:assembleRelease`, `:core:test`, `:app:deadComposables` (109 composables, none dead) — all green on Gradle 9.7.1. Confirmed in the built artifact rather than assumed: `aapt2 dump resources` shows **zero** `statusBarColor` entries under `style/Theme.Zerokosh`; the "Autofill service" string ships; `InlineSuggestions` and androidx's `InlineSuggestionUi` are both in the dex.
 - **Resulting App State:** the **minified** `releaseCheck` build installs and runs on a Pixel 9 — the check that matters, since a new library plus R8 is exactly where a release breaks. `pm query-services` confirms the service survives minification and is still offered to the system.
 - **Next Sprint Phase:** AGP stays at **9.3.1**. There is no stable 9.4.0 — Google Maven has only `9.4.0-rc02` and alphas, and a release candidate is the wrong toolchain for a Play submission. Also outstanding: `EncryptedSharedPreferences`/`MasterKey` are deprecated (11 warnings in `Prefs.kt`), and the app module still has no test source set.
-
-## [2026-08-26 21:55:00] - Play Console identity, and the listing assets finished
-
-### 1. Intent, Roles, & Context
-- **The Problem:** the app id had to become the one reserved in Play Console (`com.zerokosh.app`), and the store listing was still one asset short — screenshots.
-- **Specialist Personas Invoked:** Android Release Engineer; Growth/Store-Listing Strategist.
-- **The Strategy:** change `applicationId` and nothing else. `namespace` names the generated `R`/`BuildConfig` and resolves the manifest's relative class names — it is not what Play matches on, so renaming it would have moved ~100 source files and rewritten the R8 keep rules to buy nothing. Resource lookups through `context.packageName` still resolve, because the merged manifest's package follows `applicationId`; that is the same mechanism `applicationIdSuffix` has always relied on, and `releaseCheck` already exercises it.
-
-### 2. Surgical Technical Modifications
-- **Modified Files:**
-  - `app/build.gradle.kts` (defaultConfig): `applicationId` → `com.zerokosh.app`, with the namespace split explained in place so nobody "fixes" the mismatch later.
-  - `RELEASE.md` (line 68): the `releaseCheck` id follows the suffix.
-  - `play/listing.md`: the "one asset still missing" section replaced by the upload table and screenshot order.
-  - `play/screenshots/`: five device captures plus their Play-ready conversions.
-- **Irreversible Actions:** none yet — but `applicationId` is permanent **after** the first upload. Play never lets an id be reused or renamed, so this had to be right before the AAB goes up, not after.
-- **Payload/Schema Changes:** none. No stored data is keyed by package name; existing sideloaded installs simply sit beside the new id rather than upgrading it.
-
-### 3. Verification & Validation
-- **Execution Commands & Diagnostics:** `:app:bundleRelease` clean; merged release manifest reads `package="com.zerokosh.app"`; `jarsigner -verify` passes with the upload key (alias `zerokosh`, valid to 2054-01-10, comfortably past Play's 2033 floor); `design/check_listing.py` green (24/30, 72/80, 2964/4000); `make_play_screenshots.py` emitted 5 files at exactly 1080×1920.
-- **Resulting App State:** unchanged at runtime — one build-config string moved. The 10.9 MB AAB is uploadable as it stands.
-- **Next Sprint Phase:** the Console work only the account holder can do — upload the AAB, accept Play App Signing, complete Data safety and the content-rating questionnaire, paste the listing. The app module still has 0 tests; seven ship-blocking bugs this month were all found by looking at the app, none by the suite.

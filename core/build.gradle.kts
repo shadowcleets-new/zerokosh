@@ -24,6 +24,6 @@ dependencies {
     // desktop libsodium binding to run the §3.6 conformance vectors on the JVM.
     testImplementation(kotlin("test-junit"))
     testImplementation("com.goterl:lazysodium-java:5.1.4")
-    testImplementation("net.java.dev.jna:jna:5.14.0")
+    testImplementation("net.java.dev.jna:jna:5.19.1")
     testRuntimeOnly("org.slf4j:slf4j-nop:2.0.13")
 }

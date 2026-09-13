@@ -174,7 +174,7 @@ dependencies {
         exclude(group = "net.java.dev.jna", module = "jna") // pulls the desktop jar; we ship the @aar below
     }
     // BV-21: JNA gained 16 KB page alignment in 5.15.
-    implementation("net.java.dev.jna:jna:5.17.0@aar")
+    implementation("net.java.dev.jna:jna:5.19.1@aar")
 
     val composeBom = platform("androidx.compose:compose-bom:2026.03.01")
     implementation(composeBom)

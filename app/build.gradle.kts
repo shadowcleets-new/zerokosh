@@ -176,7 +176,7 @@ dependencies {
     // BV-21: JNA gained 16 KB page alignment in 5.15.
     implementation("net.java.dev.jna:jna:5.19.1@aar")
 
-    val composeBom = platform("androidx.compose:compose-bom:2026.03.01")
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     // Material 3 Expressive. The BOM pins material3 1.4.0, which carries the
@@ -257,7 +257,7 @@ dependencies {
     // authentication Intent that could not return a result. Unit tests could
     // not have caught any of them, and none of them needed a person to find —
     // only a device.
-    androidTestImplementation(platform("androidx.compose:compose-bom:2026.03.01"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2026.09.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test:runner:1.7.0")
@@ -271,7 +271,7 @@ dependencies {
     // The app module had no test source set at all, which is why every defect
     // this month was found by looking at the app rather than by a build.
     testImplementation(kotlin("test-junit"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
 
     // TOTP QR scanning only (§6.2)
     // camera-compose rather than camera-view. The scanner used exactly one thing
@@ -283,7 +283,7 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.6.2")
     implementation("androidx.camera:camera-lifecycle:1.6.2")
     implementation("androidx.camera:camera-compose:1.6.2")
-    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:core:3.5.4")
 }
 
 // #region Dynamic-resource guard

@@ -183,7 +183,7 @@ dependencies {
     // Expressive *tokens* but not the components that consume them — ButtonGroup,
     // ToggleButton, FloatingActionButtonMenu, FloatingToolbar, LoadingIndicator,
     // the wavy progress indicators and MaterialShapes all land in 1.5.0.
-    implementation("androidx.compose.material3:material3:1.5.0-alpha25")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha28")
     // MaterialShapes / Morph are backed by the shapes library.
     implementation("androidx.graphics:graphics-shapes:1.0.1")
     implementation("androidx.compose.material:material-icons-extended")

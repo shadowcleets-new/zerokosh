@@ -444,7 +444,7 @@ fun ZerokoshTheme(
         // tinted surfaces, so this is an accessibility fix, not a restyle.
         CompositionLocalProvider(
             LocalRippleThemeConfiguration provides
-                RippleDefaults.InsetFocusRingRippleThemeConfiguration,
+                RippleDefaults.InsetFocusRingThemeConfiguration,
         ) {
         MaterialExpressiveTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,

@@ -994,7 +994,10 @@ fun VaultNavBar(
                 },
                 colors = ShortNavigationBarItemDefaults.colors(
                     selectedIconColor = c.primary,
-                    selectedTextColor = c.ink,
+                    // 1.5.0-alpha26 split the selected label colour by icon
+                    // position; both carry what the single colour used to.
+                    selectedTextColorTopIconPosition = c.ink,
+                    selectedTextColorStartIconPosition = c.ink,
                     selectedIndicatorColor = c.primary.copy(alpha = 0.15f),
                     unselectedIconColor = c.ink(0.55f),
                     unselectedTextColor = c.ink(0.55f),
@@ -1043,7 +1046,10 @@ fun VaultNavRail(
                 },
                 colors = WideNavigationRailItemDefaults.colors(
                     selectedIconColor = c.primary,
-                    selectedTextColor = c.ink,
+                    // 1.5.0-alpha26 split the selected label colour by icon
+                    // position; both carry what the single colour used to.
+                    selectedTextColorTopIconPosition = c.ink,
+                    selectedTextColorStartIconPosition = c.ink,
                     selectedIndicatorColor = c.primary.copy(alpha = 0.15f),
                     unselectedIconColor = c.ink(0.55f),
                     unselectedTextColor = c.ink(0.55f),

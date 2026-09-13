@@ -18,7 +18,7 @@ kotlin {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     // Test-only (excluded from the R0.7 budget — see DECISIONS.md D-001):
     // desktop libsodium binding to run the §3.6 conformance vectors on the JVM.

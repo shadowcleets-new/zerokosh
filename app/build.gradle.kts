@@ -185,9 +185,9 @@ dependencies {
     // the wavy progress indicators and MaterialShapes all land in 1.5.0.
     implementation("androidx.compose.material3:material3:1.5.0-alpha28")
     // MaterialShapes / Morph are backed by the shapes library.
-    implementation("androidx.graphics:graphics-shapes:1.0.1")
+    implementation("androidx.graphics:graphics-shapes:1.1.0")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation("androidx.activity:activity-compose:1.13.0")
     // §6.2 addition (approved): Navigation 3. Replaces navigation-compose.
     // The back stack is an ordinary observable list this app owns, rather than
     // state held inside a NavController and addressed through it — which is
@@ -206,9 +206,9 @@ dependencies {
     implementation("androidx.autofill:autofill:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.security:security-crypto:1.1.0") // prefs only, never the vault (§6.2)
-    implementation("androidx.documentfile:documentfile:1.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
-    implementation("androidx.work:work-runtime-ktx:2.9.0") // reminders + clipboard-clear fallback
+    implementation("androidx.documentfile:documentfile:1.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("androidx.work:work-runtime-ktx:2.11.2") // reminders + clipboard-clear fallback
 
     // §6.2 addition (approved): process-level lifecycle for auto-lock.
     // "Lock when I leave the app" was bookkept by hand in MainActivity, which

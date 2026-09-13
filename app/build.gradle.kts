@@ -41,10 +41,13 @@ android {
         // follows applicationId, which is exactly how applicationIdSuffix works.
         applicationId = "com.zerokosh.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 5 // fixed per release — reproducible builds (§6.8)
-        versionName = "0.5.0"
+        // versionCode is a plain counter, deliberately not mirroring the name:
+        // mirroring gives 0.7.5 -> 75 and then 0.8.0 -> 8, which Play rejects
+        // as a downgrade. Fixed per release — reproducible builds (§6.8).
+        versionCode = 6
+        versionName = "0.7.5"
 
         // JNA's aar still carries armeabi, mips and mips64. Android dropped
         // MIPS at NDK r17 and armeabi at r16; no device Play can reach runs
@@ -579,7 +582,7 @@ val deadComposables by tasks.registering {
                 """\s*(?:internal\s+|private\s+|public\s+)?fun\s+([A-Z][A-Za-z0-9_]*)\s*\(""",
         )
         val texts = sources.files.associateWith { it.readText() }
-        val declared = mutableMapOf<String, MutableList<java.io.File>>()
+        val declared = mutableMapOf<String, MutableList<File>>()
         texts.forEach { (file, src) ->
             decl.findAll(src).forEach { m ->
                 declared.getOrPut(m.groupValues[1]) { mutableListOf() }.add(file)

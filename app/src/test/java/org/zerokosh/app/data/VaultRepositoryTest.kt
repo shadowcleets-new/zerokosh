@@ -15,6 +15,8 @@ import kotlinx.coroutines.test.runTest
 import org.zerokosh.core.model.Record
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -68,6 +70,31 @@ class VaultRepositoryTest {
         r.createVault(passphrase.copyOf())
         assertEquals(UnlockOutcome.SUCCESS, r.unlockWithPassphrase(passphrase.copyOf()))
         assertFalse(prefs.secretIsPin)
+    }
+
+    /**
+     * The session's one backup is taken before the first write. A store that
+     * could not write it still reported nothing, and the session recorded the
+     * backup as done — so every later save in that session ran with no copy
+     * behind it, which is the state the backup exists to prevent.
+     */
+    @Test
+    fun `a backup that failed is retried on the next write, not assumed`() = runTest {
+        val store = FakeVaultStore()
+        val r = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        r.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, r.unlockWithPassphrase(passphrase.copyOf()))
+
+        store.failBackups = true
+        assertTrue(r.upsertRecord(record("u1")).isSuccess)
+        val afterFailure = store.backups
+        assertTrue(afterFailure > 0, "a backup was attempted")
+        assertNull(store.readBackup(), "and it did not happen")
+
+        store.failBackups = false
+        assertTrue(r.upsertRecord(record("u2")).isSuccess)
+        assertTrue(store.backups > afterFailure, "the next write tries again")
+        assertNotNull(store.readBackup(), "and this time there is a backup")
     }
 
     private fun record(uuid: String = "u1", password: String = "first-secret") = Record(

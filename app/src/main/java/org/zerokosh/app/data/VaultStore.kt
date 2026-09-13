@@ -20,8 +20,15 @@ interface VaultStore {
     /** §4.4 atomic write: tmp → fsync → verify-by-reopen → rename. NEVER in place. */
     fun writeAtomic(bytes: ByteArray, verify: (ByteArray) -> Boolean)
 
-    /** Copy current file to vault.kosh.bak — called before the first write of a session (§4.4). */
-    fun backupCurrent()
+    /**
+     * Copy the current file to vault.kosh.bak — before the first write of a
+     * session (§4.4).
+     *
+     * @return whether a backup now exists. The caller records the session's
+     *   backup as done only on true: a store that silently failed here used to
+     *   be remembered as having succeeded, so the session ran on with none.
+     */
+    fun backupCurrent(): Boolean
 
     /** §4.5.3: sibling `vault*.kosh` conflict files (cloud "conflicted copy" artifacts). */
     fun conflictSiblings(): List<Pair<String, ByteArray>>
@@ -43,9 +50,18 @@ class LocalVaultStore(context: Context) : VaultStore {
 
     override fun readBackup(): ByteArray? = if (bak.exists()) bak.readBytes() else null
 
-    override fun backupCurrent() {
-        if (vault.exists()) {
-            Files.copy(vault.toPath(), bak.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    override fun backupCurrent(): Boolean {
+        if (!vault.exists()) return true // nothing to copy yet
+        // Staged and moved, not copied over: REPLACE_EXISTING truncates the old
+        // backup first, so a crash mid-copy left a half-written .bak.
+        val staging = File(dir, "$VAULT_NAME.bak.tmp")
+        return runCatching {
+            Files.copy(vault.toPath(), staging.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            Files.move(staging.toPath(), bak.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+            true
+        }.getOrElse {
+            staging.delete()
+            false
         }
     }
 

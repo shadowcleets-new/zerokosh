@@ -33,9 +33,14 @@ class FakeVaultStore(private var content: ByteArray? = null) : VaultStore {
         writes++
     }
 
-    override fun backupCurrent() {
-        backup = content
+    /** Set [failBackups] to stand in for a store that cannot write one. */
+    var failBackups = false
+
+    override fun backupCurrent(): Boolean {
         backups++
+        if (failBackups) return false
+        backup = content
+        return true
     }
 
     override fun conflictSiblings(): List<Pair<String, ByteArray>> = emptyList()

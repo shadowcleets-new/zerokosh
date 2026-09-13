@@ -271,8 +271,9 @@ class VaultRepository(
             val out = VaultOperations.changePassphrase(bytes, current, new, prefs.deviceId, now, crypto)
                 ?: return@withLock false
             if (!backupDoneThisSession) {
-                store.backupCurrent()
-                backupDoneThisSession = true
+                // Only a backup that actually happened counts as this
+                // session's backup; otherwise the next write tries again.
+                backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
             envelope = VaultFileCodec.decode(out)
@@ -300,8 +301,9 @@ class VaultRepository(
                 bytes, masterKey, new, prefs.deviceId, now, crypto,
             ) ?: return@withLock false
             if (!backupDoneThisSession) {
-                store.backupCurrent()
-                backupDoneThisSession = true
+                // Only a backup that actually happened counts as this
+                // session's backup; otherwise the next write tries again.
+                backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
             envelope = VaultFileCodec.decode(out)
@@ -318,8 +320,9 @@ class VaultRepository(
             val (out, formatted) = VaultOperations.rotateRecoveryKey(bytes, passphrase, prefs.deviceId, now, crypto)
                 ?: return@withLock null
             if (!backupDoneThisSession) {
-                store.backupCurrent()
-                backupDoneThisSession = true
+                // Only a backup that actually happened counts as this
+                // session's backup; otherwise the next write tries again.
+                backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
             envelope = VaultFileCodec.decode(out)
@@ -362,8 +365,9 @@ class VaultRepository(
             }
 
             if (!backupDoneThisSession) {
-                store.backupCurrent()
-                backupDoneThisSession = true
+                // Only a backup that actually happened counts as this
+                // session's backup; otherwise the next write tries again.
+                backupDoneThisSession = store.backupCurrent()
             }
             val fileBytes = VaultOperations.save(env, bodyToWrite, key, prefs.deviceId, now, crypto)
             store.writeAtomic(fileBytes) { candidate ->

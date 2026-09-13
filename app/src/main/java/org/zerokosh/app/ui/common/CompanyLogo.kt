@@ -41,17 +41,35 @@ private val logoAliases = mapOf(
     "niyoglobal" to "niyo",
     "unicard" to "unicards",
     "fampay" to "famapp",
+    // Domains whose name is not the brand's: shorteners, old names, and the
+    // hosts a sign-in actually lands on.
+    "twitter" to "x",
+    "youtu" to "youtube",
+    "fb" to "facebook",
+    "messenger" to "facebook",
+    "wa" to "whatsapp",
+    "goo" to "google",
+    "googleusercontent" to "google",
+    "gstatic" to "google",
+    "protonmail" to "proton",
+    "githubusercontent" to "github",
+    "stackexchange" to "stackoverflow",
+    "redditmedia" to "reddit",
+    "chatgpt" to "openai",
 )
 
 @SuppressLint("DiscouragedApi")
 @Composable
 fun CompanyLogo(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp) {
     val context = LocalContext.current
-    val normalizedName = name.lowercase().replace(Regex("[^a-z0-9_]"), "")
+    // An imported record's name is usually a URL, so the brand has to be found
+    // before anything can be looked up under it — see BrandName.kt.
+    val brand = remember(name) { brandOf(name) }
 
-    val resId = remember(normalizedName) {
-        logoResIds.getOrPut(normalizedName) {
-            val key = logoAliases[normalizedName] ?: normalizedName
+    val resId = remember(brand.logoKey) {
+        if (brand.logoKey.isEmpty()) 0
+        else logoResIds.getOrPut(brand.logoKey) {
+            val key = logoAliases[brand.logoKey] ?: brand.logoKey
             context.resources.getIdentifier("logo_$key", "drawable", context.packageName)
         }
     }
@@ -69,9 +87,12 @@ fun CompanyLogo(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp) {
         // dark initials on a dark tile and the mark was effectively invisible.
         // They come from the theme now and flip with it.
         val c = VaultTheme.colors
-        val shortName = name.take(4).uppercase()
+        // Initials of the brand, not the first four characters of whatever the
+        // record happens to be called: that is what printed HTTP on every
+        // imported login and ACCO on eight different Google accounts.
+        val shortName = brand.monogram
         val tints = listOf(c.ink(0.75f), c.primary, c.accent)
-        val tint = tints[kotlin.math.abs(name.hashCode()) % tints.size]
+        val tint = tints[kotlin.math.abs(brand.logoKey.ifEmpty { name }.hashCode()) % tints.size]
 
         Box(
             modifier = modifier.size(size),
@@ -80,7 +101,9 @@ fun CompanyLogo(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp) {
             Text(
                 text = shortName,
                 color = tint,
-                fontSize = 12.sp,
+                // 12sp was sized for four cramped characters; two initials can
+                // have the room the tile always had.
+                fontSize = (size.value * 0.36f).sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
                 letterSpacing = (-0.5).sp

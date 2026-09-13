@@ -22,5 +22,4 @@ HomeScreen.kt:HomeScreen = 17
 AuthenticatorScreen.kt:AuthenticatorScreen = 16
 Onboarding.kt:TrustFactRow = 12
 RecordDetailScreen.kt:FieldRow = 12
-ImportBackup.kt:ImportResultDialog = 11
 SettingsScreen.kt:ChangePassphraseDialog = 11

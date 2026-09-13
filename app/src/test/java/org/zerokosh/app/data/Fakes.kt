@@ -53,8 +53,14 @@ class FakeVaultStore(private var content: ByteArray? = null) : VaultStore {
 
     fun snapshot(): ByteArray? = content
 
-    override fun conflictSiblings(): List<Pair<String, ByteArray>> = emptyList()
-    override fun deleteSibling(name: String) = Unit
+    /** What a sync client leaves behind when two devices write at once. */
+    val siblings = linkedMapOf<String, ByteArray>()
+
+    override fun conflictSiblings(): List<Pair<String, ByteArray>> = siblings.map { it.key to it.value }
+
+    override fun deleteSibling(name: String) {
+        siblings.remove(name)
+    }
     override fun readBackup(): ByteArray? = backup
 }
 

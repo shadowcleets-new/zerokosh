@@ -49,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.zerokosh.app.R
+import org.zerokosh.app.ui.common.saveErrorMessage
 import org.zerokosh.app.ZerokoshApp
 import org.zerokosh.app.data.ImportOutcome
 import org.zerokosh.app.ui.common.RevealToggle
@@ -180,31 +181,44 @@ private fun PassphrasePrompt(onDismiss: () -> Unit, onConfirm: (ByteArray) -> Un
 // #endregion
 
 // #region Result
+/** Counts only, and the conflict note when there is one. */
 @Composable
-private fun ImportResultDialog(outcome: ImportOutcome, onDismiss: () -> Unit) {
-    val message = when (outcome) {
-        is ImportOutcome.Merged -> buildString {
-            append(
-                when {
-                    outcome.added == 0 && outcome.updated == 0 ->
-                        stringResource(R.string.import_nothing_new)
-                    else -> stringResource(
-                        R.string.import_merged,
-                        outcome.added,
-                        outcome.updated,
-                    )
-                },
-            )
-            if (outcome.conflicts > 0) {
-                append("\n\n")
-                append(stringResource(R.string.import_conflicts, outcome.conflicts))
-            }
+private fun mergedMessage(outcome: ImportOutcome.Merged): String = buildString {
+        append(
+            when {
+                outcome.added == 0 && outcome.updated == 0 ->
+                    stringResource(R.string.import_nothing_new)
+                else -> stringResource(
+                    R.string.import_merged,
+                    outcome.added,
+                    outcome.updated,
+                )
+            },
+        )
+        if (outcome.conflicts > 0) {
+            append("\n\n")
+            append(stringResource(R.string.import_conflicts, outcome.conflicts))
         }
+    }
+
+/** What the import actually did, in the user's words. */
+@Composable
+private fun importMessage(outcome: ImportOutcome): String =
+    when (outcome) {
+        is ImportOutcome.Merged -> mergedMessage(outcome)
         // §3.3: never a crypto error string.
         ImportOutcome.WrongPassphrase -> stringResource(R.string.scr_lock_wrong)
         ImportOutcome.NotAVault -> stringResource(R.string.import_not_a_vault)
         ImportOutcome.Locked -> stringResource(R.string.import_locked)
+        // The same wording a failed save gets, because that is what happened:
+        // the backup was fine, the vault could not be written, and the records
+        // already in it are untouched. Already translated, so no new string.
+        ImportOutcome.WriteFailed -> saveErrorMessage(LocalContext.current, null)
     }
+
+@Composable
+private fun ImportResultDialog(outcome: ImportOutcome, onDismiss: () -> Unit) {
+    val message = importMessage(outcome)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.import_title)) },

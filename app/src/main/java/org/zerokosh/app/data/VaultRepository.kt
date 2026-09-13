@@ -56,11 +56,26 @@ sealed interface ImportOutcome {
     data object WrongPassphrase : ImportOutcome
     data object NotAVault : ImportOutcome
     data object Locked : ImportOutcome
+
+    /**
+     * The backup opened and merged, and then the vault could not be written.
+     * Reported separately because the file was fine and the user's own records
+     * are untouched — the old code called this a successful import of N records.
+     */
+    data object WriteFailed : ImportOutcome
 }
 // #endregion
 
 /** Whether a mutation reached disk. Callers must not assume it did. */
 typealias SaveResult = Result<Unit>
+
+/**
+ * A mutation asked for while the vault is not open — auto-lock can fire between
+ * a screen opening and its Save being tapped. It carries no message: the
+ * failure dialog's own wording is translated, and an English detail underneath
+ * it would be worse than none.
+ */
+class VaultLockedException : IllegalStateException()
 
 class VaultRepository(
     val crypto: CryptoProvider,
@@ -486,29 +501,56 @@ class VaultRepository(
                         },
                         conflicts = fresh.count { it.title.endsWith(VaultMerge.CONFLICT_SUFFIX) },
                     )
-                    if (merged != current) persist(merged)
-                    outcome
+                    // Nothing was imported unless the write happened.
+                    if (merged != current && persist(merged).isFailure) {
+                        ImportOutcome.WriteFailed
+                    } else {
+                        outcome
+                    }
                 }
             }
         }
 
     /** §4.5.3: merge and remove `vault*.kosh` conflict siblings with our vault_uuid. */
+    /**
+     * Fold every sibling that belongs to this vault into [into], naming the ones
+     * that were taken in. Split out so the caller stays inside the complexity
+     * budget, and so what it decides — write first, delete second — is the only
+     * thing left in it.
+     */
+    private fun absorbSiblings(
+        siblings: List<Pair<String, ByteArray>>,
+        into: VaultBody,
+        key: ByteArray,
+        vaultUuid: ByteArray,
+    ): Pair<VaultBody, List<String>> {
+        var merged = into
+        val absorbed = mutableListOf<String>()
+        for ((name, bytes) in siblings) {
+            val sibEnv = runCatching { VaultFileCodec.decode(bytes) }.getOrNull() ?: continue
+            if (!sibEnv.vaultUuid.contentEquals(vaultUuid)) continue
+            val sibBody = VaultOperations.unlockWithMasterKeyless(sibEnv, key, crypto) ?: continue
+            merged = VaultMerge.merge(merged, sibBody, System.currentTimeMillis())
+            absorbed += name
+        }
+        return merged to absorbed
+    }
+
     private suspend fun mergeConflictSiblings() {
         val key = vaultKey ?: return
         val env = envelope ?: return
         val siblings = store.conflictSiblings()
         if (siblings.isEmpty()) return
-        var merged = _body.value ?: return
-        var changed = false
-        for ((name, bytes) in siblings) {
-            val sibEnv = runCatching { VaultFileCodec.decode(bytes) }.getOrNull() ?: continue
-            if (!sibEnv.vaultUuid.contentEquals(env.vaultUuid)) continue
-            val sibBody = VaultOperations.unlockWithMasterKeyless(sibEnv, key, crypto) ?: continue
-            merged = VaultMerge.merge(merged, sibBody, System.currentTimeMillis())
-            store.deleteSibling(name)
-            changed = true
+        val body = _body.value ?: return
+        val (merged, absorbed) = absorbSiblings(siblings, body, key, env.vaultUuid)
+        if (absorbed.isEmpty()) return
+        // Write first, delete second. A conflict copy holds records that exist
+        // nowhere else — it is what a sync client saved when two devices wrote
+        // at once — and deleting it before the merge reached disk meant a
+        // failed write took those records with it.
+        if (persist(merged).isSuccess) {
+            absorbed.forEach { store.deleteSibling(it) }
         }
-        if (changed) persist(merged)
     }
     // #endregion
 
@@ -522,7 +564,7 @@ class VaultRepository(
     var secretKeysFor: (String) -> Set<String> = { emptySet() }
 
     suspend fun upsertRecord(record: Record): SaveResult {
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         val now = System.currentTimeMillis()
         val existing = current.records.firstOrNull { it.uuid == record.uuid }
         val prepared = if (existing == null) {
@@ -558,7 +600,7 @@ class VaultRepository(
      */
     suspend fun upsertRecords(incoming: List<Record>): SaveResult {
         if (incoming.isEmpty()) return SaveResult.success(Unit)
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         val now = System.currentTimeMillis()
         val byUuid = current.records.associateBy { it.uuid }
         val prepared = incoming.map { record ->
@@ -589,23 +631,23 @@ class VaultRepository(
 
     /** Moves the record to trash for 30 days; the tombstone is written too. */
     suspend fun deleteRecord(uuid: String): SaveResult {
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         return persist(VaultMerge.applyDeletion(current, uuid, System.currentTimeMillis()))
     }
 
     suspend fun restoreRecord(uuid: String): SaveResult {
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         return persist(VaultMerge.applyRestore(current, uuid, System.currentTimeMillis()))
     }
 
     /** Permanent. The tombstone stays behind so the deletion still syncs. */
     suspend fun purgeRecord(uuid: String): SaveResult {
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         return persist(VaultMerge.applyPurge(current, uuid))
     }
 
     suspend fun emptyTrash(): SaveResult {
-        val current = _body.value ?: return SaveResult.success(Unit)
+        val current = _body.value ?: return SaveResult.failure(VaultLockedException())
         return persist(current.copy(trash = emptyList()))
     }
 

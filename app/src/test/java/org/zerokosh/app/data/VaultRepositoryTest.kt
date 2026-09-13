@@ -177,6 +177,78 @@ class VaultRepositoryTest {
         return reader.body.value ?: error("no body after unlock")
     }
 
+    /**
+     * A conflict copy is what a sync client saves when two devices write at
+     * once, and it can hold the only copy of a record. Deleting it before the
+     * merge reached disk meant a failed write destroyed those records.
+     */
+    @Test
+    fun `a conflict copy is deleted only after its records are safely stored`() = runTest {
+        val store = FakeVaultStore()
+        val mine = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        mine.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, mine.unlockWithPassphrase(passphrase.copyOf()))
+        val pristine = store.snapshot() ?: error("nothing written")
+
+        // The other device's copy, holding a record only it has.
+        val elsewhere = FakeVaultStore(pristine.copyOf())
+        val theirs = VaultRepository(FakeCrypto(), elsewhere, FakeVaultPrefs())
+        assertEquals(UnlockOutcome.SUCCESS, theirs.unlockWithPassphrase(passphrase.copyOf()))
+        assertTrue(theirs.upsertRecord(record("only-in-the-conflict-copy")).isSuccess)
+        store.siblings["vault (1).kosh"] = elsewhere.snapshot() ?: error("nothing there")
+
+        store.failWrites = IllegalStateException("sync folder grant lapsed")
+        mine.refreshFromDisk()
+        assertTrue(
+            "vault (1).kosh" in store.siblings,
+            "the copy survives a failed write — it is the only place that record exists",
+        )
+
+        store.failWrites = null
+        mine.refreshFromDisk()
+        assertTrue("vault (1).kosh" !in store.siblings, "and is cleaned up once the merge is stored")
+        assertTrue("only-in-the-conflict-copy" in openStored(store).records.map { it.uuid })
+    }
+
+    /** An import that could not be written is not an import. */
+    @Test
+    fun `an import whose write fails is reported as a failure`() = runTest {
+        val store = FakeVaultStore()
+        val mine = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        mine.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, mine.unlockWithPassphrase(passphrase.copyOf()))
+
+        val backupStore = FakeVaultStore()
+        val backup = VaultRepository(FakeCrypto(), backupStore, FakeVaultPrefs())
+        val backupPass = "the-backups-own-passphrase".toByteArray()
+        backup.createVault(backupPass.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, backup.unlockWithPassphrase(backupPass.copyOf()))
+        assertTrue(backup.upsertRecord(record("from-the-backup")).isSuccess)
+
+        store.failWrites = IllegalStateException("sync folder grant lapsed")
+        val outcome = mine.importVaultFile(
+            backupStore.snapshot() ?: error("no backup"),
+            backupPass.copyOf(),
+        )
+        assertEquals(ImportOutcome.WriteFailed, outcome, "not a count of records that were never stored")
+        assertTrue("from-the-backup" !in openStored(store).records.map { it.uuid })
+    }
+
+    /** Auto-lock can fire between opening a screen and tapping Save. */
+    @Test
+    fun `a save into a locked vault fails instead of claiming success`() = runTest {
+        val store = FakeVaultStore()
+        val r = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        r.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, r.unlockWithPassphrase(passphrase.copyOf()))
+        r.lock()
+
+        val result = r.upsertRecord(record("typed-while-it-locked"))
+        assertTrue(result.isFailure, "the screen must not close saying it saved")
+        assertTrue(result.exceptionOrNull() is VaultLockedException)
+        assertTrue(r.deleteRecord("anything").isFailure)
+    }
+
     private fun record(uuid: String = "u1", password: String = "first-secret") = Record(
         uuid = uuid,
         template_id = "login",

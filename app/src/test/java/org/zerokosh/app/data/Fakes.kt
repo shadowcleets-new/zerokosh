@@ -43,6 +43,16 @@ class FakeVaultStore(private var content: ByteArray? = null) : VaultStore {
         return true
     }
 
+    /**
+     * What a sync client does behind the app's back: replace the file with a
+     * copy made somewhere else, which may not contain what this device wrote.
+     */
+    fun overwriteExternally(bytes: ByteArray) {
+        content = bytes
+    }
+
+    fun snapshot(): ByteArray? = content
+
     override fun conflictSiblings(): List<Pair<String, ByteArray>> = emptyList()
     override fun deleteSibling(name: String) = Unit
     override fun readBackup(): ByteArray? = backup

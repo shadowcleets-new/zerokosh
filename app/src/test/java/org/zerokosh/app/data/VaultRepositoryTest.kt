@@ -13,6 +13,7 @@ package org.zerokosh.app.data
 
 import kotlinx.coroutines.test.runTest
 import org.zerokosh.core.model.Record
+import org.zerokosh.core.model.VaultBody
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -95,6 +96,85 @@ class VaultRepositoryTest {
         assertTrue(r.upsertRecord(record("u2")).isSuccess)
         assertTrue(store.backups > afterFailure, "the next write tries again")
         assertNotNull(store.readBackup(), "and this time there is a backup")
+    }
+
+    /**
+     * The refresh path only writes when the merge differs from the disk, which
+     * needs local state the disk does not have — a sync client replacing the
+     * file with a copy made elsewhere is how that really happens.
+     *
+     * The merge is then lost when the write fails, which is expected. What must
+     * not happen is the disk being recorded as read: the next ordinary save
+     * skips its merge and writes a body that never held the other copy's
+     * records straight over them.
+     */
+    @Test
+    fun `a refresh whose write fails does not mark the disk as seen`() = runTest {
+        val store = FakeVaultStore()
+        val mine = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        mine.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, mine.unlockWithPassphrase(passphrase.copyOf()))
+        val pristine = store.snapshot() ?: error("nothing written")
+
+        // Another device, working from the vault as it was before my edit.
+        val elsewhere = FakeVaultStore(pristine.copyOf())
+        val theirs = VaultRepository(FakeCrypto(), elsewhere, FakeVaultPrefs())
+        assertEquals(UnlockOutcome.SUCCESS, theirs.unlockWithPassphrase(passphrase.copyOf()))
+        assertTrue(theirs.upsertRecord(record("from-the-other-device")).isSuccess)
+
+        assertTrue(mine.upsertRecord(record("mine")).isSuccess)
+        // The sync client drops their copy on top of mine: the file no longer
+        // contains "mine", and my memory does not contain theirs.
+        store.overwriteExternally(elsewhere.snapshot() ?: error("nothing there"))
+
+        store.failWrites = IllegalStateException("sync folder grant lapsed")
+        mine.refreshFromDisk()
+        store.failWrites = null
+
+        assertTrue(mine.upsertRecord(record("later")).isSuccess)
+        val finalRecords = openStored(store).records.map { it.uuid }.toSet()
+        assertTrue("from-the-other-device" in finalRecords, "the other copy's record survived")
+        assertTrue("mine" in finalRecords, "and so did mine")
+        assertTrue("later" in finalRecords)
+    }
+
+    /**
+     * A passphrase change re-wraps the file on disk, which may hold records this
+     * process has never seen. The old code left the in-memory body behind while
+     * claiming the disk had been read, so the next save overwrote them.
+     */
+    @Test
+    fun `a passphrase change adopts what it wrote`() = runTest {
+        val store = FakeVaultStore()
+        val mine = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        mine.createVault(passphrase.copyOf())
+        assertEquals(UnlockOutcome.SUCCESS, mine.unlockWithPassphrase(passphrase.copyOf()))
+
+        val theirs = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        assertEquals(UnlockOutcome.SUCCESS, theirs.unlockWithPassphrase(passphrase.copyOf()))
+        assertTrue(theirs.upsertRecord(record("from-the-other-device")).isSuccess)
+
+        val newPassphrase = "a-much-longer-new-passphrase".toByteArray()
+        assertTrue(mine.changePassphrase(passphrase.copyOf(), newPassphrase.copyOf()))
+        assertTrue(
+            mine.body.value?.records?.any { it.uuid == "from-the-other-device" } == true,
+            "the re-wrapped body is what this repository now holds",
+        )
+
+        assertTrue(mine.upsertRecord(record("mine")).isSuccess)
+        val finalRecords = openStored(store, newPassphrase).records.map { it.uuid }.toSet()
+        assertTrue("from-the-other-device" in finalRecords, "and it is still there after the next save")
+        assertTrue("mine" in finalRecords)
+    }
+
+    /** Read the stored file back the way a fresh install would. */
+    private suspend fun openStored(
+        store: FakeVaultStore,
+        pass: ByteArray = passphrase,
+    ): VaultBody {
+        val reader = VaultRepository(FakeCrypto(), store, FakeVaultPrefs())
+        assertEquals(UnlockOutcome.SUCCESS, reader.unlockWithPassphrase(pass.copyOf()))
+        return reader.body.value ?: error("no body after unlock")
     }
 
     private fun record(uuid: String = "u1", password: String = "first-secret") = Record(

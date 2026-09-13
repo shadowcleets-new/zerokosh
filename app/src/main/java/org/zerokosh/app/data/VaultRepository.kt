@@ -276,8 +276,7 @@ class VaultRepository(
                 backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
-            envelope = VaultFileCodec.decode(out)
-            lastSeenModifiedMs = now
+            adoptWritten(out)
             true
         }
     }
@@ -306,8 +305,7 @@ class VaultRepository(
                 backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
-            envelope = VaultFileCodec.decode(out)
-            lastSeenModifiedMs = now
+            adoptWritten(out)
             true
         }
     }
@@ -325,12 +323,34 @@ class VaultRepository(
                 backupDoneThisSession = store.backupCurrent()
             }
             store.writeAtomic(out) { candidate -> runCatching { VaultFileCodec.decode(candidate) }.isSuccess }
-            envelope = VaultFileCodec.decode(out)
-            lastSeenModifiedMs = now
+            adoptWritten(out)
             formatted
         }
     }
     // #endregion
+
+    /**
+     * Take on the state of a file this repository has just written.
+     *
+     * A re-wrap — a passphrase change, a recovery-key rotation — is computed
+     * from the bytes on disk, which can hold records this process has never
+     * seen. The old code advanced lastSeenModifiedMs to match the file it wrote
+     * while leaving _body untouched, so the merge-before-write was then skipped
+     * as "already seen" and the next ordinary save wrote the stale body over
+     * those records.
+     *
+     * The VaultKey never changes in a re-wrap, so reading the body back costs a
+     * decrypt and no key derivation. If that read somehow fails, the deadline is
+     * deliberately NOT advanced: the next write then sees the disk as unread and
+     * merges from it, which is the safe way to be wrong.
+     */
+    private fun adoptWritten(out: ByteArray) {
+        val env = runCatching { VaultFileCodec.decode(out) }.getOrNull() ?: return
+        envelope = env
+        val body = vaultKey?.let { VaultOperations.unlockWithMasterKeyless(env, it, crypto) } ?: return
+        lastSeenModifiedMs = env.lastModifiedMs
+        _body.value = body
+    }
 
     // #region Persistence (§4.4 atomic write + §4.5 merge-before-write)
     /**
@@ -389,9 +409,19 @@ class VaultRepository(
             if (diskEnv.lastModifiedMs == lastSeenModifiedMs) return@withContext
             val diskBody = VaultOperations.unlockWithMasterKeyless(diskEnv, key, crypto) ?: return@withContext
             val merged = VaultMerge.merge(current, diskBody, System.currentTimeMillis())
-            envelope = diskEnv
-            lastSeenModifiedMs = diskEnv.lastModifiedMs
-            if (merged != diskBody) persist(merged) else _body.value = merged
+            if (merged == diskBody) {
+                // Nothing of ours to add: what is on disk is the whole truth.
+                envelope = diskEnv
+                lastSeenModifiedMs = diskEnv.lastModifiedMs
+                _body.value = merged
+            } else {
+                // persist keeps its own books, and only on a write that
+                // happened. Marking the disk as seen out here meant a failed
+                // write left memory pre-merge while the deadline claimed
+                // otherwise — and the next save overwrote the very records
+                // this refresh had just read.
+                persist(merged)
+            }
         }
         mergeConflictSiblings()
     }
